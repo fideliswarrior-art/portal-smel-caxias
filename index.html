@@ -1,65 +1,410 @@
 <!DOCTYPE html>
-<html lang="pt-BR"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Caxias Mais Esporte · Secretaria de Esportes e Lazer</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&family=Barlow:wght@400;600&display=swap">
-<style>
-:root{--paper:#f7f4ed;--ink:#16202e;--navy:#1a365d;--green:#10b981;--line:#d8d2c4;--mut:#5b6472;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-*{box-sizing:border-box}html{scroll-padding-top:80px}
-body{margin:0;background:var(--paper);color:var(--ink);font:18px/1.55 Barlow,system-ui,sans-serif}
-h1,h2,h3{font-family:"Barlow Condensed",Impact,sans-serif;text-transform:uppercase;letter-spacing:.01em;line-height:1.05;margin:0}
-h1{font-size:clamp(40px,8vw,76px);font-weight:800}h2{font-size:34px;font-weight:800;color:var(--navy);padding-bottom:8px;border-bottom:3px solid var(--navy);margin:44px 0 18px}h3{font-size:24px;font-weight:600}
-a{color:var(--navy)}.mut{color:var(--mut);font-size:16px}
-header{background:var(--paper);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:9}
-.top{background:var(--navy);color:#cbd5e1;font-size:14px;padding:4px 16px}
-.hd{max-width:1120px;margin:auto;padding:8px 16px;display:flex;flex-wrap:wrap;gap:4px 24px;align-items:center;justify-content:space-between}
-.brand{font:800 24px/1 "Barlow Condensed",sans-serif;text-transform:uppercase;color:var(--navy);text-decoration:none;display:flex;align-items:center;gap:12px}
-.logo{height:52px;width:auto;display:block}@media(max-width:600px){.brand span{font-size:18px;line-height:1.05}.logo{height:40px}}
-nav{display:flex;gap:20px}nav a{min-height:48px;display:flex;align-items:center;text-decoration:none;font-weight:600;color:var(--ink);border-bottom:3px solid transparent}nav a.on{border-color:var(--green)}
-.btn{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:0 24px;background:var(--green);color:#022c1e;font:600 18px Barlow,sans-serif;border:0;border-radius:2px;text-decoration:none;cursor:pointer}
-.btn.o{background:transparent;color:var(--navy);border:2px solid var(--navy)}
-a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #d97706;outline-offset:2px}
-main{max-width:1120px;margin:auto;padding:24px 16px}
-.hero{display:grid;gap:28px;grid-template-columns:1fr;align-items:center}@media(min-width:860px){.hero{grid-template-columns:1.1fr .9fr}}
-.eb{font-weight:600;letter-spacing:.12em;text-transform:uppercase;font-size:14px;color:var(--mut);margin-bottom:10px}
-.row{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
-.ph{aspect-ratio:4/3;display:flex;align-items:flex-end;padding:14px;color:#fff;font:800 34px/1 "Barlow Condensed",sans-serif;text-transform:uppercase;background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.06) 0 14px,transparent 14px 28px)}
-.fi img,.fi iframe{width:100%;aspect-ratio:4/3;object-fit:cover;border:0;display:block;background:#000}
-.ev{display:grid;grid-template-columns:76px 1fr;gap:16px;padding:16px 0;border-bottom:1px solid var(--line);text-decoration:none;color:inherit}
-.ev:hover h3{text-decoration:underline}
-.db{background:var(--navy);color:#fff;text-align:center;padding:8px 0;font:800 36px/1 "Barlow Condensed",sans-serif}.db small{display:block;font:600 14px Barlow;letter-spacing:.1em;text-transform:uppercase;color:#a7f3d0}
-.st{display:inline-block;font:600 14px Barlow;text-transform:uppercase;letter-spacing:.06em;padding:2px 8px;border:2px solid;margin-bottom:4px}
-.st.ab{background:var(--green);border-color:var(--green);color:#022c1e}.st.br{border-color:#b45309;color:#92400e}.st.en{border-color:#6b7280;color:#4b5563}.st.es{background:#b91c1c;border-color:#b91c1c;color:#fff}
-.g3{display:grid;gap:20px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}.fb{padding:10px 0}.fb p{margin:4px 0}
-.num{background:var(--navy);color:#fff;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1px;margin-top:44px}.num div{padding:22px;border-left:1px solid rgba(255,255,255,.2)}.num b{display:block;font:800 52px/1 "Barlow Condensed",sans-serif;color:#6ee7b7}
-.bar{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.chip{min-height:48px;padding:0 16px;background:transparent;border:2px solid var(--navy);color:var(--navy);font:600 17px Barlow;cursor:pointer;border-radius:2px}.chip.on{background:var(--navy);color:#fff}
-input,select{width:100%;min-height:52px;font:18px Barlow;padding:0 12px;border:2px solid #8a93a0;border-radius:2px;background:#fff}
-label{display:block;font-weight:600;margin:14px 0 4px}
-.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:18px 0;padding:14px 0;border-block:1px solid var(--line)}.kv b{display:block;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
-table{width:100%;border-collapse:collapse}td,th{text-align:left;padding:10px;border-bottom:1px solid var(--line)}
-iframe.ch{width:100%;height:420px;border:1px solid var(--line);background:#fff}
-form{background:#fff;border:1px solid var(--line);padding:20px;max-width:720px}.f2{display:grid;gap:0 16px;grid-template-columns:1fr}@media(min-width:700px){.f2{grid-template-columns:1fr 1fr}}
-.safe{border-left:4px solid var(--green);background:#ecfdf5;padding:10px 14px;margin:12px 0;max-width:720px}
-.err{color:#b91c1c;font-weight:600;margin-top:10px;display:none}.ck{display:flex;gap:10px;align-items:flex-start;margin-top:16px}.ck input{width:28px;min-height:28px;margin-top:4px}
-.m{position:fixed;inset:0;background:rgba(22,32,46,.95);display:none;align-items:center;justify-content:center;z-index:99;padding:20px}.m.on{display:flex}.m div{background:#fff;padding:30px;max-width:480px;text-align:center}
-footer{background:var(--navy);color:#dbe4f0;padding:28px 16px 90px;margin-top:48px}footer div{max-width:1120px;margin:auto}footer a{color:#6ee7b7}
-.wa{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));background:#128c4a;color:#fff;min-height:52px;padding:0 18px;display:flex;align-items:center;font-weight:600;text-decoration:none;border-radius:2px;z-index:8;box-shadow:0 2px 8px rgba(0,0,0,.35)}
-.pg{display:none}.pg.on{display:block}
-.btn[disabled]{background:#cbd5e1;color:#475569;cursor:not-allowed}
-.prot{font:800 28px/1.2 "Barlow Condensed",sans-serif;color:var(--navy);margin:12px 0;word-break:break-all}
-.at{border:1px solid var(--line);background:#fff;padding:6px 14px 14px;margin:16px 0}.at legend{font:800 22px "Barlow Condensed",sans-serif;text-transform:uppercase;color:var(--navy);padding:0 6px}
-.g4{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}.fp{display:block}.fp img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
-.cd{display:block;background:#fff;border:1px solid var(--line);text-decoration:none;color:inherit}.cd:hover{border-color:var(--navy)}.cd img,.cd .ph{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}.cb{padding:12px 14px}.cc{background:var(--navy);color:#fff;padding:14px;text-align:center;font-weight:600}
-.fb2{display:grid;gap:12px;grid-template-columns:1fr;background:#fff;border:1px solid var(--line);padding:14px;margin:14px 0}@media(min-width:760px){.fb2{grid-template-columns:1fr 1fr 1.4fr}}.fb2 label{margin:0}
-.stp{display:flex;align-items:center;gap:12px;margin:24px 0 8px}.stp span{background:var(--navy);color:#fff;min-width:40px;height:40px;display:flex;align-items:center;justify-content:center;font:800 22px "Barlow Condensed",sans-serif}.stp h2{border:0;margin:0;padding:0;font-size:28px}
-.tm{border:1px solid var(--navy);background:#f1f5fb;padding:4px 16px 8px;margin:8px 0}.tm summary{font-weight:600;cursor:pointer;color:var(--navy);min-height:44px;display:flex;align-items:center}
-.card2{background:#fff;border:1px solid var(--line);padding:16px;margin:16px 0}.cod{display:flex;gap:10px}.cod input{font:800 30px "Barlow Condensed",sans-serif;letter-spacing:.25em;text-transform:uppercase;text-align:center}
-.cn{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:16px 0}.cn b{font:800 24px "Barlow Condensed",sans-serif;text-transform:uppercase;text-align:center}.cw{display:none}.cg{display:grid;gap:8px;grid-template-columns:1fr}.dp{display:none}
-.dc{background:#fff;border:1px solid var(--line);padding:10px 12px;min-height:56px;display:flex;gap:12px;align-items:flex-start}.dc:not(.tem){background:transparent;border-style:dashed;min-height:46px;opacity:.65}.dc.hoje{border:2px solid var(--green);opacity:1}
-.dn{min-width:54px}.dn b{display:block;font:800 28px/1 "Barlow Condensed",sans-serif}.dn span{font-size:13px;color:var(--mut);text-transform:uppercase}.dv{flex:1;min-width:0}
-.de{display:block;text-decoration:none;color:var(--ink);border-left:4px solid var(--navy);padding:6px 10px;background:#eef3fb;margin-bottom:6px}.de.ab{border-color:var(--green);background:#ecfdf5}.de.es{border-color:#b91c1c;background:#fef2f2}.de small{display:block;color:var(--mut)}
-@media(min-width:760px){.cw{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;text-align:center;font-weight:600;color:var(--mut);margin-bottom:6px}.cg{grid-template-columns:repeat(7,1fr)}.dp{display:block}.dc{flex-direction:column;gap:6px;min-height:110px}.dn span{display:none}.de{font-size:15px;padding:4px 8px}}
-@media(max-width:700px){.top{display:none}header{position:static}.hd{justify-content:flex-start}.hd>.btn{display:none}h1{font-size:40px}h2{font-size:28px}.row{flex-direction:column}.row .btn{width:100%}.cod{flex-direction:column}main{padding-bottom:96px}footer{padding-bottom:150px}
-#nav{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);z-index:20;gap:0;padding-bottom:env(safe-area-inset-bottom,0px)}#nav a{flex:1;justify-content:center;text-align:center;font-size:12px;letter-spacing:-.01em;min-height:58px;border-bottom:0;border-top:4px solid transparent;padding:0 2px}#nav a.on{border-top-color:var(--green)}.wa{bottom:calc(72px + env(safe-area-inset-bottom,0px));min-height:48px;padding:0 14px;font-size:15px}}
-</style></head><body>
-<header><div class="top">Prefeitura de Duque de Caxias · Secretaria Municipal de Esportes e Lazer (SMEL)</div><div class="hd"><a class="brand" href="#inicio"><img class="logo" src="data:image/png;base64,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saHVXH2i19+nJrKkiEx0b71pZP5q12U7/IzJj208F9f/efS965r3p91b79+b+s5N/vL9567vO83z3Zub/9mG/5z/x1/58lWua9a7L+1+ujs9eM7f8+vC/m6k862a/u1v77Xhffx0k7lPH3i270nv76fX97VQS1JzFflm+0X/U5P612XyZ5k759e6E258Y5p5iU/0j1wzT7Vq/Nf2v3zD3934t/d5/mK76b1e2a537fpcv5t/qZtz8LwN/bF/ZULX7/2c/8+g3Ztx7R+9/kP3wTu2+YvP/e9/87/10z/67z7/Cde1Gzz/rZ2Xui4N7qznP+ZfOvl2N8q+6kbaq9xY+/r/6/t/39z/Nf7iQ97n2s17/H//5k/uuNte4dr01a7k10O9Xb3G7eO/vOtx1/U119d854Jw9l/51z2/9r84bK1zwXj3mYWdbsr/e8t/eeefuvfd/hH/o4nfrg9Am/tD22s34gGv8j9+4ebv/98+7L+w9/tcxT7qjrn1N/7yfb/kFk78m5s247puY545P/Gfe2L3vO43LMPyL/pT43+uC8G0/081qj4B3w9r01M0rP044X8W7Ld+4+u822H+0v17/23330f8j8y/r1e7e/11K//Vv/hQf37tqf4j7n/v39vXsk/7L48/b+i/t+h9r1v5pLtwwkX/69/3wfv8/887P7eQ+v+G5b/l3//A9/r/68/d/4o/7/92yVv1/vT/F295h/+xOf/h/3fB3/1lB9z0z/w1f17jL973/vV/74bH79t9hZtz8A/8xfs/8c//0X/fB37qvnj0V1zFvMV3mluB/v/ZuzP4KKusf/x5ZsksmS2zkISwhIQlhLBCQkASVlHcFpTaqq1ttdpatV5rbW+r1r1ea22ttba1rb1eW7W9/bV4ra2iVhBBVvYlhC2EEJaEkISQfbLPzMz8/jgzZ5JkZiabQNT9fJ48GTLnPO/zPL/nPM/nfc7k1r/5j1923R987Tff9K3/5v9/6Z+/6P6q+/e9N5j14T3VqN8bN653Z930y18+dE6vXv2R6066qV21WkUqX2R15N9/vU74c5d/wzly7/Z3v/L6d+uQ+u1N1rR/9924/x9/79/t/q1r3m3X9/mrv938r4+/Z0L9+t80N+205H974w4747YJftrtHwJb5r/j0x+6F367yW/ffo27/oFvff9r/+Uu+q831N5z9zN3fL1W2u933hsv3n3N91/92PUnrN7mX//zN1/9n39lP7D8q87E+7/uXvyz5Vv9+X7lX3Dlv7qTfu/n1m42/7y7Zt3n3a70+T7/5f5X9/yX31w31l12w+3uvNf7n/T49s990r3g51/3P/WjV9755f/xJ/e1Pz3Wf8/aX7srf3z3Vv/uD/3u8u95vWvT/uPqZ17983W/d19b/Uv/o2v/94P+3Pq7X3zF6//d/fXjf3/4/2q/7Z91j+vG3e+8o5dMv/vP/1/7y84F7/p35+rfr3/yK3/2lPvl9Qc6h8170b3+u9c9/j+OuuZ3/3WfT8mP2t/qLnn7y1v94747/X3f/rW75/3vdV1z870f/M9/+u9Ouv0V98+v/2f/w7/9bV8b/Kj970e/e/rV999w2+F/a3r/D7rvnv2wP/m3a6/842uH/GfXvuuK333e69j7N+/b8d/46Q+82n9yv3v867e+wP0w03+T/c/uC04zO335Dfe2P/64e/7F97j3fN/n+P7n/I8u/6x7zQ+a9h87Z68r/bPv83e0X/zJ+r+676y+4uU/8u9669e2+Qe+2f6P09/tHvuT8/xPbfiUe+mPvvXU57d472z27vj4j90bv9784o/Xve7f/813uP3XvN3/423Pd5+9+Gq3+8K/9e/75yv/632/d2994zZ31p/3n1P3g0337v2X7y/+yW1fvfd/fcPvd4+f80F33P1f7X776Gv/053x2s9f8/03fM+94UvHuA9f9fUffvW3n/759f3NfeW/eX/5/b/lTvzYx1yXH/u7V/y7b973V677Uu/3X97/6f/0f7e/ZJ3rnnb1X//qg/90g7v4e590r3rnQf+K43/tPvuG5/oPnH6Xe9Vd/7XN3/K5t7iOvdv/6t/2/q/3v+Gv/+n3vj7j3/yR8444/P479n8m/yT70O896F78q79wb/27R9wX/t93uHf87R3u5F+sdh/Z9H/c5+7+hfvK8mXunGve/9Q/f57/+f3e5p71p/3u8f/l/Nf3vPZnr3zkn7jPPffb7iPv/qD/wQ1vcb994nvuqg8d5t5z
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Caxias Mais Esporte · Secretaria de Esportes e Lazer</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&family=Barlow:wght@400;600&display=swap">
+  <style>
+    :root{--paper:#f7f4ed;--ink:#16202e;--navy:#1a365d;--green:#10b981;--line:#d8d2c4;--mut:#5b6472;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+    *{box-sizing:border-box}html{scroll-padding-top:80px}
+    body{margin:0;background:var(--paper);color:var(--ink);font:18px/1.55 Barlow,system-ui,sans-serif}
+    h1,h2,h3{font-family:"Barlow Condensed",Impact,sans-serif;text-transform:uppercase;letter-spacing:.01em;line-height:1.05;margin:0}
+    h1{font-size:clamp(40px,8vw,76px);font-weight:800}h2{font-size:34px;font-weight:800;color:var(--navy);padding-bottom:8px;border-bottom:3px solid var(--navy);margin:44px 0 18px}h3{font-size:24px;font-weight:600}
+    a{color:var(--navy)}.mut{color:var(--mut);font-size:16px}
+    header{background:var(--paper);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:9}
+    .top{background:var(--navy);color:#cbd5e1;font-size:14px;padding:4px 16px}
+    .hd{max-width:1120px;margin:auto;padding:8px 16px;display:flex;flex-wrap:wrap;gap:4px 24px;align-items:center;justify-content:space-between}
+    .brand{font:800 24px/1 "Barlow Condensed",sans-serif;text-transform:uppercase;color:var(--navy);text-decoration:none;display:flex;align-items:center;gap:12px}
+    .logo{height:52px;width:auto;display:block}@media(max-width:600px){.brand span{font-size:18px;line-height:1.05}.logo{height:40px}}
+    nav{display:flex;gap:20px}nav a{min-height:48px;display:flex;align-items:center;text-decoration:none;font-weight:600;color:var(--ink);border-bottom:3px solid transparent}nav a.on{border-color:var(--green)}
+    .btn{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:0 24px;background:var(--green);color:#022c1e;font:600 18px Barlow,sans-serif;border:0;border-radius:2px;text-decoration:none;cursor:pointer}
+    .btn.o{background:transparent;color:var(--navy);border:2px solid var(--navy)}
+    a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #d97706;outline-offset:2px}
+    main{max-width:1120px;margin:auto;padding:24px 16px}
+    .hero{display:grid;gap:28px;grid-template-columns:1fr;align-items:center}@media(min-width:860px){.hero{grid-template-columns:1.1fr .9fr}}
+    .eb{font-weight:600;letter-spacing:.12em;text-transform:uppercase;font-size:14px;color:var(--mut);margin-bottom:10px}
+    .row{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+    .ph{aspect-ratio:4/3;display:flex;align-items:flex-end;padding:14px;color:#fff;font:800 34px/1 "Barlow Condensed",sans-serif;text-transform:uppercase;background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.06) 0 20px,transparent 20px 40px)}
+    .fi img,.fi iframe{width:100%;aspect-ratio:4/3;object-fit:cover;border:0;display:block;background:#000}
+    .ev{display:grid;grid-template-columns:76px 1fr;gap:16px;padding:16px 0;border-bottom:1px solid var(--line);text-decoration:none;color:inherit}
+    .ev:hover h3{text-decoration:underline}
+    .db{background:var(--navy);color:#fff;text-align:center;padding:8px 0;font:800 36px/1 "Barlow Condensed",sans-serif}.db small{display:block;font:600 14px Barlow;letter-spacing:.1em;text-transform:uppercase;color:#a7f3d0}
+    .st{display:inline-block;font:600 14px Barlow;text-transform:uppercase;letter-spacing:.06em;padding:2px 8px;border:2px solid;margin-bottom:4px}
+    .st.ab{background:var(--green);border-color:var(--green);color:#022c1e}.st.br{border-color:#b45309;color:#92400e}.st.en{border-color:#6b7280;color:#4b5563}.st.es{background:#b91c1c;border-color:#b91c1c;color:#fff}
+    .g3{display:grid;gap:20px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}.fb{padding:10px 0}.fb p{margin:4px 0}
+    .num{background:var(--navy);color:#fff;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1px;margin-top:44px}.num div{padding:22px;border-left:1px solid rgba(255,255,255,.2)}.num b{display:block;font:800 56px/1 "Barlow Condensed",sans-serif;color:#a7f3d0}
+    .bar{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.chip{min-height:48px;padding:0 16px;background:transparent;border:2px solid var(--navy);color:var(--navy);font:600 17px Barlow;cursor:pointer;border-radius:2px}.chip.on{background:var(--navy);color:#fff}
+    input,select{width:100%;min-height:52px;font:18px Barlow;padding:0 12px;border:2px solid #8a93a0;border-radius:2px;background:#fff}
+    label{display:block;font-weight:600;margin:14px 0 4px}
+    .kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:18px 0;padding:14px 0;border-block:1px solid var(--line)}.kv b{display:block;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+    .callout{background:#ecfdf5;border-left:4px solid var(--green);padding:14px 18px;margin:18px 0}
+    footer{background:var(--navy);color:#e2e8f0;margin-top:64px;padding:36px 16px;font-size:15px;line-height:1.7}footer a{color:#a7f3d0}
+    .wa-link{display:inline-block;background:#25d366;color:#0b4619;padding:8px 14px;font-weight:600;border-radius:2px;text-decoration:none;margin-top:10px}
+    .m{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99;padding:16px;overflow-y:auto;align-items:center;justify-content:center}.m.on{display:flex}
+    .m>div{background:var(--paper);max-width:560px;width:100%;padding:28px;border-radius:2px;border:2px solid var(--navy);box-shadow:0 10px 25px rgba(0,0,0,.3)}
+    .pg{display:none}.pg.on{display:block}
+    .notice{background:#fffbeb;border:1px solid #fef3c7;padding:12px 16px;border-left:4px solid #d97706;margin:14px 0}
+  </style>
+</head>
+<body>
+  <div class="top">Prefeitura de Duque de Caxias · Secretaria Municipal de Esportes e Lazer (SMEL)</div>
+  <header>
+    <div class="hd">
+      <a href="#inicio" class="brand">
+        <svg class="logo" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="24" cy="24" r="22" stroke="#1a365d" stroke-width="4"/>
+          <path d="M24 2C36.15 2 46 11.85 46 24M2 24C2 36.15 11.85 46 24 46" stroke="#10b981" stroke-width="4"/>
+          <path d="M8 24H40M24 8V40" stroke="#1a365d" stroke-width="3"/>
+        </svg>
+        <span>Caxias Mais Esporte</span>
+      </a>
+      <nav aria-label="Navegação principal">
+        <a href="#inicio" id="n-inicio" class="on">Início</a>
+        <a href="#competicoes" id="n-competicoes">Competições</a>
+        <a href="#calendario" id="n-calendario">Calendário</a>
+        <a href="#midia" id="n-midia">Fotos e Avisos</a>
+        <a href="#inscricoes" id="n-inscricoes">Inscrições</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="pg on" id="inicio"></section>
+    <section class="pg" id="competicoes"></section>
+    <section class="pg" id="calendario"></section>
+    <section class="pg" id="midia"></section>
+    <section class="pg" id="inscricoes"></section>
+  </main>
+
+  <footer>
+    <div>
+      <b>CAXIAS MAIS ESPORTE</b> · Secretaria Municipal de Esporte e Lazer · Prefeitura de Duque de Caxias · 2026<br>
+      Telefone: <span id="ftel"></span> · E-mail: <span id="fmail"></span> · Ginásios: <span id="fgym"></span><br>
+      <a class="wa-link" id="fwa" target="_blank" rel="noopener">Ajuda pelo WhatsApp</a>
+    </div>
+  </footer>
+
+  <div class="m" id="modal" role="dialog" aria-modal="true">
+    <div>
+      <h2 style="margin-top:0" id="m-title">Inscrição Enviada!</h2>
+      <p id="m-msg">A equipe da Secretaria de Esportes irá conferir os documentos e confirmar a vaga pelo WhatsApp.</p>
+      <div class="callout" id="m-proto" style="display:none"><b>Protocolo:</b> <span id="m-prototxt"></span></div>
+      <button class="btn" style="width:100%;margin-top:14px" onclick="closeModal()">Fechar</button>
+    </div>
+  </div>
+
+  <script>
+    /* ===== CONFIGURAÇÃO DE PRODUÇÃO CONSOLIDADA ===== */
+    const CFG = {
+      WHATSAPP: "5521999999999",
+      TEL: "(21) 0000-0000",
+      EMAIL: "esportes@duquedecaxias.rj.gov.br",
+      GINASIOS: "Ginásio Central · Ginásio da Vila São Luís",
+      STATS: { c: 42, t: 118, a: 3600 },
+      SCRIPT_URL: "https://script.google.com/macros/s/AKfycbw8pG93KkAWXq6OkZRTpg20sCjNTLsfT0wH35tUqEgEsaQVVJdlgg72n_wqH0yh9K-7/exec",
+      PLANILHA_URL: "https://docs.google.com/spreadsheets/d/1vRtMEpKMmz2ly2-_pfmziDMQZqQeI8arTa60nEyU97mk7x9CHlGaJO4DH_hvdVxjdIhDOU7frneZEHB/edit",
+      CSV: {
+        eventos: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRtMEpKMmz2Iy2-_pfmziDMQZqQeI8arTa60nEyU97mk7x9CHlGaJO4DH_hvdVxjdIhDOU7frneZEHB/pub?gid=117289662&single=true&output=csv",
+        feed: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRtMEpKMmz2Iy2-_pfmziDMQZqQeI8arTa60nEyU97mk7x9CHlGaJO4DH_hvdVxjdIhDOU7frneZEHB/pub?gid=1218360201&single=true&output=csv",
+        colocacoes: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRtMEpKMmz2Iy2-_pfmziDMQZqQeI8arTa60nEyU97mk7x9CHlGaJO4DH_hvdVxjdIhDOU7frneZEHB/pub?gid=583720856&single=true&output=csv"
+      }
+    };
+
+    /* ===== DADOS MOCK / FALLBACK EM CASO DE DELAY DO CSV ===== */
+    const DATA = {
+      eventos: [
+        {id:"1",nome:"Copa Basquete 3x3",modalidade:"Basquete 3x3",categoria:"Livre",local_evento:"Centro",data_inicio:"2026-11-08",data_fim:"2026-11-09",prazo_inscricao:"2026-10-30",status:"Aberto",tipo_inscricao:"completa",descricao:"Torneio aberto de basquete 3x3 nas quadras municipais.",min_atletas:"3",max_atletas:"4",vagas_max:"16"},
+        {id:"2",nome:"Golzinho de Rua",modalidade:"Golzinho de Rua",categoria:"Sub-17",local_evento:"Vila São Luís",data_inicio:"2026-10-25",data_fim:"2026-10-25",prazo_inscricao:"2026-10-25",status:"Aberto",tipo_inscricao:"rapida",descricao:"Campeonato relâmpago para a juventude da Vila São Luís.",min_atletas:"1",max_atletas:"1",vagas_max:"32"},
+        {id:"3",nome:"Copa Vôlei Comunitário",modalidade:"Vôlei",categoria:"Livre",local_evento:"Centro",data_inicio:"2026-12-05",data_fim:"2026-12-06",prazo_inscricao:"",status:"Em breve",tipo_inscricao:"completa",descricao:"Inscrições em breve no ginásio municipal.",min_atletas:"6",max_atletas:"12",vagas_max:"12"},
+        {id:"4",nome:"Torneio de Queimado",modalidade:"Queimado",categoria:"Sub-15",local_evento:"Vila São Luís",data_inicio:"2027-02-14",data_fim:"2027-02-14",prazo_inscricao:"",status:"Em breve",tipo_inscricao:"rapida",descricao:"Circuito recreativo de férias.",min_atletas:"1",max_atletas:"1",vagas_max:"20"},
+        {id:"5",nome:"Copa de Futebol de Campo 2025",modalidade:"Futebol de Campo",categoria:"Livre",local_evento:"Campo do Bairro",data_inicio:"2025-09-13",data_fim:"2025-09-14",prazo_inscricao:"2025-09-05",status:"Encerrado",tipo_inscricao:"completa",descricao:"Edição anterior encerrada.",min_atletas:"11",max_atletas:"18",vagas_max:"8"}
+      ],
+      feed: [
+        {data:"2026-10-05",tipo:"foto",titulo:"Golzinho reuniu 80 crianças",legenda:"Sábado esportivo na quadra da Vila São Luís.",url:""},
+        {data:"2026-10-01",tipo:"video",titulo:"Melhores momentos do Vôlei",legenda:"Resumo dos confrontos do circuito passado.",url:""},
+        {data:"2026-09-28",tipo:"aviso",titulo:"Inscrições abertas: Basquete 3x3",legenda:"Até 30 de outubro, diretamente pelo portal.",url:""}
+      ],
+      colocacoes: [
+        {evento_id:"5",colocacao:"1",nome_equipe:"Unidos da Vila",placar_final:"3 x 1 na final"},
+        {evento_id:"5",colocacao:"2",nome_equipe:"Estrela do Centro",placar_final:"Vice-campeão"}
+      ]
+    };
+
+    /* ===== PARSER CSV ROBUSTO ===== */
+    function parseCSV(text) {
+      const lines = text.trim().split(/\r?\n/).filter(l => l.trim().length > 0);
+      if (lines.length < 2) return [];
+      const headers = lines[0].split(",").map(h => h.trim().replace(/^"|"$/g, ""));
+      return lines.slice(1).map(line => {
+        const values = line.split(",").map(v => v.trim().replace(/^"|"$/g, ""));
+        const obj = {};
+        headers.forEach((h, i) => obj[h] = values[i] || "");
+        return obj;
+      });
+    }
+
+    async function loadLiveData() {
+      try {
+        if (CFG.CSV.eventos) {
+          const res = await fetch(CFG.CSV.eventos);
+          if (res.ok) {
+            const parsed = parseCSV(await res.text());
+            if (parsed.length) DATA.eventos = parsed;
+          }
+        }
+        if (CFG.CSV.feed) {
+          const res = await fetch(CFG.CSV.feed);
+          if (res.ok) {
+            const parsed = parseCSV(await res.text());
+            if (parsed.length) DATA.feed = parsed;
+          }
+        }
+        if (CFG.CSV.colocacoes) {
+          const res = await fetch(CFG.CSV.colocacoes);
+          if (res.ok) {
+            const parsed = parseCSV(await res.text());
+            if (parsed.length) DATA.colocacoes = parsed;
+          }
+        }
+      } catch (err) {
+        console.warn("Utilizando dados padrão (fallback local):", err);
+      } finally {
+        route();
+      }
+    }
+
+    /* ===== HELPERS DE FORMATAÇÃO E ESCAPE ===== */
+    const $ = s => document.querySelector(s);
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+    const dt = d => {
+      if (!d) return "A definir";
+      const p = String(d).split("-");
+      return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : esc(d);
+    };
+
+    function stClass(s) {
+      const v = String(s || "").toLowerCase();
+      if (v.includes("abert")) return "st ab";
+      if (v.includes("breve")) return "st br";
+      if (v.includes("encerr")) return "st en";
+      return "st es";
+    }
+
+    /* ===== RENDERIZAÇÃO DAS PÁGINAS ===== */
+    function renderHome() {
+      const abertos = DATA.eventos.filter(e => String(e.status).toLowerCase().includes("abert"));
+      $("#inicio").innerHTML = `
+        <div class="hero">
+          <div>
+            <div class="eb">Secretaria de Esporte e Lazer · Duque de Caxias</div>
+            <h1>Competições Esportivas em Toda a Cidade</h1>
+            <p>Acompanhe torneios oficiais, consulte resultados e inscreva sua equipe nas competições da Baixada.</p>
+            <div class="row">
+              <a href="#competicoes" class="btn">Ver Competições</a>
+              <a href="#inscricoes" class="btn o">Inscrever Agora</a>
+            </div>
+          </div>
+          <div class="ph" style="background-color:#1a365d">
+            <div>ESPORTE QUE TRANSFORMA CAXIAS</div>
+          </div>
+        </div>
+        <div class="num">
+          <div><b>${CFG.STATS.c}</b><span>Bairros Alcançados</span></div>
+          <div><b>${CFG.STATS.t}</b><span>Torneios Realizados</span></div>
+          <div><b>+${CFG.STATS.a}</b><span>Atletas Inscritos</span></div>
+        </div>
+        <h2>Inscrições Abertas Agora</h2>
+        <div class="g3">
+          ${abertos.length ? abertos.map(e => `
+            <div class="ev" style="display:block;padding:16px;border:1px solid var(--line);background:#fff">
+              <span class="${stClass(e.status)}">${esc(e.status)}</span>
+              <h3 style="margin:8px 0 4px">${esc(e.nome)}</h3>
+              <p class="mut" style="margin:0 0 12px">${esc(e.modalidade)} · ${esc(e.categoria)} · ${esc(e.local_evento)}</p>
+              <a href="#inscricoes" class="btn" style="min-height:40px;font-size:15px;width:100%">Fazer Inscrição</a>
+            </div>
+          `).join("") : `<p class="mut">Nenhuma inscrição aberta no momento.</p>`}
+        </div>
+      `;
+    }
+
+    function renderCompeticoes() {
+      $("#competicoes").innerHTML = `
+        <h2>Todas as Competições</h2>
+        <div style="margin-top:20px">
+          ${DATA.eventos.map(e => `
+            <div class="ev">
+              <div class="db">${(e.data_inicio || "2026-01-01").split("-")[2] || "00"}<small>${(e.data_inicio || "2026-01-01").split("-")[1] || "MÊS"}</small></div>
+              <div>
+                <span class="${stClass(e.status)}">${esc(e.status)}</span>
+                <h3>${esc(e.nome)}</h3>
+                <p class="mut" style="margin:4px 0">${esc(e.modalidade)} · ${esc(e.categoria)} · Local: ${esc(e.local_evento)}</p>
+                <p style="margin:6px 0">${esc(e.descricao)}</p>
+                ${e.status.toLowerCase().includes("abert") ? `<a href="#inscricoes" class="btn" style="min-height:36px;font-size:14px;margin-top:8px">Inscrever Equipe</a>` : ""}
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function renderCalendario() {
+      $("#calendario").innerHTML = `
+        <h2>Calendário Esportivo 2026</h2>
+        <div style="margin-top:20px">
+          ${DATA.eventos.map(e => `
+            <div class="ev">
+              <div class="db">${(e.data_inicio || "2026-01-01").split("-")[2] || "00"}<small>DIA</small></div>
+              <div>
+                <h3>${esc(e.nome)}</h3>
+                <p class="mut">Início: ${dt(e.data_inicio)} · Término: ${dt(e.data_fim)}</p>
+                <p class="mut">Local: ${esc(e.local_evento)} · Prazo de Inscrição: ${dt(e.prazo_inscricao)}</p>
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function renderMidia() {
+      $("#midia").innerHTML = `
+        <h2>Fotos e Avisos Oficiais</h2>
+        <div class="g3" style="margin-top:20px">
+          ${DATA.feed.map(f => `
+            <div style="background:#fff;border:1px solid var(--line);padding:16px">
+              <span class="st ab">${esc(f.tipo)}</span>
+              <p class="mut" style="font-size:13px;margin:6px 0">${dt(f.data)}</p>
+              <h3 style="font-size:20px;margin-bottom:8px">${esc(f.titulo)}</h3>
+              <p style="margin:0">${esc(f.legenda)}</p>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function renderInscricoes() {
+      const abertos = DATA.eventos.filter(e => String(e.status).toLowerCase().includes("abert"));
+      $("#inscricoes").innerHTML = `
+        <h2>Ficha de Inscrição Oficial</h2>
+        <p>Preencha os dados abaixo para inscrever sua equipe ou inscrição individual.</p>
+        <div style="max-width:680px;background:#fff;border:1px solid var(--line);padding:24px;margin-top:20px">
+          <form id="f-ins" onsubmit="handleInscricao(event)">
+            <label for="f-evt">Competição Aberta:</label>
+            <select id="f-evt" required>
+              ${abertos.map(e => `<option value="${esc(e.id)}" data-tipo="${esc(e.tipo_inscricao)}">${esc(e.nome)} (${esc(e.modalidade)})</option>`).join("")}
+            </select>
+            
+            <label for="f-time">Nome da Equipe / Atleta:</label>
+            <input type="text" id="f-time" required placeholder="Ex: União Futebol Clube ou Seu Nome">
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div>
+                <label for="f-resp">Responsável / Capitão:</label>
+                <input type="text" id="f-resp" required placeholder="Nome completo">
+              </div>
+              <div>
+                <label for="f-cpf">CPF:</label>
+                <input type="text" id="f-cpf" required placeholder="000.000.000-00">
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div>
+                <label for="f-wa">WhatsApp:</label>
+                <input type="tel" id="f-wa" required placeholder="(21) 90000-0000">
+              </div>
+              <div>
+                <label for="f-bairro">Bairro de Caxias:</label>
+                <input type="text" id="f-bairro" required placeholder="Ex: Centro, Vila São Luís...">
+              </div>
+            </div>
+
+            <button type="submit" id="f-sub" class="btn" style="width:100%;margin-top:24px">Enviar Inscrição</button>
+          </form>
+        </div>
+      `;
+    }
+
+    /* ===== CONTROLE DE ROTAS (SPA) ===== */
+    function route() {
+      const hash = location.hash.replace("#", "") || "inicio";
+      document.querySelectorAll(".pg").forEach(p => p.classList.remove("on"));
+      document.querySelectorAll("nav a").forEach(a => a.classList.remove("on"));
+      
+      const target = document.getElementById(hash);
+      const navItem = document.getElementById("n-" + hash);
+      if (target) target.classList.add("on");
+      if (navItem) navItem.classList.add("on");
+
+      if (hash === "inicio") renderHome();
+      else if (hash === "competicoes") renderCompeticoes();
+      else if (hash === "calendario") renderCalendario();
+      else if (hash === "midia") renderMidia();
+      else if (hash === "inscricoes") renderInscricoes();
+      
+      window.scrollTo({top: 0, behavior: "smooth"});
+    }
+
+    window.addEventListener("hashchange", route);
+
+    /* ===== ENVIO DE INSCRIÇÃO DEFENSIVO (API) ===== */
+    async function handleInscricao(ev) {
+      ev.preventDefault();
+      const btn = $("#f-sub");
+      btn.disabled = true;
+      btn.innerText = "Gravando na planilha...";
+
+      const selEvt = $("#f-evt");
+      const opt = selEvt.options[selEvt.selectedIndex];
+      const tipo = opt ? opt.getAttribute("data-tipo") : "equipes";
+
+      const payload = {
+        tipo: tipo || "equipes",
+        evento_id: $("#f-evt").value,
+        evento: opt ? opt.text : "",
+        nome_equipe: $("#f-time").value,
+        nome: $("#f-time").value,
+        responsavel: $("#f-resp").value,
+        cpf: $("#f-cpf").value,
+        whatsapp: $("#f-wa").value,
+        bairro: $("#f-bairro").value
+      };
+
+      try {
+        if (CFG.SCRIPT_URL) {
+          await fetch(CFG.SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify(payload)
+          });
+        }
+        $("#m-title").innerText = "Inscrição Registrada!";
+        $("#m-msg").innerText = "Os dados foram salvos diretamente na planilha oficial da Secretaria de Esportes.";
+        $("#m-proto").style.display = "block";
+        $("#m-prototxt").innerText = "SMEL-" + Date.now().toString().slice(-6);
+        $("#modal").classList.add("on");
+        $("#f-ins").reset();
+      } catch (err) {
+        alert("Ocorreu um erro ao conectar ao servidor: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Enviar Inscrição";
+      }
+    }
+
+    function closeModal() {
+      $("#modal").classList.remove("on");
+    }
+
+    /* ===== INICIALIZAÇÃO ===== */
+    window.addEventListener("DOMContentLoaded", () => {
+      $("#ftel").innerText = CFG.TEL;
+      $("#fmail").innerText = CFG.EMAIL;
+      $("#fgym").innerText = CFG.GINASIOS;
+      $("#fwa").href = `https://wa.me/${CFG.WHATSAPP}`;
+      loadLiveData();
+    });
+  </script>
+</body>
+</html>
