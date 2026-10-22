@@ -77,13 +77,24 @@ footer{background:var(--navy);color:#dbe4f0;padding:28px 16px 90px;margin-top:48
 <a class="wa wa-link" target="_blank" rel="noopener">Ajuda pelo WhatsApp</a>
 <div class="m" id="modal" role="dialog" aria-modal="true"><div><h2 style="margin-top:0">Inscrição Enviada com Sucesso!</h2><p>A equipe da Secretaria de Esportes irá conferir os documentos e confirmar a vaga no seu WhatsApp.</p><div>Seu código de acesso (guarde!):</div><div class="prot" id="cod"></div><p class="mut">Com ele você consulta e edita sua inscrição em Inscrições › Minha inscrição.</p><div class="mut">Protocolo: <b id="prot"></b></div><a class="btn" id="wsh" target="_blank" rel="noopener">Compartilhar Comprovante no WhatsApp</a><button class="btn o" id="ok">Entendi</button></div></div>
 <script>
-/* ===== CONFIGURAÇÃO ===== */
-const CFG={WHATSAPP:"5521999999999",TEL:"(21) 0000-0000",EMAIL:"esportes@prefeitura.gov.br",GINASIOS:"Ginásio Central · Ginásio da Vila São Luís",
-STATS:{c:42,t:118,a:3600},
-SCRIPT_URL:"", /* URL do Web App (Apps Script) */
-PLANILHA_URL:"https://docs.google.com/spreadsheets/d/COLE_O_ID_DA_PLANILHA/edit" /* atalho "Abrir planilha" dentro do Acesso Servidores */};
-const DEMO={
-eventos:[
+/* ===== CONFIGURAÇÃO DE PRODUÇÃO ===== */
+const CFG = {
+  WHATSAPP: "5521999999999",
+  TEL: "(21) 0000-0000",
+  EMAIL: "esportes@duquedecaxias.rj.gov.br",
+  GINASIOS: "Ginásio Central · Ginásio da Vila São Luís",
+  STATS: { c: 42, t: 118, a: 3600 },
+  SCRIPT_URL: "https://script.google.com/macros/s/AKfycbw8pG93KkAWXq6OkZRTpg20sCjNTLsfT0wH35tUqEgEsaQVVJdlgg72n_wqH0yh9K-7/exec",
+  PLANILHA_URL: "https://docs.google.com/spreadsheets/d/1vRtMEpKMmz2ly2-_pfmziDMQZqQeI8arTa60nEyU97mk7x9CHlGaJO4DH_hvdVxjdIhDOU7frneZEHB/edit",
+  CSV: {
+    eventos: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRtMEpKMmz2Iy2-_pfmziDMQZqQeI8arTa60nEyU97mk7x9CHlGaJO4DH_hvdVxjdIhDOU7frneZEHB/pub?gid=117289662&single=true&output=csv",
+    feed: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRtMEpKMmz2Iy2-_pfmziDMQZqQeI8arTa60nEyU97mk7x9CHlGaJO4DH_hvdVxjdIhDOU7frneZEHB/pub?gid=1218360201&single=true&output=csv",
+    colocacoes: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRtMEpKMmz2Iy2-_pfmziDMQZqQeI8arTa60nEyU97mk7x9CHlGaJO4DH_hvdVxjdIhDOU7frneZEHB/pub?gid=583720856&single=true&output=csv"
+  }
+};
+
+const DEMO = {
+  eventos: [
 {id:"1",nome:"Copa Basquete 3x3",modalidade:"Basquete 3x3",categoria:"Livre",local_evento:"Centro",data_inicio:"2026-11-08",data_fim:"2026-11-09",prazo_inscricao:"2026-10-30",status:"Aberto",tipo_inscricao:"completa",descricao:"Times de 3 a 4 atletas. Inscrição antecipada.",regulamento_url:"",link_challonge_embed:""},
 {id:"2",nome:"Golzinho de Rua",modalidade:"Golzinho de Rua",categoria:"Sub-17",local_evento:"Vila São Luís",data_inicio:"2026-10-25",data_fim:"2026-10-25",prazo_inscricao:"2026-10-25",status:"Aberto",tipo_inscricao:"rapida",descricao:"Os times são montados no dia. Chegue cedo!",regulamento_url:"",link_challonge_embed:""},
 {id:"3",nome:"Copa Vôlei Comunitário",modalidade:"Vôlei",categoria:"Livre",local_evento:"Centro",data_inicio:"2026-12-05",data_fim:"2026-12-06",prazo_inscricao:"",status:"Em breve",tipo_inscricao:"completa",descricao:"Evento em planejamento. Datas podem mudar.",regulamento_url:"",link_challonge_embed:""},
