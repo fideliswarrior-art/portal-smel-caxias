@@ -124,7 +124,7 @@ if(p.acao==="listar")return{ok:1,rows:a.map((r,i)=>({...r,_row:i+2})),eventos:DE
 if(p.acao==="salvar"){const d={...p.dados},w=d._row;delete d._row;if(w)Object.assign(a[w-2],d);else{if(p.aba==="eventos")d.id=d.id||"evt-"+Date.now();a.push(d)}return{ok:1}}
 if(p.acao==="excluir"){a.splice(p.row-2,1);return{ok:1}}
 return{ok:0}}
-let D={},F={q:"",st:"",m:""};
+let D = { eventos: [], feed: [], colocacoes: [], galeria: [], home_fotos: [] }, F = { q: "", st: "", m: "" };
 const PAL=["#1a365d","#2f6f5e","#9a4f26","#4c4380"];
 const ph=(t)=>{let h=0;for(const c of t||"x")h+=c.charCodeAt(0);return`<div class="ph" style="background-color:${PAL[h%4]}"><span>${esc(t)}</span></div>`};
 const yt=u=>{const m=String(u||"").match(/(?:youtu\.be\/|v=)([\w-]{11})/);return m?"https://www.youtube-nocookie.com/embed/"+m[1]:""};
@@ -292,5 +292,23 @@ b.disabled=false;b.textContent="Salvar"}}
 addEventListener("hashchange",()=>{if(location.hash.slice(1)!==cur)route()});document.addEventListener("click",e=>{const a=e.target.closest('a[href^="#"]');if(a){e.preventDefault();nav(a.getAttribute("href"))}});$("#ok").onclick=()=>{$("#modal").classList.remove("on");nav("#inicio")};
 document.querySelectorAll(".wa-link").forEach(a=>a.href="https://wa.me/"+CFG.WHATSAPP+"?text="+encodeURIComponent("Olá! Preciso de ajuda com o portal de esportes."));
 $("#ftel").textContent=CFG.TEL;$("#fmail").textContent=CFG.EMAIL;$("#fgym").textContent=CFG.GINASIOS;
-(async()=>{try{D=await api({acao:"publico"})}catch(e){D={eventos:[],feed:[],colocacoes:[],galeria:[]}}route()})();
+(async () => {
+  D = {
+    eventos: (DEMO.eventos || []).slice(),
+    feed: (DEMO.feed || []).slice(),
+    colocacoes: (DEMO.colocacoes || []).slice(),
+    home_fotos: (DEMO.home_fotos || []).slice()
+  };
+  route();
+
+  try {
+    const live = await api({ acao: "publico" });
+    if (live && live.eventos && Array.isArray(live.eventos) && live.eventos.length) {
+      D = live;
+      route();
+    }
+  } catch (err) {
+    console.warn("Utilizando dados locais:", err);
+  }
+})();
 </script></body></html>
