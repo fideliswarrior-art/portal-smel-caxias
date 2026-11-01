@@ -69,7 +69,7 @@ footer{background:var(--navy);color:#dbe4f0;padding:28px 16px 90px;margin-top:48
 @media(min-width:760px){.cw{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;text-align:center;font-weight:600;color:var(--mut);margin-bottom:6px}.cg{grid-template-columns:repeat(7,1fr)}.dp{display:block}.dc{flex-direction:column;gap:6px;min-height:110px}.dn span{display:none}.de{font-size:15px;padding:4px 8px}}
 .m{overflow:auto}.m div{max-height:92vh;overflow:auto}
 /* ===== BARRA SUPERIOR DE STATUS ADMIN & ISOLAMENTO DE LAYOUT ===== */
-#admin-bar{background:#0f172a;color:#f8fafc;border-bottom:3px solid var(--green);padding:8px 16px;font-size:15px;position:sticky;top:0;z-index:30}
+#admin-bar{background:#0f172a;color:#f8fafc;border-bottom:3px solid var(--green);padding:8px 16px;font-size:15px}
 #admin-bar .ab-wrap{max-width:1120px;margin:auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px}
 #admin-bar .ab-badge{background:var(--green);color:#022c1e;font-weight:800;padding:2px 8px;border-radius:2px;text-transform:uppercase;font-size:13px;margin-right:6px;letter-spacing:.04em}
 #admin-bar .ab-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -86,8 +86,7 @@ footer{background:var(--navy);color:#dbe4f0;padding:28px 16px 90px;margin-top:48
 @media(max-width:700px){.top{display:none}header{position:static}.hd{justify-content:flex-start}.hd>.btn{display:none}h1{font-size:40px}h2{font-size:28px}.row{flex-direction:column}.row .btn{width:100%}.cod{flex-direction:column}main{padding-bottom:96px}footer{padding-bottom:150px}
 #nav{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);z-index:20;gap:0;padding-bottom:env(safe-area-inset-bottom,0px)}#nav a{flex:1;justify-content:center;text-align:center;font-size:12px;letter-spacing:-.01em;min-height:58px;border-bottom:0;border-top:4px solid transparent;padding:0 2px}#nav a.on{border-top-color:var(--green)}.wa{bottom:calc(72px + env(safe-area-inset-bottom,0px));min-height:48px;padding:0 14px;font-size:15px}}
 </style></head><body>
-<div id="admin-bar" hidden></div>
-<header><div class="top">Prefeitura de Duque de Caxias · Secretaria Municipal de Esportes e Lazer (SMEL)</div><div class="hd"><a class="brand" href="#inicio"><img class="logo" src="logo-caxias-mais-esporte.png" alt="Projeto Caxias Mais Esporte"></a>
+<header><div id="admin-bar" hidden></div><div class="top">Prefeitura de Duque de Caxias · Secretaria Municipal de Esportes e Lazer (SMEL)</div><div class="hd"><a class="brand" href="#inicio"><img class="logo" src="logo-caxias-mais-esporte.png" alt="Projeto Caxias Mais Esporte"></a>
 <nav id="nav"><a href="#inicio" data-p="inicio">Início</a><a href="#competicoes" data-p="competicoes">Competições</a><a href="#calendario" data-p="calendario">Calendário</a><a href="#midia" data-p="midia">Mídia</a><a href="#inscricoes" data-p="inscricoes">Inscrições</a></nav><a class="btn" href="#inscricoes">Inscreva-se</a>
 </div></header>
 <main>
@@ -126,21 +125,42 @@ const dt=d=>{const p=dp(d);return p.length?`${p[2]}/${p[1]}/${p[0]}`:esc(d||"A d
 const hojeISO=()=>{const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`};
 const agoraBR=()=>{const d=new Date(),p=n=>String(n).padStart(2,"0");return`${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()} às ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`};
 const jaPassou=e=>{const df=dp((e||{}).data_fim||(e||{}).data_inicio).join("-");return!!(df&&df<hojeISO())};
-const normEv=e=>{if(e&&jaPassou(e))e.status="Encerrado";return e};
+const normEv=e=>{if(!e)return e;const ai=String(e.aceita_individual||"");if(/no[ _]?evento|inscri.*evento/i.test(ai))e.status="Inscrição feita apenas no evento";else if(/esgotad/i.test(ai))e.status="Vagas esgotadas";if(jaPassou(e))e.status="Encerrado";return e};
+const prepDadosEv=d=>{if(!d)return d;const out={...d},s=String(out.status||"");if(/no[ _]?evento/i.test(s)){out.aceita_individual="Inscrição feita apenas no evento";out.status="Em breve"}else if(/esgotad/i.test(s)){out.aceita_individual="Vagas esgotadas";out.status="Em breve"}else{out.aceita_individual=""}return out};
 DEMO.fotos_eventos={"5":[1,2,3,4].map(i=>({thumb:"",link:"",nome:"Foto "+i}))};
 
 /* ===== TRILHA DE AUDITORIA (LOGS DE ATIVIDADE) ===== */
 function carregarLogsLocais(){try{const raw=localStorage.getItem("smel_audit_log");if(raw){const arr=JSON.parse(raw);if(Array.isArray(arr)&&arr.length)return arr}}catch(e){}return[{data_hora:"31/10/2026 às 14:20:00",servidor:"fidelis",acao:"APROVAR_INSCRICAO",detalhes:"fidelis aprovou a inscrição do time Time Teste (código DEMO12) no evento Copa Basquete 3x3"}]}
 DEMO.auditoria=carregarLogsLocais();
-function regLogLocal(servidor,acao,detalhes){const item={data_hora:agoraBR(),servidor:servidor||A.user||"servidor",acao:acao||"ACAO",detalhes:detalhes||""};DEMO.auditoria.unshift(item);if(DEMO.auditoria.length>500)DEMO.auditoria.length=500;try{localStorage.setItem("smel_audit_log",JSON.stringify(DEMO.auditoria))}catch(e){}return item}
+function regLogLocal(servidor,acao,detalhes){const item={data_hora:agoraBR(),servidor:servidor||A.user||"servidor",acao:acao||"ACAO",detalhes:detalhes||""};if(DEMO.auditoria[0]&&DEMO.auditoria[0].detalhes===item.detalhes&&DEMO.auditoria[0].data_hora===item.data_hora)return item;DEMO.auditoria.unshift(item);if(DEMO.auditoria.length>500)DEMO.auditoria.length=500;try{localStorage.setItem("smel_audit_log",JSON.stringify(DEMO.auditoria))}catch(e){}return item}
 
 const rlKey=k=>"smel_rl_"+k;
 function rlStatus(k,max,winMs){try{const raw=localStorage.getItem(rlKey(k));if(!raw)return{ok:true,rest:max};const d=JSON.parse(raw);if(Date.now()>d.exp){localStorage.removeItem(rlKey(k));return{ok:true,rest:max}}if(d.n>=max)return{ok:false,min:Math.max(1,Math.ceil((d.exp-Date.now())/60000))};return{ok:true,rest:max-d.n}}catch(e){return{ok:true,rest:max}}}
 function rlFail(k,max,winMs){try{const s=rlStatus(k,max,winMs),raw=localStorage.getItem(rlKey(k)),d=raw?JSON.parse(raw):{n:0,exp:Date.now()+winMs};d.n=(d.n||0)+1;d.exp=Date.now()+winMs;localStorage.setItem(rlKey(k),JSON.stringify(d));return Math.max(0,max-d.n)}catch(e){return 1}}
 function rlClear(k){try{localStorage.removeItem(rlKey(k))}catch(e){}}
-function comprimirImg(file,maxW=1200,qual=0.82){return new Promise((res,rej)=>{const rd=new FileReader();rd.onerror=()=>rej(new Error("Erro ao ler imagem"));rd.onload=()=>{const img=new Image();img.onerror=()=>rej(new Error("Imagem inválida"));img.onload=()=>{let w=img.width,h=img.height;if(w>maxW){h=Math.round(h*(maxW/w));w=maxW}const cv=document.createElement("canvas");cv.width=w;cv.height=h;cv.getContext("2d").drawImage(img,0,0,w,h);res(cv.toDataURL("image/jpeg",qual))};img.src=rd.result};rd.readAsDataURL(file)})}
+function comprimirImg(file,maxW=1080,qual=0.82){return new Promise((res,rej)=>{const rd=new FileReader();rd.onerror=()=>rej(new Error("Erro ao ler imagem"));rd.onload=()=>{const img=new Image();img.onerror=()=>rej(new Error("Imagem inválida"));img.onload=()=>{let w=img.width,h=img.height;if(w>maxW){h=Math.round(h*(maxW/w));w=maxW}const cv=document.createElement("canvas");cv.width=w;cv.height=h;const ctx=cv.getContext("2d");ctx.fillStyle="#ffffff";ctx.fillRect(0,0,w,h);ctx.drawImage(img,0,0,w,h);res(cv.toDataURL("image/jpeg",qual))};img.src=rd.result};rd.readAsDataURL(file)})}
 const DS=CFG.SCRIPT_URL;
-async function api(p){if(!DS)return demo(p);try{const r=await fetch(DS,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify(p)}),j=await r.json();if(j&&j.protocol&&!("ok"in j)&&!("eventos"in j))return demo(p);return j}catch(e){if(p.acao!=="publico")return demo(p);throw e}}
+async function api(p){
+  if(!DS||(p.acao==="listar"&&p.aba==="auditoria"&&p.token==="demo"))return demo(p);
+  const reqPayload=p.acao==="salvar"&&p.aba==="eventos"&&p.dados?{...p,dados:prepDadosEv(p.dados)}:p;
+  let lastErr;
+  for(let tent=0;tent<2;tent++){
+    try{
+      const r=await fetch(DS,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify(reqPayload)}),j=await r.json();
+      if(j&&j.protocol&&!("ok"in j)&&!("eventos"in j))return demo(p);
+      if(j&&!j.ok&&p.acao==="listar"&&p.aba==="auditoria")return demo(p);
+      if(j&&Array.isArray(j.eventos))j.eventos.forEach(normEv);
+      if(j&&Array.isArray(j.rows)&&p.aba==="eventos")j.rows.forEach(normEv);
+      if(j&&j.evento)normEv(j.evento);
+      return j;
+    }catch(e){
+      lastErr=e;
+      if(tent===0)await new Promise(rs=>setTimeout(rs,700));
+    }
+  }
+  if(p.acao!=="publico"&&(!A.tok||A.tok==="demo"||p.acao==="listar"))return demo(p);
+  throw lastErr;
+}
 let SEQ=0;
 function demo(p){DEMO.eventos.forEach(normEv);const cnt=e=>{const r=DEMO.inscricoes.filter(i=>i.evento_id===e.id&&i.status_aprovacao!=="Recusada");return +e.max_atletas>1?new Set(r.map((i,k)=>(i.time||"").trim().toLowerCase()||"_"+k)).size:r.length};
 if(p.acao==="publico")return{eventos:DEMO.eventos.map(e=>({...normEv(e),inscritos:String(cnt(e))})),feed:DEMO.feed,colocacoes:DEMO.colocacoes,home_fotos:DEMO.home_fotos};
@@ -152,7 +172,7 @@ if(p.acao==="editar"){if(!ed)return{ok:0,msg:"A edição desta inscrição está
 return{ok:1,codigo:c,protocolo:r[0].protocolo,situacao:r[0].status_aprovacao,evento:e,editavel:ed,time:r[0].time||"",instagram_time:r[0].instagram_time||"",atletas:r.map(({nome,idade,telefone,cpf,email,rede_social})=>({nome,idade,telefone,cpf,email,rede_social}))}}
 if(p.acao==="login"){const st=rlStatus("login",5,900000);if(!st.ok)return{ok:0,msg:`Muitas tentativas de login. Bloqueado temporariamente por ${st.min} min.`};const u=DEMO.usuarios.find(x=>x.login===p.login&&x.senha===p.senha);if(u){rlClear("login");regLogLocal(u.login,"LOGIN",`${u.login} iniciou sessão no painel administrativo`);return{ok:1,token:"demo",login:u.login}}const rest=rlFail("login",5,900000);return{ok:0,msg:"Login ou senha incorretos."+(rest>0?` Restam ${rest} tentativa(s).`:" Conta bloqueada por 15 minutos.")}}
 if(p.acao==="logout"){regLogLocal(A.user||"servidor","LOGOUT",`${A.user||"servidor"} encerrou a sessão`);return{ok:1}}
-if(p.token!=="demo")return{ok:0,msg:"Sessão expirada. Entre novamente.",expirou:1};
+if(!p.token)return{ok:0,msg:"Sessão expirada. Entre novamente.",expirou:1};
 if(p.acao==="listar"&&p.aba==="auditoria")return{ok:1,rows:DEMO.auditoria.map((r,i)=>({...r,_row:i+2}))};
 const a=DEMO[p.aba];
 if(p.acao==="listar"&&p.aba==="inscricoes"){const ev=DEMO.eventos.find(e=>e.id===p.evento_id)||null;return{ok:1,rows:ev?DEMO.inscricoes.filter(i=>i.evento_id===ev.id).map((r,i)=>({...r,_row:i+2})):[],eventos:DEMO.eventos.map(e=>({id:e.id,nome:e.nome})),evento:ev}}
@@ -182,7 +202,7 @@ const fcard=f=>{const t=(f.tipo||"").toLowerCase();let m="";
  return`<article class="fi">${m}<div class="fb"><div class="mut">${dt(f.data)}</div><h3>${esc(f.titulo)}</h3><p>${esc(f.legenda)}</p></div></article>`};
 const fo=f=>`<a class="fp"${su(f.link)?` href="${esc(su(f.link))}" target="_blank" rel="noopener"`:""}>${su(f.thumb)?`<img src="${esc(su(f.thumb))}" alt="${esc(f.nome)}" loading="lazy">`:ph("Foto do evento")}</a>`;
 const byDate=(a,b)=>String(a.data_inicio).localeCompare(b.data_inicio);
-const card=(e,href)=>{const k=stk(e);return`<a class="cd" href="${href||"#evento/"+esc(e.id)}">${su(e.imagem_url)?`<img src="${esc(su(e.imagem_url))}" alt="" loading="lazy">`:ph(e.modalidade)}<div class="cb"><span class="st ${k}">${stl[k]}</span><div class="eb" style="margin:6px 0 2px">${esc(e.modalidade)} · ${esc(e.categoria)}</div><h3>${esc(e.nome)}</h3><div class="mut">${dt(e.data_inicio)}${e.data_fim&&e.data_fim!==e.data_inicio?" a "+dt(e.data_fim):""} · ${esc(e.local_evento)}</div></div>${k==="ab"&&!href?'<div class="cc">Inscrever-se →</div>':k==="ne"&&!href?'<div class="cc" style="background:#0369a1">Inscrições no evento →</div>':""}</a>`};
+const card=(e,href)=>{const k=stk(e);return`<a class="cd" href="${href||"#evento/"+esc(e.id)}">${su(e.imagem_url)?`<img src="${esc(su(e.imagem_url))}" alt="${esc(e.nome)}" loading="lazy" onerror="this.outerHTML=ph('${esc(e.modalidade).replace(/'/g,"\\'")}')">`:ph(e.modalidade)}<div class="cb"><span class="st ${k}">${stl[k]}</span><div class="eb" style="margin:6px 0 2px">${esc(e.modalidade)} · ${esc(e.categoria)}</div><h3>${esc(e.nome)}</h3><div class="mut">${dt(e.data_inicio)}${e.data_fim&&e.data_fim!==e.data_inicio?" a "+dt(e.data_fim):""} · ${esc(e.local_evento)}</div></div>${k==="ab"?'<div class="cc">Inscrever-se →</div>':k==="ne"?'<div class="cc" style="background:#0369a1">Inscrições no evento →</div>':""}</a>`};
 const cr=e=>{const k=stk(e);return`<a class="cr" href="#evento/${esc(e.id)}">${su(e.imagem_url)?`<img src="${esc(su(e.imagem_url))}" alt="" loading="lazy">`:ph(e.modalidade)}<div><span class="st ${k}">${stl[k]}</span><h3>${esc(e.nome)}</h3><div class="mut">${esc(e.modalidade)} · ${dt(e.data_inicio)}</div></div></a>`};
 function home(){const ab=D.eventos.filter(e=>["ab","ne","es"].includes(stk(e))).sort(byDate),m=D.home_fotos||[];
 $("#inicio").innerHTML=`<div class="hero"><div><div class="eb">Portal Oficial do Caxias Mais Esporte</div><h1>Esporte para todos</h1><p>Veja o que vem por aí, confira os resultados e inscreva sua equipe.</p></div>${m[0]?fo(m[0]):""}</div>
@@ -363,11 +383,33 @@ function renderAdminBar(){
   if(btnOut)btnOut.onclick=()=>encerrarSessao();
 }
 
-const call=async p=>{tocarAtividade();const r=await api({...p,token:A.tok});if(r&&r.ok&&(p.acao==="salvar"||p.acao==="excluir"||p.acao==="uploadFotos"))STALE=true;if(r&&r.expirou)salvarSessao("","");return r};
-async function admin(){try{await adm()}catch(x){salvarSessao("","");$("#admin").innerHTML='<h2 style="margin-top:12px">Acesso Servidores</h2><p class="err" style="display:block">Não foi possível falar com o servidor. Tente novamente.</p><a class="btn" href="#admin">Tentar de novo</a>'}}
+const call=async p=>{
+  tocarAtividade();
+  const r=await api({...p,token:A.tok});
+  if(r&&r.ok){
+    if(p.acao==="salvar"||p.acao==="excluir"||p.acao==="uploadFotos")STALE=true;
+    if(p.acao==="salvar"&&p.dados){
+      const d=p.dados;
+      regLogLocal(A.user,(d._row?"EDITAR_":"CRIAR_")+(p.aba||"REGISTRO").toUpperCase(),`${A.user||"servidor"} ${d._row?"atualizou":"cadastrou"} em ${p.aba}: "${d.nome||d.nome_equipe||d.titulo||d.id||""}"${d.status?` (Situação: ${d.status})`:""}${d.max_vagas!==undefined?` [Vagas: ${d.max_vagas||"sem limite"}]`:""}`);
+    }else if(p.acao==="excluir"){
+      regLogLocal(A.user,"EXCLUIR_"+(p.aba||"REGISTRO").toUpperCase(),`${A.user||"servidor"} excluiu linha ${p.row} da aba ${p.aba}`);
+    }else if(p.acao==="uploadFotos"){
+      regLogLocal(A.user,"UPLOAD_FOTOS",`${A.user||"servidor"} enviou ${(p.arquivos||[]).length} foto(s) para o evento ${p.evento_id||""}`);
+    }else if(p.acao==="inscAdmin"){
+      regLogLocal(A.user,p.codigo?"EDITAR_INSCRICAO":"CRIAR_INSCRICAO",`${A.user||"servidor"} ${p.codigo?"editou":"cadastrou"} inscrição ${p.codigo||""} (${p.time||(p.atletas&&p.atletas[0]&&p.atletas[0].nome)||""})`);
+    }else if(p.acao==="inscStatus"){
+      regLogLocal(A.user,"STATUS_INSCRICAO",`${A.user||"servidor"} alterou a inscrição ${p.codigo} para "${p.status}"`);
+    }else if(p.acao==="inscExcluir"){
+      regLogLocal(A.user,"EXCLUIR_INSCRICAO",`${A.user||"servidor"} excluiu a inscrição ${p.codigo}`);
+    }
+  }
+  if(r&&r.expirou)salvarSessao("","");
+  return r;
+};
+async function admin(){try{await adm()}catch(x){$("#admin").innerHTML=`${barra()}<div class="card2"><p class="err" style="display:block;margin-top:0">Falha de comunicação com o servidor (verifique sua conexão com a internet).</p><button class="btn" type="button" onclick="admin()">Tentar novamente</button></div>`}}
 async function adm(){const el=$("#admin");renderAdminBar();
 if(!A.tok){el.innerHTML=`<h2 style="margin-top:12px">Acesso Servidores</h2>${A.msgSessao?`<div class="safe" style="border-left-color:#d97706;background:#fef3c7;color:#92400e"><b>Aviso de Segurança:</b> ${esc(A.msgSessao)}</div>`:""}<form id="lf" style="max-width:420px"><label for="lg1">Login</label><input id="lg1" autocomplete="username" autocapitalize="none"><label for="pw">Senha</label><input id="pw" type="password" autocomplete="current-password"><div class="err" id="le"></div><div class="row"><button class="btn">Entrar</button></div></form>`;
-$("#lf").onsubmit=async e=>{e.preventDefault();const le=$("#le"),b=e.target.querySelector("button"),st=rlStatus("login_ui",5,900000);le.style.display="none";if(!st.ok){le.textContent=`Muitas tentativas de login. Aguarde ${st.min} min para tentar novamente.`;le.style.display="block";return}b.disabled=true;const lgVal=$("#lg1").value.trim();try{const r=await api({acao:"login",login:lgVal,senha:$("#pw").value});if(r.ok){rlClear("login_ui");salvarSessao(r.token,r.login||lgVal);admin()}else{const rest=rlFail("login_ui",5,900000);le.textContent=r.msg||("Login ou senha incorretos."+(rest>0?` Restam ${rest} tentativa(s).`:" Bloqueado por 15 minutos."));le.style.display="block"}}catch(x){le.textContent="Não consegui falar com o servidor. Confira o SCRIPT_URL e a implantação.";le.style.display="block"}b.disabled=false};return}
+$("#lf").onsubmit=async e=>{e.preventDefault();const le=$("#le"),b=e.target.querySelector("button"),st=rlStatus("login_ui",5,900000);le.style.display="none";if(!st.ok){le.textContent=`Muitas tentativas de login. Aguarde ${st.min} min para tentar novamente.`;le.style.display="block";return}b.disabled=true;const lgVal=$("#lg1").value.trim();try{const r=await api({acao:"login",login:lgVal,senha:$("#pw").value});if(r.ok){rlClear("login_ui");regLogLocal(r.login||lgVal,"LOGIN",`${r.login||lgVal} iniciou sessão no painel administrativo`);salvarSessao(r.token,r.login||lgVal);admin()}else{const rest=rlFail("login_ui",5,900000);le.textContent=r.msg||("Login ou senha incorretos."+(rest>0?` Restam ${rest} tentativa(s).`:" Bloqueado por 15 minutos."));le.style.display="block"}}catch(x){le.textContent="Não consegui falar com o servidor. Verifique sua conexão com a internet.";le.style.display="block"}b.disabled=false};return}
 if(A.tab==="auditoria")return admAudit(el);
 const S=SC[A.tab],r=await call({acao:"listar",aba:A.tab,evento_id:A.ev});if(!r.ok){if(!A.tok)return admin();throw new Error(r.msg)}
 if(A.tab==="inscricoes")return admInsc(el,r);let rows=(r.rows||[]).map(x=>A.tab==="eventos"?normEv(x):x);const E=r.eventos||[];if(S.ev&&A.ev)rows=rows.filter(x=>x.evento_id===A.ev);if(A.tab==="colocacoes")rows.sort((a,b)=>a.colocacao-b.colocacao);
@@ -385,7 +427,7 @@ ${A.tab==="eventos"?`<div class="qctrl" data-qrow="${x._row}">
 </div>`:""}</div>`).join("")||'<p class="mut">Nada cadastrado ainda.</p>'}`;
 el.onclick=async e=>{const b=e.target.closest("button");if(!b)return;const d=b.dataset;
 if(d.t){A.tab=d.t;admin()}else if(d.out){encerrarSessao()}else if(d.n)form(S,{});else if(d.e)form(S,rows.find(x=>x._row==d.e));else if(d.p)formFotos(rows.find(x=>x._row==d.p));else if(d.d){const x=rows.find(y=>y._row==d.d);form(S,{...x,_row:undefined,id:"",status:"Em breve",nome:x.nome+" (cópia)"})}
-else if(d.qsave){const rowId=+d.qsave,orig=rows.find(x=>x._row==rowId),box=el.querySelector(`[data-qrow="${rowId}"]`);if(!orig||!box)return;const stVal=box.querySelector('[data-qf="status"]').value,vgVal=box.querySelector('[data-qf="max_vagas"]').value.trim(),pzVal=box.querySelector('[data-qf="prazo_inscricao"]').value,drVal=box.querySelector('[data-qf="pasta_fotos_url"]').value.trim();b.disabled=true;b.textContent="Salvando...";const novo={...orig,status:stVal,max_vagas:vgVal,prazo_inscricao:pzVal,pasta_fotos_url:drVal};const res=await call({acao:"salvar",aba:"eventos",dados:novo});b.disabled=false;b.textContent=res.ok?"Salvo ✓":"Erro";setTimeout(()=>admin(),400)}
+else if(d.qsave){const rowId=+d.qsave,orig=rows.find(x=>x._row==rowId),box=el.querySelector(`[data-qrow="${rowId}"]`);if(!orig||!box)return;const stVal=box.querySelector('[data-qf="status"]').value,vgVal=box.querySelector('[data-qf="max_vagas"]').value.trim(),pzVal=box.querySelector('[data-qf="prazo_inscricao"]').value,drVal=box.querySelector('[data-qf="pasta_fotos_url"]').value.trim();b.disabled=true;b.textContent="Salvando...";const novo={...orig,status:stVal,max_vagas:vgVal,prazo_inscricao:pzVal,pasta_fotos_url:drVal};try{const res=await call({acao:"salvar",aba:"eventos",dados:novo});b.disabled=false;b.textContent=res&&res.ok?"Salvo ✓":"Erro";setTimeout(()=>admin(),400)}catch(err){b.disabled=false;b.textContent="Erro de rede"}}
 else if(d.x){if(d.arm!=="1"){b.dataset.arm="1";b.textContent="Confirmar exclusão";b.style.background="#b91c1c";b.style.color="#fff";return}await call({acao:"excluir",aba:A.tab,row:+d.x});admin()}};
 const es=$("#es");if(es)es.onchange=()=>{A.ev=es.value;admin()}}
 
@@ -428,8 +470,8 @@ ${isEv?`<fieldset class="at" style="margin-top:18px"><legend>Capa do Evento e Pa
 $("#cx").onclick=()=>admin();
 const inpCapa=$("#capa_arq");
 if(inpCapa)inpCapa.onchange=async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;try{capaNome=f.name;capaB64=await comprimirImg(f,1200,0.84);$("#capa_prev").innerHTML=`<img src="${capaB64}" alt="Prévia da capa" style="max-width:280px;aspect-ratio:16/9;object-fit:cover;border:2px solid var(--green)"><div class="mut">Imagem pronta para envio (${esc(f.name)})</div>`}catch(err){$("#ae").textContent="Não foi possível carregar a imagem selecionada.";$("#ae").style.display="block"}};
-$("#af").onsubmit=async e=>{e.preventDefault();const b=$("#bsv");b.disabled=true;b.textContent="Salvando, aguarde...";const d=Object.fromEntries(new FormData(e.target));if(r._row)d._row=r._row;if(S.ev)d.evento_id=r.evento_id||A.ev;if(r.id)d.id=r.id;if(r.pasta_evento_url)d.pasta_evento_url=r.pasta_evento_url;
-const x=await call({acao:"salvar",aba:A.tab,dados:d,capa_b64:capaB64,capa_nome:capaNome});b.disabled=false;b.textContent="Salvar";if(!x.ok){if(!A.tok)return admin();$("#ae").textContent=x.msg||"Erro ao salvar.";$("#ae").style.display="block";return}admin()}}
+$("#af").onsubmit=async e=>{e.preventDefault();const b=$("#bsv"),ae=$("#ae");ae.style.display="none";b.disabled=true;b.textContent="Salvando, aguarde...";const d=Object.fromEntries(new FormData(e.target));if(r._row)d._row=r._row;if(S.ev)d.evento_id=r.evento_id||A.ev;if(r.id)d.id=r.id;if(r.pasta_evento_url)d.pasta_evento_url=r.pasta_evento_url;
+try{const x=await call({acao:"salvar",aba:A.tab,dados:d,capa_b64:capaB64,capa_nome:capaNome});b.disabled=false;b.textContent="Salvar";if(!x.ok){if(!A.tok)return admin();ae.textContent=x.msg||"Erro ao salvar.";ae.style.display="block";return}admin()}catch(err){b.disabled=false;b.textContent="Salvar";ae.textContent="Falha de conexão com a internet. Verifique sua rede e clique em Salvar novamente.";ae.style.display="block"}}}
 function formFotos(ev){if(!ev)return admin();const el=$("#admin");let selecionadas=[];
 el.innerHTML=`${barra()}<h2 style="margin-top:12px">Gestão de Galeria e Mídias: ${esc(ev.nome)}</h2><div class="safe">Cole diretamente o link de uma pasta pública do Google Drive abaixo (ideal para a assessoria de imprensa) ou envie as fotos diretamente pela plataforma para a subpasta <b>"Fotos"</b> do evento.</div>
 <form id="f_link_drive" style="max-width:720px;margin-bottom:18px"><label for="inp_pasta_url">Link da pasta pública do Google Drive (Galeria de Fotos)</label><div class="cod"><input id="inp_pasta_url" type="url" style="font:16px Barlow;letter-spacing:0;text-transform:none;text-align:left" placeholder="https://drive.google.com/drive/folders/..." value="${esc(ev.pasta_fotos_url||"")}"><button class="btn" type="submit">Salvar Link do Drive</button></div><div id="ok_link" class="safe" style="display:none;margin-top:10px">Link da pasta do Google Drive atualizado com sucesso!</div></form>

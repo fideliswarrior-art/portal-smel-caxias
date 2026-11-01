@@ -11,7 +11,7 @@
 // Planilha principal: eventos | feed | colocacoes | usuarios | auditoria
 // Planilha de inscrições: "indice" + uma aba por evento ("i_<id do evento>"), criadas sozinhas.
 const ABAS = {
-  eventos: ["id","nome","modalidade","categoria","local_evento","data_inicio","data_fim","prazo_inscricao","status","min_atletas","max_atletas","max_vagas","descricao","regulamento_url","link_challonge_embed","pasta_fotos_url","imagem_url","pasta_evento_url"],
+  eventos: ["id","nome","modalidade","categoria","local_evento","data_inicio","data_fim","prazo_inscricao","status","min_atletas","max_atletas","max_vagas","descricao","regulamento_url","link_challonge_embed","pasta_fotos_url","imagem_url","aceita_individual","pasta_evento_url"],
   feed: ["data","titulo","legenda","imagem_url","categoria"],
   colocacoes: ["evento_id","colocacao","nome_equipe"],
   usuarios: ["login","senha"],
@@ -114,6 +114,9 @@ function eventos() {
       if (colId > 0) sh.getRange(e._row, colId).setValue(e.id);
     }
     const fim = String(e.data_fim || e.data_inicio || "").trim().slice(0, 10);
+    if (e.aceita_individual && (/no[ _]?evento/i.test(e.aceita_individual) || /esgotad/i.test(e.aceita_individual)) && !/^encerr/i.test(e.status || "")) {
+      e.status = /no[ _]?evento/i.test(e.aceita_individual) ? "Inscrição feita apenas no evento" : "Vagas esgotadas";
+    }
     if (/^\d{4}-\d{2}-\d{2}$/.test(fim) && fim < hj && !/^encerr/i.test(e.status || "")) {
       e.status = "Encerrado";
       if (colSt > 0 && e._row) {
@@ -448,7 +451,9 @@ function admin(p) {
         }
       }
       const row = h.map((k,i) => d[k] !== undefined && k !== "_row" ? cel(d[k]) : (old[i] === undefined ? "" : old[i]));
-      sh.getRange(d._row ? +d._row : sh.getLastRow() + 1, 1, 1, h.length).setValues([row]);
+      const targetRow = d._row ? +d._row : sh.getLastRow() + 1;
+      try { sh.getRange(targetRow, 1, 1, h.length).clearDataValidations(); } catch (eVal) {}
+      sh.getRange(targetRow, 1, 1, h.length).setValues([row]);
       if (ab === "eventos") { const id = d.id || row[h.indexOf("id")]; if (id) abaInsc(id, true); }
       const descItem = d.nome || d.titulo || d.nome_equipe || d.id || "";
       registrarAuditoria(usr, (d._row ? "Edição (" : "Criação (") + ab + ")", usr + (d._row ? " atualizou '" : " cadastrou '") + descItem + "'" + (d.status ? " [Status: " + d.status + ", Vagas: " + (d.max_vagas || "sem limite") + "]" : ""));
