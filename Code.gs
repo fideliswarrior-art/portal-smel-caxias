@@ -8,13 +8,14 @@
 //      PASTA_EVENTOS = (link ou ID da pasta mãe onde serão criadas as pastas dos eventos; se vazio, usa a pasta da planilha)
 // 4) Execute a função "autorizar" (aceite as permissões). Ela cria as abas e configura as pastas.
 // 5) Implantar > Gerenciar implantações > lápis > Nova versão > Implantar. (A URL /exec continua a mesma.)
-// Planilha principal: eventos | feed | colocacoes | usuarios (login e senha do Acesso Servidores).
+// Planilha principal: eventos | feed | colocacoes | usuarios | auditoria
 // Planilha de inscrições: "indice" + uma aba por evento ("i_<id do evento>"), criadas sozinhas.
 const ABAS = {
   eventos: ["id","nome","modalidade","categoria","local_evento","data_inicio","data_fim","prazo_inscricao","status","min_atletas","max_atletas","max_vagas","descricao","regulamento_url","link_challonge_embed","pasta_fotos_url","imagem_url","pasta_evento_url"],
   feed: ["data","titulo","legenda","imagem_url","categoria"],
   colocacoes: ["evento_id","colocacao","nome_equipe"],
-  usuarios: ["login","senha"]
+  usuarios: ["login","senha"],
+  auditoria: ["data_hora","servidor","acao","detalhes"]
 };
 const INSC = ["data_envio","codigo","protocolo","time","instagram_time","nome","idade","telefone","cpf","email","rede_social","status_aprovacao","origem","termo","evento_id","evento"];
 const IDX = ["codigo","evento_id","protocolo"];
@@ -24,6 +25,18 @@ function autorizar() {
   Object.keys(ABAS).forEach(aba);
   indice();
   eventos().forEach(e => abaInsc(e.id, true));
+}
+
+// ---- Trilha de Auditoria (Logs de Atividade Oficial) ----
+function registrarAuditoria(servidor, acao, detalhes) {
+  try {
+    const sh = aba("auditoria");
+    const tz = Session.getScriptTimeZone();
+    const dh = Utilities.formatDate(new Date(), tz, "dd/MM/yyyy 'às' HH:mm:ss");
+    sh.appendRow([dh, cel(servidor || "sistema"), cel(acao || ""), cel(detalhes || "")]);
+  } catch (e) {
+    console.error("Erro ao gravar auditoria:", e);
+  }
 }
 
 // ---- Rate Limit (Proteção contra Brute Force e Spam) ----
@@ -251,7 +264,6 @@ function publico() {
 }
 
 // ---- validação oficial (servidor) ----
-// ins = inscrições que contam (sem recusadas; na edição, sem as do próprio código). o: {editando, admin}
 function checar(ev, p, ins, o) {
   o = o || {};
   const mx = Math.max(1, +ev.max_atletas || 1), mn = Math.min(mx, Math.max(1, +ev.min_atletas || 1));
@@ -273,7 +285,6 @@ function checar(ev, p, ins, o) {
   return {at, time};
 }
 
-// Grava um grupo (time ou atleta) na aba do evento. v: {at,time,igt}. o: {rows (se já existe), codigo, protocolo, origem, termo, status}
 function gravar(ev, v, o) {
   const sh = abaInsc(ev.id, true), h = cabecalho(sh), col = k => h.indexOf(k) + 1, rows = o.rows || [];
   const campos = ["nome","idade","telefone","cpf","email","rede_social"];
@@ -298,7 +309,8 @@ function inscrever(p) {
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
   try {
     const ev = eventos().find(e => e.id === p.evento_id);
-    if (!ev || !/^aberto/i.test(ev.status)) return {ok:0, msg:"As inscrições deste evento não estão abertas."};
+    if (!ev || /^inscri.*no evento/i.test(ev.status || "")) return {ok:0, msg:"Inscrição feita no dia do evento, com os organizadores."};
+    if (!/^aberto/i.test(ev.status)) return {ok:0, msg:"As inscrições deste evento não estão abertas."};
     if (!aberto(ev)) return {ok:0, msg:"O prazo de inscrição deste evento já terminou."};
     if (p.termo !== true) return {ok:0, msg:"É necessário aceitar o Termo de Responsabilidade."};
     const v = checar(ev, p, ativas(ev.id)); if (v.erro) return {ok:0, msg:v.erro};
@@ -356,7 +368,7 @@ function login(p) {
   const c = CacheService.getScriptCache(), lg = String(p.login || "").trim().toLowerCase(), kf = "falha_" + lg, kg = "falha_geral";
   if (!lg || !p.senha) return {ok:0, msg:"Informe login e senha."};
   if (!verificarRateLimit(kf, 5, 900) || !verificarRateLimit(kg, 15, 900)) {
-    return {ok:0, msg:"Muitas tentativas de login. Conta temporariamente bloqueada por 15 minutos contra força bruta."};
+    return {ok:0, msg:"Muitas tentativas de login. Aguarde 15 minutos e tente novamente."};
   }
   const u = ler("usuarios").find(x => x.login.trim().toLowerCase() === lg && x.senha.trim() === String(p.senha).trim());
   if (!u) {
@@ -368,8 +380,9 @@ function login(p) {
   }
   limparRateLimit(kf);
   const t = Utilities.getUuid() + Utilities.getUuid();
-  c.put("tok_" + t, lg, 21600); // sessão de 6 horas
-  return {ok:1, token:t};
+  c.put("tok_" + t, lg, 21600); // sessão máxima de 6 horas no servidor (e 15 min de inatividade no cliente)
+  registrarAuditoria(lg, "Login", lg + " iniciou sessão no painel administrativo");
+  return {ok:1, token:t, login:lg};
 }
 
 function admin(p) {
@@ -377,20 +390,34 @@ function admin(p) {
   if (!verificarRateLimit("falha_tok_admin", 15, 900)) {
     return {ok:0, msg:"Muitas requisições não autorizadas. Aguarde 15 minutos.", expirou:1};
   }
-  if (!p.token || !c.get("tok_" + p.token)) {
+  const usr = p.token ? c.get("tok_" + p.token) : "";
+  if (!usr) {
     Utilities.sleep(300);
     registrarFalhaRateLimit("falha_tok_admin", 900);
     return {ok:0, msg:"Sessão expirada. Entre novamente.", expirou:1};
   }
   const ab = p.aba, limpa = () => c.remove("pub"), evl = () => eventos().map(e => ({id:e.id, nome:e.nome}));
+  if (p.acao === "logout") {
+    c.remove("tok_" + p.token);
+    registrarAuditoria(usr, "Logout", usr + " encerrou a sessão administrativa");
+    return {ok:1};
+  }
   if (p.acao === "listar") {
+    if (ab === "auditoria") return {ok:1, rows:ler("auditoria").reverse().slice(0, 200)};
     if (ab === "inscricoes") { const ev = p.evento_id ? eventos().find(e => e.id === p.evento_id) : null; return {ok:1, rows:ev ? lerInsc(ev.id) : [], eventos:evl(), evento:ev || null}; }
     if (["eventos","feed","colocacoes"].indexOf(ab) < 0) return {ok:0, msg:"Aba inválida."};
     return {ok:1, rows:ler(ab), eventos:evl()};
   }
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
   try {
-    if (p.acao === "excluir" && ["eventos","feed","colocacoes"].indexOf(ab) >= 0) { if (+p.row < 2) return {ok:0}; aba(ab).deleteRow(+p.row); limpa(); return {ok:1}; }
+    if (p.acao === "excluir" && ["eventos","feed","colocacoes"].indexOf(ab) >= 0) {
+      if (+p.row < 2) return {ok:0};
+      const sh = aba(ab), h = cabecalho(sh), vals = sh.getRange(+p.row, 1, 1, h.length).getValues()[0];
+      const nomeItem = vals[h.indexOf("nome")] || vals[h.indexOf("titulo")] || vals[h.indexOf("nome_equipe")] || ("linha " + p.row);
+      sh.deleteRow(+p.row);
+      registrarAuditoria(usr, "Exclusão (" + ab + ")", usr + " excluiu '" + nomeItem + "' da aba " + ab);
+      limpa(); return {ok:1};
+    }
     if (p.acao === "salvar" && ["eventos","feed","colocacoes"].indexOf(ab) >= 0) {
       const sh = aba(ab), h = cabecalho(sh), d = p.dados || {};
       const old = d._row ? sh.getRange(+d._row, 1, 1, h.length).getValues()[0] : [];
@@ -399,12 +426,10 @@ function admin(p) {
           const u = {}; ler("eventos").forEach(e => { if (e.id) u[e.id] = 1; });
           d.id = idUnico(d.nome, d.data_inicio, u);
         }
-        // Encerra automaticamente se a data já passou
         const fim = String(d.data_fim || d.data_inicio || "").trim().slice(0, 10);
         if (/^\d{4}-\d{2}-\d{2}$/.test(fim) && fim < hoje()) {
           d.status = "Encerrado";
         }
-        // Cria/garante a pasta do evento no Drive com as subpastas "capa evento" e "Fotos"
         try {
           const idxPastaEv = h.indexOf("pasta_evento_url");
           const pastaEvAntiga = d.pasta_evento_url || (idxPastaEv >= 0 ? old[idxPastaEv] : "");
@@ -425,9 +450,10 @@ function admin(p) {
       const row = h.map((k,i) => d[k] !== undefined && k !== "_row" ? cel(d[k]) : (old[i] === undefined ? "" : old[i]));
       sh.getRange(d._row ? +d._row : sh.getLastRow() + 1, 1, 1, h.length).setValues([row]);
       if (ab === "eventos") { const id = d.id || row[h.indexOf("id")]; if (id) abaInsc(id, true); }
+      const descItem = d.nome || d.titulo || d.nome_equipe || d.id || "";
+      registrarAuditoria(usr, (d._row ? "Edição (" : "Criação (") + ab + ")", usr + (d._row ? " atualizou '" : " cadastrou '") + descItem + "'" + (d.status ? " [Status: " + d.status + ", Vagas: " + (d.max_vagas || "sem limite") + "]" : ""));
       limpa(); return {ok:1};
     }
-    // ----- Upload de fotos do evento pela plataforma (Acesso Servidores) -----
     if (p.acao === "uploadFotos") {
       const sh = aba("eventos"), h = cabecalho(sh), evs = ler("eventos");
       const ev = evs.find(e => e.id === p.evento_id || String(e._row) === String(p.row));
@@ -454,6 +480,7 @@ function admin(p) {
         c.remove("f" + idLimpar + "_4");
         c.remove("f" + idLimpar + "_60");
       }
+      registrarAuditoria(usr, "Upload de Fotos", usr + " enviou " + enviadas + " foto(s) para o evento '" + ev.nome + "'");
       limpa();
       return {ok:1, enviadas, pasta_fotos_url: fotosUrlFinal};
     }
@@ -475,19 +502,30 @@ function admin(p) {
         if (v.erro) return {ok:0, msg:v.erro};
       }
       v.igt = p.instagram_time;
-      if (rows.length) gravar(ev, v, {rows, status:st});
-      else { const codigo = novoCodigo(), proto = protocolo();
+      if (rows.length) {
+        gravar(ev, v, {rows, status:st});
+        registrarAuditoria(usr, "Edição de Inscrição", usr + " editou a inscrição " + cod + " (" + (v.time || v.at[0].nome) + ") no evento '" + ev.nome + "'");
+      } else {
+        const codigo = novoCodigo(), proto = protocolo();
         gravar(ev, v, {codigo, protocolo:proto, origem:basica ? "admin-basica" : "admin", termo:basica ? "Registro presencial (Secretaria)" : "Registrado pela Secretaria", status:st || "Aprovada"});
-        indice().appendRow([codigo, ev.id, proto]); }
+        indice().appendRow([codigo, ev.id, proto]);
+        registrarAuditoria(usr, "Nova Inscrição (Admin)", usr + " cadastrou a inscrição " + codigo + " (" + (v.time || v.at[0].nome) + ") no evento '" + ev.nome + "'");
+      }
       limpa(); return {ok:1};
     }
     if (p.acao === "inscStatus" && rows.length) {
       const sh = abaInsc(ev.id, false), col = cabecalho(sh).indexOf("status_aprovacao") + 1;
       if (["Pendente","Aprovada","Recusada"].indexOf(p.status) < 0) return {ok:0, msg:"Situação inválida."};
-      rows.forEach(r => sh.getRange(r._row, col).setValue(p.status)); limpa(); return {ok:1};
+      rows.forEach(r => sh.getRange(r._row, col).setValue(p.status));
+      const nomeEq = rows[0].time || rows[0].nome || cod;
+      registrarAuditoria(usr, "Status de Inscrição", usr + " alterou a inscrição de '" + nomeEq + "' (" + cod + ") para " + p.status + " no evento '" + ev.nome + "'");
+      limpa(); return {ok:1};
     }
     if (p.acao === "inscExcluir" && rows.length) {
-      const sh = abaInsc(ev.id, false); rows.slice().reverse().forEach(r => sh.deleteRow(r._row)); limpa(); return {ok:1};
+      const nomeEq = rows[0].time || rows[0].nome || cod;
+      const sh = abaInsc(ev.id, false); rows.slice().reverse().forEach(r => sh.deleteRow(r._row));
+      registrarAuditoria(usr, "Exclusão de Inscrição", usr + " excluiu a inscrição de '" + nomeEq + "' (" + cod + ") do evento '" + ev.nome + "'");
+      limpa(); return {ok:1};
     }
     return {ok:0, msg:"Ação desconhecida."};
   } finally { lock.releaseLock(); }
