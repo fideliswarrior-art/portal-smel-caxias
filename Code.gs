@@ -19,6 +19,7 @@ const ABAS = {
 };
 const INSC = ["data_envio","codigo","protocolo","time","instagram_time","nome","idade","telefone","cpf","email","rede_social","status_aprovacao","origem","termo","evento_id","evento"];
 const IDX = ["codigo","evento_id","protocolo"];
+const JOGOS = ["id_jogo","evento_id","formato","etapa","fase","grupo","rodada","ordem","time_a","placar_a","time_b","placar_b","vencedor","status_jogo","proximo_jogo_id","proximo_slot","origem_a","origem_b","num_grupos","passam_por_grupo"];
 
 function autorizar() {
   DriveApp.getRootFolder();
@@ -84,6 +85,8 @@ const aba = n => abaSh(SpreadsheetApp.getActive(), n, ABAS[n]);
 function ssInsc() { const id = PropertiesService.getScriptProperties().getProperty("INSCRICOES_ID"); return id ? SpreadsheetApp.openById(id.trim()) : SpreadsheetApp.getActive(); }
 const nomeAba = id => "i_" + String(id).replace(/[\[\]*?:\/\\]/g, "-").slice(0, 90);
 function abaInsc(id, criar) { const ss = ssInsc(), n = nomeAba(id); return (criar || ss.getSheetByName(n)) ? abaSh(ss, n, INSC) : null; }
+const nomeAbaJogos = id => "jogos_" + String(id).replace(/[\[\]*?:\/\\]/g, "-").slice(0, 85);
+function abaJogos(id, criar) { const ss = ssInsc(), n = nomeAbaJogos(id); return (criar || ss.getSheetByName(n)) ? abaSh(ss, n, JOGOS) : null; }
 const indice = () => abaSh(ssInsc(), "indice", IDX);
 const cabecalho = sh => sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(String);
 function lerSh(sh, cols) {
@@ -95,6 +98,7 @@ function lerSh(sh, cols) {
 }
 const ler = n => lerSh(aba(n), ABAS[n]);
 function lerInsc(id) { const sh = abaInsc(id, false); return sh ? lerSh(sh, INSC) : []; }
+function lerJogos(id) { const sh = abaJogos(id, false); return sh ? lerSh(sh, JOGOS) : []; }
 const cel = x => { x = x == null ? "" : String(x); return /^[=+@-]/.test(x) ? "'" + x : x; };
 const hoje = () => Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd");
 const slug = s => String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -253,12 +257,23 @@ function fotosPasta(u, limite) {
   return r;
 }
 
-// ---- leitura pública (sem dados pessoais; só quantas vagas já foram ocupadas) ----
+// ---- leitura pública (sem dados pessoais; inclui partidas e chaveamento nativo dos eventos) ----
 function publico() {
   const c = CacheService.getScriptCache(), k = c.get("pub"); if (k) return JSON.parse(k);
   const lim = r => { delete r._row; return r; };
+  const partidas = {};
+  const evs = eventos().map(e => {
+    e.inscritos = String(aberto(e) && +e.max_vagas > 0 ? vagas(e, ativas(e.id)) : 0);
+    const jgs = lerJogos(e.id).map(lim);
+    if (jgs.length) {
+      partidas[e.id] = jgs;
+      e.partidas = jgs;
+    }
+    return lim(e);
+  });
   const o = {
-    eventos: eventos().map(e => { e.inscritos = String(aberto(e) && +e.max_vagas > 0 ? vagas(e, ativas(e.id)) : 0); return lim(e); }),
+    eventos: evs,
+    partidas: partidas,
     feed: ler("feed").map(lim), colocacoes: ler("colocacoes").map(lim),
     home_fotos: fotosPasta(PropertiesService.getScriptProperties().getProperty("PASTA_HOME"), 4)
   };
@@ -407,6 +422,7 @@ function admin(p) {
   }
   if (p.acao === "listar") {
     if (ab === "auditoria") return {ok:1, rows:ler("auditoria").reverse().slice(0, 200)};
+    if (ab === "jogos") { const ev = p.evento_id ? eventos().find(e => e.id === p.evento_id) : null; return {ok:1, rows:ev ? lerJogos(ev.id) : [], eventos:evl(), evento:ev || null}; }
     if (ab === "inscricoes") { const ev = p.evento_id ? eventos().find(e => e.id === p.evento_id) : null; return {ok:1, rows:ev ? lerInsc(ev.id) : [], eventos:evl(), evento:ev || null}; }
     if (["eventos","feed","colocacoes"].indexOf(ab) < 0) return {ok:0, msg:"Aba inválida."};
     return {ok:1, rows:ler(ab), eventos:evl()};
@@ -488,6 +504,82 @@ function admin(p) {
       registrarAuditoria(usr, "Upload de Fotos", usr + " enviou " + enviadas + " foto(s) para o evento '" + ev.nome + "'");
       limpa();
       return {ok:1, enviadas, pasta_fotos_url: fotosUrlFinal};
+    }
+    // ----- chaveamento e gerenciamento de torneios (partidas e placares) -----
+    if (p.acao === "salvarPartidas") {
+      const ev = eventos().find(e => e.id === p.evento_id);
+      if (!ev) return {ok:0, msg:"Evento não encontrado."};
+      const sh = abaJogos(ev.id, true), h = cabecalho(sh);
+      if (sh.getLastRow() > 1) {
+        sh.getRange(2, 1, sh.getLastRow() - 1, Math.max(1, sh.getLastColumn())).clearContent();
+      }
+      const lista = Array.isArray(p.partidas) ? p.partidas : [];
+      if (lista.length) {
+        const novas = lista.map((j, idx) => {
+          const obj = Object.assign({}, j, {
+            id_jogo: j.id_jogo || ("J" + (idx + 1)),
+            evento_id: ev.id,
+            formato: j.formato || p.formato || "mata_mata",
+            num_grupos: j.num_grupos || p.num_grupos || "",
+            passam_por_grupo: j.passam_por_grupo || p.passam_por_grupo || ""
+          });
+          return h.map(k => obj[k] === undefined ? "" : cel(obj[k]));
+        });
+        sh.getRange(2, 1, novas.length, h.length).setValues(novas);
+      }
+      // Espelha resumo JSON no evento para leitura imediata
+      try {
+        const shEv = aba("eventos"), hEv = cabecalho(shEv), colCh = hEv.indexOf("link_challonge_embed") + 1;
+        if (colCh > 0 && ev._row) {
+          const pacote = {formato: p.formato || "mata_mata", num_grupos: p.num_grupos || 2, passam_por_grupo: p.passam_por_grupo || 2, times: p.times || [], partidas: lista};
+          shEv.getRange(ev._row, colCh).setValue("SMEL_TORNEIO:" + JSON.stringify(pacote));
+        }
+      } catch (eMir) {}
+      registrarAuditoria(usr, "Gerar / Salvar Torneio", usr + " configurou a tabela de jogos (" + (p.formato || "torneio") + ", " + lista.length + " partidas) do evento '" + ev.nome + "'");
+      limpa();
+      return {ok:1, total: lista.length};
+    }
+    if (p.acao === "atualizarPlacar") {
+      const ev = eventos().find(e => e.id === p.evento_id);
+      if (!ev) return {ok:0, msg:"Evento não encontrado."};
+      const sh = abaJogos(ev.id, true), h = cabecalho(sh);
+      // Se o cliente enviou a lista completa de partidas (com avanço automático de mata-mata), grava de forma atômica
+      if (Array.isArray(p.partidas) && p.partidas.length) {
+        if (sh.getLastRow() > 1) {
+          sh.getRange(2, 1, sh.getLastRow() - 1, Math.max(1, sh.getLastColumn())).clearContent();
+        }
+        const novas = p.partidas.map((j, idx) => {
+          const obj = Object.assign({}, j, {id_jogo: j.id_jogo || ("J" + (idx + 1)), evento_id: ev.id});
+          return h.map(k => obj[k] === undefined ? "" : cel(obj[k]));
+        });
+        sh.getRange(2, 1, novas.length, h.length).setValues(novas);
+        try {
+          const shEv = aba("eventos"), hEv = cabecalho(shEv), colCh = hEv.indexOf("link_challonge_embed") + 1;
+          if (colCh > 0 && ev._row) {
+            const pacote = {formato: p.formato || (p.partidas[0] && p.partidas[0].formato) || "mata_mata", num_grupos: p.num_grupos || 2, passam_por_grupo: p.passam_por_grupo || 2, times: p.times || [], partidas: p.partidas};
+            shEv.getRange(ev._row, colCh).setValue("SMEL_TORNEIO:" + JSON.stringify(pacote));
+          }
+        } catch (eMir2) {}
+      } else {
+        const jgs = lerJogos(ev.id);
+        const alvo = jgs.find(x => String(x.id_jogo) === String(p.id_jogo));
+        if (!alvo) return {ok:0, msg:"Partida não encontrada."};
+        const col = k => h.indexOf(k) + 1;
+        if (col("placar_a")) sh.getRange(alvo._row, col("placar_a")).setValue(cel(p.placar_a));
+        if (col("placar_b")) sh.getRange(alvo._row, col("placar_b")).setValue(cel(p.placar_b));
+        if (col("vencedor")) sh.getRange(alvo._row, col("vencedor")).setValue(cel(p.vencedor));
+        if (col("status_jogo")) sh.getRange(alvo._row, col("status_jogo")).setValue(cel(p.status_jogo || "finalizado"));
+        if (alvo.proximo_jogo_id && p.vencedor && p.vencedor !== "EMPATE") {
+          const prox = jgs.find(x => String(x.id_jogo) === String(alvo.proximo_jogo_id));
+          if (prox) {
+            const slotCol = String(alvo.proximo_slot).toUpperCase() === "B" ? col("time_b") : col("time_a");
+            if (slotCol) sh.getRange(prox._row, slotCol).setValue(cel(p.vencedor));
+          }
+        }
+      }
+      registrarAuditoria(usr, "Atualizar Placar", usr + " registrou placar no evento '" + ev.nome + "' (" + (p.resumo || ("Jogo " + (p.id_jogo || ""))) + ")");
+      limpa();
+      return {ok:1};
     }
     // ----- inscrições (por evento) -----
     const ev = eventos().find(e => e.id === p.evento_id), cod = String(p.codigo || "").trim().toUpperCase();
