@@ -118,7 +118,9 @@ function eventos() {
       if (colId > 0) sh.getRange(e._row, colId).setValue(e.id);
     }
     const fim = String(e.data_fim || e.data_inicio || "").trim().slice(0, 10);
-    if (e.aceita_individual && (/no[ _]?evento/i.test(e.aceita_individual) || /esgotad/i.test(e.aceita_individual)) && !/^encerr/i.test(e.status || "")) {
+    if (e.aceita_individual && /encerr/i.test(e.aceita_individual)) {
+      e.status = "Encerrado";
+    } else if (e.aceita_individual && (/no[ _]?evento/i.test(e.aceita_individual) || /esgotad/i.test(e.aceita_individual)) && !/^encerr/i.test(e.status || "")) {
       e.status = /no[ _]?evento/i.test(e.aceita_individual) ? "Inscrição feita apenas no evento" : "Vagas esgotadas";
     }
     if (/^\d{4}-\d{2}-\d{2}$/.test(fim) && fim < hj && !/^encerr/i.test(e.status || "")) {
@@ -268,7 +270,10 @@ function pastaMaeEventos() {
 function obterOuCriarSubpasta(pai, nome) {
   const limpo = String(nome || "Evento").trim().replace(/[\/\\]/g, "-") || "Evento";
   const it = pai.getFoldersByName(limpo);
-  if (it.hasNext()) return it.next();
+  while (it.hasNext()) {
+    const f = it.next();
+    try { if (!f.isTrashed()) return f; } catch (e) {}
+  }
   return pai.createFolder(limpo);
 }
 
@@ -277,15 +282,28 @@ function garantirPastasEvento(nomeEvento, pastaEventoUrlExistente) {
   let pastaEv = null;
   const idEv = idPasta(pastaEventoUrlExistente);
   if (idEv) {
-    try { pastaEv = DriveApp.getFolderById(idEv); } catch (e) { pastaEv = null; }
+    try {
+      const f = DriveApp.getFolderById(idEv);
+      if (f && !f.isTrashed()) pastaEv = f;
+    } catch (e) { pastaEv = null; }
+  }
+  let pastaCapa = null, pastaFotos = null;
+  if (pastaEv) {
+    try {
+      if (nomeEvento && pastaEv.getName() !== nomeEvento) {
+        try { pastaEv.setName(nomeEvento); } catch (e) {}
+      }
+      pastaCapa = obterOuCriarSubpasta(pastaEv, "capa evento");
+      pastaFotos = obterOuCriarSubpasta(pastaEv, "Fotos");
+    } catch (ePerm) {
+      pastaEv = null;
+    }
   }
   if (!pastaEv) {
     pastaEv = obterOuCriarSubpasta(pastaMaeEventos(), nomeEvento || "Evento SMEL");
-  } else if (nomeEvento && pastaEv.getName() !== nomeEvento) {
-    try { pastaEv.setName(nomeEvento); } catch (e) {}
+    pastaCapa = obterOuCriarSubpasta(pastaEv, "capa evento");
+    pastaFotos = obterOuCriarSubpasta(pastaEv, "Fotos");
   }
-  const pastaCapa = obterOuCriarSubpasta(pastaEv, "capa evento");
-  const pastaFotos = obterOuCriarSubpasta(pastaEv, "Fotos");
   try { pastaCapa.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (e) {}
   try { pastaFotos.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (e) {}
   return {
@@ -609,18 +627,31 @@ function admin(p) {
           if (p.capa_b64) {
             const img = salvarBase64NoDrive(pst.pastaCapa, p.capa_b64, p.capa_nome || ("capa-" + (d.id || "evento")), true);
             if (img) d.imagem_url = img.thumb;
+            else if (String(p.capa_b64).length < 48000) d.imagem_url = p.capa_b64;
           } else if (!d.imagem_url) {
             const capaDrive = buscarCapaNaPasta(pst.pastaCapa);
             if (capaDrive) d.imagem_url = capaDrive;
           }
         } catch (errDrive) {
           console.error("Aviso Drive:", errDrive);
+          if (p.capa_b64 && String(p.capa_b64).length < 48000) d.imagem_url = p.capa_b64;
         }
       }
       const row = h.map((k,i) => d[k] !== undefined && k !== "_row" ? cel(d[k]) : (old[i] === undefined ? "" : old[i]));
       const targetRow = d._row ? +d._row : sh.getLastRow() + 1;
       try { sh.getRange(targetRow, 1, 1, h.length).clearDataValidations(); } catch (eVal) {}
-      sh.getRange(targetRow, 1, 1, h.length).setValues([row]);
+      try {
+        sh.getRange(targetRow, 1, 1, h.length).setValues([row]);
+      } catch (eSet) {
+        const idxSt = h.indexOf("status"), idxAi = h.indexOf("aceita_individual");
+        if (idxSt >= 0) {
+          if (idxAi >= 0 && !row[idxAi]) row[idxAi] = row[idxSt];
+          row[idxSt] = "Em breve";
+          sh.getRange(targetRow, 1, 1, h.length).setValues([row]);
+        } else {
+          throw eSet;
+        }
+      }
       if (ab === "eventos") { const id = d.id || row[h.indexOf("id")]; if (id) abaInsc(id, true); }
       const descItem = d.nome || d.titulo || d.nome_equipe || d.id || "";
       registrarAuditoria(usr, (d._row ? "Edição (" : "Criação (") + ab + ")", usr + (d._row ? " atualizou '" : " cadastrou '") + descItem + "'" + (d.status ? " [Status: " + d.status + ", Vagas: " + (d.max_vagas || "sem limite") + "]" : ""));

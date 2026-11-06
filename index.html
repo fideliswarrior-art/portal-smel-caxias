@@ -198,8 +198,8 @@ const dt=d=>{const p=dp(d);return p.length?`${p[2]}/${p[1]}/${p[0]}`:esc(d||"A d
 const hojeISO=()=>{const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`};
 const agoraBR=()=>{const d=new Date(),p=n=>String(n).padStart(2,"0");return`${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()} às ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`};
 const jaPassou=e=>{const df=dp((e||{}).data_fim||(e||{}).data_inicio).join("-");return!!(df&&df<hojeISO())};
-const normEv=e=>{if(!e)return e;const ai=String(e.aceita_individual||"");if(/no[ _]?evento|inscri.*evento/i.test(ai))e.status="Inscrição feita apenas no evento";else if(/esgotad/i.test(ai))e.status="Vagas esgotadas";if(jaPassou(e))e.status="Encerrado";return e};
-const prepDadosEv=d=>{if(!d)return d;const out={...d},s=String(out.status||"");if(/no[ _]?evento/i.test(s)){out.aceita_individual="Inscrição feita apenas no evento";out.status="Em breve"}else if(/esgotad/i.test(s)){out.aceita_individual="Vagas esgotadas";out.status="Em breve"}else{out.aceita_individual=""}return out};
+const normEv=e=>{if(!e)return e;const ai=String(e.aceita_individual||""),st=String(e.status||"");if(/^encerr/i.test(st)||/encerr/i.test(ai)||jaPassou(e)){e.status="Encerrado";return e}if(/no[ _]?evento|inscri.*evento/i.test(ai))e.status="Inscrição feita apenas no evento";else if(/esgotad/i.test(ai))e.status="Vagas esgotadas";return e};
+const prepDadosEv=d=>{if(!d)return d;const out={...d},s=String(out.status||"");if(/^encerr/i.test(s)){out.aceita_individual="Encerrado";out.status="Em breve"}else if(/no[ _]?evento/i.test(s)){out.aceita_individual="Inscrição feita apenas no evento";out.status="Em breve"}else if(/esgotad/i.test(s)){out.aceita_individual="Vagas esgotadas";out.status="Em breve"}else{out.aceita_individual=""}return out};
 DEMO.fotos_eventos={"5":[1,2,3,4].map(i=>({thumb:"",link:"",nome:"Foto "+i}))};
 DEMO.partidas={};
 
@@ -213,6 +213,12 @@ function rlStatus(k,max,winMs){try{const raw=localStorage.getItem(rlKey(k));if(!
 function rlFail(k,max,winMs){try{const s=rlStatus(k,max,winMs),raw=localStorage.getItem(rlKey(k)),d=raw?JSON.parse(raw):{n:0,exp:Date.now()+winMs};d.n=(d.n||0)+1;d.exp=Date.now()+winMs;localStorage.setItem(rlKey(k),JSON.stringify(d));return Math.max(0,max-d.n)}catch(e){return 1}}
 function rlClear(k){try{localStorage.removeItem(rlKey(k))}catch(e){}}
 function comprimirImg(file,maxW=1080,qual=0.82){return new Promise((res,rej)=>{const rd=new FileReader();rd.onerror=()=>rej(new Error("Erro ao ler imagem"));rd.onload=()=>{const img=new Image();img.onerror=()=>rej(new Error("Imagem inválida"));img.onload=()=>{let w=img.width,h=img.height;if(w>maxW){h=Math.round(h*(maxW/w));w=maxW}const cv=document.createElement("canvas");cv.width=w;cv.height=h;const ctx=cv.getContext("2d");ctx.fillStyle="#ffffff";ctx.fillRect(0,0,w,h);ctx.drawImage(img,0,0,w,h);res(cv.toDataURL("image/jpeg",qual))};img.src=rd.result};rd.readAsDataURL(file)})}
+async function comprimirCapaSegura(file){
+  let b64=await comprimirImg(file,860,0.78);
+  if(b64.length>40000)b64=await comprimirImg(file,680,0.72);
+  if(b64.length>40000)b64=await comprimirImg(file,540,0.65);
+  return b64;
+}
 const DS=CFG.SCRIPT_URL;
 async function api(p){
   if(!DS||(p.acao==="listar"&&p.aba==="auditoria"&&p.token==="demo"))return demo(p);
@@ -404,7 +410,7 @@ const[p0,id,modo]=(h||"inicio").split("/"),p=p0==="eventos"?"competicoes":p0,pg=
 document.querySelectorAll(".pg").forEach(s=>s.classList.toggle("on",s.id===pg));document.querySelectorAll("#nav a").forEach(a=>a.classList.toggle("on",a.dataset.p===({evento:"competicoes",inscricao:"inscricoes"}[pg]||pg)));scrollTo(0,0)}
 
 /* ===== CONFIGURAÇÃO DO PAINEL ADMINISTRATIVO E SESSÃO PERSISTENTE + CACHE INSTANTÂNEO ===== */
-const STATUS_OPCOES=["Em breve","Aberto","Inscrição feita apenas no evento","Vagas esgotadas","Encerrado"];
+const STATUS_OPCOES=["Em breve","Aberto","Inscrição feita apenas no evento","Vagas esgotadas"];
 const SC={
 eventos:{t:"📅 Eventos",r:"nome",s:["nome","status","data_inicio"],f:[["nome","Nome do evento"],["modalidade","Esporte"],["categoria","Categoria"],["local_evento","Local"],["data_inicio","Data de início","date"],["data_fim","Data final","date"],["prazo_inscricao","Inscrições até","date"],["status","Situação","sel",STATUS_OPCOES],["min_atletas","Mínimo de atletas por inscrição","number"],["max_atletas","Máximo de atletas por inscrição","number"],["max_vagas","Máximo de vagas (times/atletas; vazio = sem limite)","number"],["descricao","Descrição","area"],["regulamento_url","Link do regulamento (PDF)"],["link_challonge_embed","Link ou código da tabela (Challonge)"],["pasta_fotos_url","Link da pasta pública de fotos no Google Drive"],["imagem_url","Link da imagem de capa (ou anexe abaixo)"]]},
 inscricoes:{t:"📋 Inscritos & Torneio",ev:1},
@@ -574,6 +580,61 @@ async function obterDadosAbaAdmin(aba,evId,forcarRede){
   return r;
 }
 
+function confirmarComSenha({titulo,descricao,labelBotao,corBotao,onConfirmar}){
+  const mod=$("#modal-torneio"),body=$("#modal-torneio-body");
+  body.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+      <h2 style="margin:0;border:0;padding:0;font-size:22px">${esc(titulo)}</h2>
+      <button type="button" class="chip sm" id="cs-fechar">✕ Fechar</button>
+    </div>
+    <div class="safe" style="margin:12px 0;border-left-color:${corBotao||"var(--navy)"};background:#f8fafc;color:var(--ink)">
+      ${descricao}
+    </div>
+    <form id="cs-form" style="border:0;padding:0;margin:0;max-width:100%">
+      <label for="cs-pw">Confirme sua senha de login (<b>${esc(A.user||"servidor")}</b>) *</label>
+      <input id="cs-pw" type="password" autocomplete="current-password" placeholder="Digite sua senha para autorizar..." required>
+      <div class="err" id="cs-err"></div>
+      <div class="row" style="margin-top:14px">
+        <button type="submit" class="btn" id="cs-ok" style="background:${corBotao||"var(--navy)"};color:#fff;flex:1">${esc(labelBotao)}</button>
+        <button type="button" class="btn o" id="cs-canc">Cancelar</button>
+      </div>
+    </form>
+  `;
+  const fechar=()=>{mod.classList.remove("on")};
+  $("#cs-fechar").onclick=fechar;
+  $("#cs-canc").onclick=fechar;
+  mod.classList.add("on");
+  setTimeout(()=>{const inp=$("#cs-pw");if(inp)inp.focus()},60);
+  $("#cs-form").onsubmit=async e=>{
+    e.preventDefault();
+    const pw=($("#cs-pw").value||"").trim(),er=$("#cs-err"),btn=$("#cs-ok");
+    er.style.display="none";
+    if(!pw){er.textContent="Digite sua senha de login para confirmar.";er.style.display="block";return}
+    btn.disabled=true;
+    const txtOrig=btn.textContent;
+    btn.textContent="Verificando senha...";
+    try{
+      const auth=await api({acao:"login",login:A.user||"fidelis",senha:pw});
+      if(!auth||!auth.ok){
+        er.textContent="Senha incorreta. A operação não foi autorizada.";
+        er.style.display="block";
+        btn.disabled=false;
+        btn.textContent=txtOrig;
+        return;
+      }
+      if(auth.token)salvarSessao(auth.token,auth.login||A.user);
+      btn.textContent="Processando...";
+      await onConfirmar(pw);
+      fechar();
+    }catch(err){
+      er.textContent="Erro ao validar ou executar a operação. Tente novamente.";
+      er.style.display="block";
+      btn.disabled=false;
+      btn.textContent=txtOrig;
+    }
+  };
+}
+
 async function admin(forcarRede){try{await adm(forcarRede)}catch(x){$("#admin").innerHTML=`${barra()}<div class="card2"><p class="err" style="display:block;margin-top:0">Falha de comunicação com o servidor (verifique sua conexão com a internet).</p><button class="btn" type="button" onclick="admin(true)">Tentar novamente</button></div>`}}
 async function adm(forcarRede){const el=$("#admin");renderAdminBar();
 if(!A.tok){el.innerHTML=`<h2 style="margin-top:8px">Acesso Servidores</h2>${A.msgSessao?`<div class="safe" style="border-left-color:#d97706;background:#fef3c7;color:#92400e"><b>Aviso:</b> ${esc(A.msgSessao)}</div>`:""}<form id="lf" style="max-width:380px"><label for="lg1">Usuário</label><input id="lg1" autocomplete="username" autocapitalize="none"><label for="pw">Senha</label><input id="pw" type="password" autocomplete="current-password"><div class="err" id="le"></div><div class="row"><button class="btn" style="width:100%">Entrar no Painel</button></div></form>`;
@@ -595,18 +656,64 @@ if(S.ev&&A.ev)rows=rows.filter(x=>x.evento_id===A.ev);
 if(A.tab==="colocacoes")rows.sort((a,b)=>a.colocacao-b.colocacao);
 el.innerHTML=`${barra()}
 ${S.ev?`<div style="display:flex;gap:8px;align-items:center;margin:8px 0"><select id="es" style="flex:1"><option value="">Escolha o evento...</option>${E.map(x=>`<option value="${esc(x.id)}"${A.ev===x.id?" selected":""}>${esc(x.nome)}</option>`).join("")}</select>${A.ev?`<button class="btn" data-n="1">+ Adicionar</button>`:""}</div>`:`<div class="row" style="margin:8px 0"><button class="btn" data-n="1">+ Novo Evento</button><button class="chip sm" data-sync="1" style="margin-left:auto">↻ Atualizar</button></div>`}
-${rows.map(x=>`<div class="card2"><div class="ar" style="border-bottom:0;padding:0"><div><span class="st ${A.tab==="eventos"?stk(x):""}">${esc(A.tab==="eventos"?stl[stk(x)]:(x.colocacao?x.colocacao+"º Lugar":x.status||""))}</span><div style="font-weight:700;font-size:17px;margin-top:2px">${esc(x.nome||x.nome_equipe||"(sem título)")}</div><div class="mut">${A.tab==="eventos"?`${esc(x.modalidade||"Esporte")} · ${esc(x.categoria||"Livre")} · ${dt(x.data_inicio)}`:""}</div></div><div class="tb">${A.tab==="eventos"?`<button class="chip sm" style="border-color:var(--green);background:#ecfdf5;color:#065f46" data-tor="${x._row}">🏆 Inscritos / Torneio</button><button class="chip sm" data-e="${x._row}">✏️ Editar</button><button class="chip sm" data-p="${x._row}">📷 Fotos</button>`:`<button class="chip sm" data-e="${x._row}">✏️ Editar</button><button class="chip sm" data-x="${x._row}">🗑️ Excluir</button>`}</div></div>
-${A.tab==="eventos"?`<details class="adm-more"><summary>⚙️ Ajuste rápido (situação, vagas, prazo, duplicar ou excluir) ▾</summary><div class="qctrl" data-qrow="${x._row}">
+${rows.map(x=>{
+  const isEnc=A.tab==="eventos"&&stk(x)==="en";
+  return`<div class="card2"><div class="ar" style="border-bottom:0;padding:0"><div><span class="st ${A.tab==="eventos"?stk(x):""}">${esc(A.tab==="eventos"?stl[stk(x)]:(x.colocacao?x.colocacao+"º Lugar":x.status||""))}</span><div style="font-weight:700;font-size:17px;margin-top:2px">${esc(x.nome||x.nome_equipe||"(sem título)")}</div><div class="mut">${A.tab==="eventos"?`${esc(x.modalidade||"Esporte")} · ${esc(x.categoria||"Livre")} · ${dt(x.data_inicio)}`:""}</div></div><div class="tb">${A.tab==="eventos"?`<button class="chip sm" style="border-color:var(--green);background:#ecfdf5;color:#065f46" data-tor="${x._row}">🏆 Inscritos / Torneio</button><button class="chip sm" data-e="${x._row}">✏️ Editar</button><button class="chip sm" data-p="${x._row}">📷 Fotos</button>${!isEnc?`<button class="chip sm" style="border-color:#d97706;background:#fffbeb;color:#92400e" data-enc="${x._row}">🔒 Encerrar Evento</button>`:`<span class="chip sm" style="background:#f1f5f9;color:#64748b;cursor:default">✓ Encerrado</span>`}<button class="chip sm" style="color:#b91c1c;border-color:#fca5a5" data-x="${x._row}">🗑️ Excluir</button>`:`<button class="chip sm" data-e="${x._row}">✏️ Editar</button><button class="chip sm" data-x="${x._row}">🗑️ Excluir</button>`}</div></div>
+${A.tab==="eventos"?`<details class="adm-more"><summary>⚙️ Ajuste rápido (situação, vagas, prazo ou duplicar) ▾</summary><div class="qctrl" data-qrow="${x._row}">
 <div><label>Situação<select data-qf="status">${STATUS_OPCOES.map(op=>`<option value="${esc(op)}"${(x.status||"")===op?" selected":""}>${esc(op)}</option>`).join("")}</select></label></div>
 <div><label>Limite Vagas<input type="number" data-qf="max_vagas" min="0" placeholder="Sem limite" value="${esc(x.max_vagas||"")}"></label></div>
 <div><label>Prazo Inscrição<input type="date" data-qf="prazo_inscricao" value="${esc(dp(x.prazo_inscricao).join("-"))}"></label></div>
 <div><label>Pasta Fotos (Drive)<input type="url" data-qf="pasta_fotos_url" placeholder="https://drive.google.com/..." value="${esc(x.pasta_fotos_url||"")}"></label></div>
-<div style="display:flex;gap:6px"><button type="button" class="btn" data-qsave="${x._row}" style="flex:1">Salvar</button><button type="button" class="chip sm" data-d="${x._row}" title="Duplicar evento">Duplicar</button><button type="button" class="chip sm" data-x="${x._row}" style="color:#b91c1c;border-color:#fca5a5">Excluir</button></div>
-</div></details>`:""}</div>`).join("")||'<p class="mut">Nenhum registro encontrado.</p>'}`;
+<div style="display:flex;gap:6px"><button type="button" class="btn" data-qsave="${x._row}" style="flex:1">Salvar</button><button type="button" class="chip sm" data-d="${x._row}" title="Duplicar evento">Duplicar</button></div>
+</div></details>`:""}</div>`;
+}).join("")||'<p class="mut">Nenhum registro encontrado.</p>'}`;
 el.onclick=async e=>{const b=e.target.closest("button");if(!b)return;const d=b.dataset;
-if(d.t){A.tab=d.t;admin()}else if(d.sync){invalidarCacheAdmin(A.tab,A.ev);admin(true)}else if(d.out){encerrarSessao()}else if(d.tor){const evAlvo=rows.find(x=>x._row==d.tor);if(evAlvo){A.ev=evAlvo.id;A.tab="inscricoes";const tEx=obterTorneio(evAlvo);A.subTab=tEx&&tEx.partidas&&tEx.partidas.length?"partidas":"inscricoes";admin()}}else if(d.n)form(S,{});else if(d.e)form(S,rows.find(x=>x._row==d.e));else if(d.p)formFotos(rows.find(x=>x._row==d.p));else if(d.d){const x=rows.find(y=>y._row==d.d);form(S,{...x,_row:undefined,id:"",status:"Em breve",nome:x.nome+" (cópia)"})}
-else if(d.qsave){const rowId=+d.qsave,orig=rows.find(x=>x._row==rowId),box=el.querySelector(`[data-qrow="${rowId}"]`);if(!orig||!box)return;const stVal=box.querySelector('[data-qf="status"]').value,vgVal=box.querySelector('[data-qf="max_vagas"]').value.trim(),pzVal=box.querySelector('[data-qf="prazo_inscricao"]').value,drVal=box.querySelector('[data-qf="pasta_fotos_url"]').value.trim();b.disabled=true;b.textContent="Salvando...";const novo=normEv({...orig,status:stVal,max_vagas:vgVal,prazo_inscricao:pzVal,pasta_fotos_url:drVal});Object.assign(orig,novo);try{const res=await call({acao:"salvar",aba:"eventos",dados:novo});b.disabled=false;b.textContent=res&&res.ok?"Salvo ✓":"Erro";admin()}catch(err){b.disabled=false;b.textContent="Erro"}}
-else if(d.x){if(d.arm!=="1"){b.dataset.arm="1";b.textContent="Confirmar?";b.style.background="#b91c1c";b.style.color="#fff";return}b.disabled=true;const itemEx=rows.find(y=>y._row==d.x);await call({acao:"excluir",aba:A.tab,row:+d.x});if(A.tab==="eventos"&&itemEx&&itemEx.id){delete ATLETAS_MAP[itemEx.id];delete ADM_CACHE.inscricoes[itemEx.id];ADM_CACHE.colocacoes=null;try{localStorage.removeItem("smel_torneio_"+itemEx.id);localStorage.setItem("smel_atletas_map",JSON.stringify(ATLETAS_MAP))}catch(e){}}admin(true)}};
+if(d.t){A.tab=d.t;admin()}else if(d.sync){invalidarCacheAdmin(A.tab,A.ev);admin(true)}else if(d.out){encerrarSessao()}else if(d.tor){const evAlvo=rows.find(x=>x._row==d.tor);if(evAlvo){A.ev=evAlvo.id;A.tab="inscricoes";const tEx=obterTorneio(evAlvo);A.subTab=tEx&&tEx.partidas&&tEx.partidas.length?"partidas":"inscricoes";admin()}}else if(d.n)form(S,{});else if(d.e)form(S,rows.find(x=>x._row==d.e));else if(d.p)formFotos(rows.find(x=>x._row==d.p));else if(d.d){const x=rows.find(y=>y._row==d.d);form(S,{...x,_row:undefined,id:"",status:"Em breve",aceita_individual:"",nome:x.nome+" (cópia)"})}
+else if(d.qsave){const rowId=+d.qsave,orig=rows.find(x=>x._row==rowId),box=el.querySelector(`[data-qrow="${rowId}"]`);if(!orig||!box)return;const stVal=box.querySelector('[data-qf="status"]').value,vgVal=box.querySelector('[data-qf="max_vagas"]').value.trim(),pzVal=box.querySelector('[data-qf="prazo_inscricao"]').value,drVal=box.querySelector('[data-qf="pasta_fotos_url"]').value.trim();b.disabled=true;b.textContent="Salvando...";const base={...orig,status:stVal,aceita_individual:"",max_vagas:vgVal,prazo_inscricao:pzVal,pasta_fotos_url:drVal};const novo=normEv(base);Object.assign(orig,novo);try{const res=await call({acao:"salvar",aba:"eventos",dados:novo});b.disabled=false;b.textContent=res&&res.ok?"Salvo ✓":"Erro";ADM_CACHE.eventos=null;admin(true)}catch(err){b.disabled=false;b.textContent="Erro"}}
+else if(d.enc){
+  const evEnc=rows.find(y=>y._row==d.enc);
+  if(!evEnc)return;
+  confirmarComSenha({
+    titulo:"🔒 Encerrar Evento",
+    descricao:`Tem certeza que deseja encerrar o evento <b>${esc(evEnc.nome)}</b>?<br><span class="mut">As inscrições serão fechadas imediatamente e o evento passará a constar como Encerrado.</span>`,
+    labelBotao:"🔒 Confirmar e Encerrar Evento",
+    corBotao:"#b45309",
+    onConfirmar:async()=>{
+      const dadosEnc={...evEnc,_row:evEnc._row,status:"Encerrado",aceita_individual:"Encerrado"};
+      const res=await call({acao:"salvar",aba:"eventos",dados:dadosEnc});
+      if(!res||!res.ok)throw new Error((res&&res.msg)||"Erro ao encerrar evento");
+      regLogLocal(A.user,"ENCERRAR_EVENTO",`${A.user||"servidor"} encerrou oficialmente o evento "${evEnc.nome}"`);
+      ADM_CACHE.eventos=null;
+      await admin(true);
+    }
+  });
+}
+else if(d.x){
+  const itemEx=rows.find(y=>y._row==d.x);
+  if(A.tab==="eventos"&&itemEx){
+    confirmarComSenha({
+      titulo:"🗑️ Excluir Evento Permanentemente",
+      descricao:`Tem certeza que deseja excluir o evento <b>${esc(itemEx.nome)}</b>?<br><span class="mut">Esta ação removerá o evento, suas pastas e fotos no Google Drive e todas as inscrições/chaves vinculadas.</span>`,
+      labelBotao:"🗑️ Confirmar e Excluir Evento",
+      corBotao:"#dc2626",
+      onConfirmar:async()=>{
+        const res=await call({acao:"excluir",aba:"eventos",row:+d.x});
+        if(!res||!res.ok)throw new Error((res&&res.msg)||"Erro ao excluir evento");
+        if(itemEx.id){
+          delete ATLETAS_MAP[itemEx.id];
+          delete ADM_CACHE.inscricoes[itemEx.id];
+          ADM_CACHE.colocacoes=null;
+          try{localStorage.removeItem("smel_torneio_"+itemEx.id);localStorage.setItem("smel_atletas_map",JSON.stringify(ATLETAS_MAP))}catch(e){}
+        }
+        ADM_CACHE.eventos=null;
+        await admin(true);
+      }
+    });
+    return;
+  }
+  if(d.arm!=="1"){b.dataset.arm="1";b.textContent="Confirmar?";b.style.background="#b91c1c";b.style.color="#fff";return}
+  b.disabled=true;await call({acao:"excluir",aba:A.tab,row:+d.x});admin(true);
+}};
 const es=$("#es");if(es)es.onchange=()=>{A.ev=es.value;admin()}}
 
 /* ===== ABA DE AUDITORIA E REGISTRO DE AÇÕES (LOGS DE ATIVIDADE) ===== */
@@ -647,9 +754,9 @@ ${isEv?`<fieldset class="at" style="margin-top:18px"><legend>Capa do Evento e Pa
 <div class="err" id="ae"></div><div class="row"><button class="btn" id="bsv">Salvar</button><button type="button" class="btn o" id="cx">Cancelar</button></div></form>`;
 $("#cx").onclick=()=>admin();
 const inpCapa=$("#capa_arq");
-if(inpCapa)inpCapa.onchange=async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;try{capaNome=f.name;capaB64=await comprimirImg(f,1200,0.84);$("#capa_prev").innerHTML=`<img src="${capaB64}" alt="Prévia da capa" style="max-width:280px;aspect-ratio:16/9;object-fit:cover;border:2px solid var(--green)"><div class="mut">Imagem pronta para envio (${esc(f.name)})</div>`}catch(err){$("#ae").textContent="Não foi possível carregar a imagem selecionada.";$("#ae").style.display="block"}};
-$("#af").onsubmit=async e=>{e.preventDefault();const b=$("#bsv"),ae=$("#ae");ae.style.display="none";b.disabled=true;b.textContent="Salvando, aguarde...";const d=Object.fromEntries(new FormData(e.target));if(r._row)d._row=r._row;if(S.ev)d.evento_id=r.evento_id||A.ev;if(r.id)d.id=r.id;if(r.pasta_evento_url)d.pasta_evento_url=r.pasta_evento_url;
-try{const x=await call({acao:"salvar",aba:A.tab,dados:d,capa_b64:capaB64,capa_nome:capaNome});b.disabled=false;b.textContent="Salvar";if(!x.ok){if(!A.tok)return admin();ae.textContent=x.msg||"Erro ao salvar.";ae.style.display="block";return}ADM_CACHE.eventos=null;if(A.ev)delete ADM_CACHE.colocacoes[A.ev];admin(true)}catch(err){b.disabled=false;b.textContent="Salvar";ae.textContent="Falha de conexão com a internet. Verifique sua rede e clique em Salvar novamente.";ae.style.display="block"}}}
+if(inpCapa)inpCapa.onchange=async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;try{capaNome=f.name;$("#capa_prev").innerHTML='<div class="mut">Otimizando imagem de capa...</div>';capaB64=await comprimirCapaSegura(f);const inpImgUrl=document.querySelector('#af [name="imagem_url"]');if(inpImgUrl)inpImgUrl.value=capaB64;$("#capa_prev").innerHTML=`<img src="${capaB64}" alt="Prévia da capa" style="max-width:280px;aspect-ratio:16/9;object-fit:cover;border:2px solid var(--green);border-radius:4px"><div class="mut">Imagem pronta para envio (${esc(f.name)})</div>`}catch(err){$("#ae").textContent="Não foi possível carregar a imagem selecionada.";$("#ae").style.display="block"}};
+$("#af").onsubmit=async e=>{e.preventDefault();const b=$("#bsv"),ae=$("#ae");ae.style.display="none";b.disabled=true;b.textContent="Salvando, aguarde...";const d=Object.fromEntries(new FormData(e.target));if(r._row)d._row=r._row;if(S.ev)d.evento_id=r.evento_id||A.ev;if(r.id)d.id=r.id;if(r.pasta_evento_url)d.pasta_evento_url=r.pasta_evento_url;if(capaB64)d.imagem_url=capaB64;
+try{let x=await call({acao:"salvar",aba:A.tab,dados:d,capa_b64:capaB64,capa_nome:capaNome});if(!x||!x.ok){if(!A.tok){b.disabled=false;b.textContent="Salvar";return admin()}if(capaB64){x=await call({acao:"salvar",aba:A.tab,dados:d})}}b.disabled=false;b.textContent="Salvar";if(!x||!x.ok){ae.textContent=(x&&x.msg)||"Erro ao salvar.";ae.style.display="block";return}ADM_CACHE.eventos=null;ADM_CACHE.colocacoes=null;admin(true)}catch(err){b.disabled=false;b.textContent="Salvar";ae.textContent="Falha de conexão com a internet. Verifique sua rede e clique em Salvar novamente.";ae.style.display="block"}}}
 function formFotos(ev){if(!ev)return admin();const el=$("#admin");let selecionadas=[],atuaisLista=[];
 el.innerHTML=`${barra()}<h2 style="margin-top:12px">Gestão de Galeria e Mídias: ${esc(ev.nome)}</h2><div class="safe">Envie fotos pelo celular/computador ou remova abaixo qualquer foto enviada por engano (sem precisar acessar o Google Drive).</div>
 <form id="f_link_drive" style="max-width:720px;margin-bottom:14px"><label for="inp_pasta_url">Link da pasta pública do Google Drive (Galeria de Fotos)</label><div class="cod"><input id="inp_pasta_url" type="url" style="font:15px Barlow;letter-spacing:0;text-transform:none;text-align:left" placeholder="https://drive.google.com/drive/folders/..." value="${esc(ev.pasta_fotos_url||"")}"><button class="btn sm" type="submit">Salvar Link</button></div><div id="ok_link" class="safe" style="display:none;margin-top:10px">Link da pasta do Google Drive atualizado com sucesso!</div></form>
