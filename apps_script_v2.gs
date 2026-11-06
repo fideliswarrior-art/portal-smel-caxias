@@ -163,7 +163,96 @@ function novoCodigo() {
 
 // ---- Pastas e Fotos no Google Drive ----
 function idPasta(u) { const m = String(u || "").match(/folders\/([\w-]+)|[?&]id=([\w-]+)|^([\w-]{15,})$/); return m ? (m[1] || m[2] || m[3]) : ""; }
+function idArquivoDrive(u) { const m = String(u || "").match(/[?&]id=([\w-]{15,})|\/file\/d\/([\w-]{15,})|\/d\/([\w-]{15,})|^([\w-]{15,})$/); return m ? (m[1] || m[2] || m[3] || m[4]) : ""; }
 function pastaDoEvento(u) { const id = idPasta(u); return id && eventos().some(e => idPasta(e.pasta_fotos_url) === id); }
+
+function moverPastaParaLixeira(pasta) {
+  if (!pasta) return;
+  try {
+    const arqs = pasta.getFiles();
+    while (arqs.hasNext()) {
+      try { arqs.next().setTrashed(true); } catch (e) {}
+    }
+    const subs = pasta.getFolders();
+    while (subs.hasNext()) {
+      try { moverPastaParaLixeira(subs.next()); } catch (e) {}
+    }
+    pasta.setTrashed(true);
+  } catch (e) {}
+}
+
+function excluirRecursosDoEvento(evId, nomeEv, pastaEvUrl, pastaFotosUrl, imgUrl) {
+  const c = CacheService.getScriptCache();
+  // 1) Remove pasta principal do evento (e subpastas "capa evento" e "Fotos") no Google Drive
+  const idEv = idPasta(pastaEvUrl);
+  if (idEv) {
+    try { moverPastaParaLixeira(DriveApp.getFolderById(idEv)); } catch (e) {}
+  }
+  // 2) Remove pasta de fotos (caso esteja fora ou separada) e limpa cache de fotos
+  const idFotos = idPasta(pastaFotosUrl);
+  if (idFotos) {
+    c.remove("f" + idFotos + "_4");
+    c.remove("f" + idFotos + "_60");
+    if (idFotos !== idEv) {
+      try {
+        const pf = DriveApp.getFolderById(idFotos);
+        // Se a pasta se chama "Fotos" e o pai tem o nome do evento, move o pai inteiro para a lixeira
+        const pais = pf.getParents();
+        if (!idEv && pais.hasNext()) {
+          const pai = pais.next();
+          if (nomeEv && pai.getName().trim().toLowerCase() === String(nomeEv).trim().toLowerCase()) {
+            moverPastaParaLixeira(pai);
+          } else {
+            moverPastaParaLixeira(pf);
+          }
+        } else {
+          moverPastaParaLixeira(pf);
+        }
+      } catch (e) {}
+    }
+  }
+  // 3) Caso o evento antigo não tivesse pasta_evento_url salva, procura pelo nome na pasta mãe dos eventos
+  if (!idEv && nomeEv) {
+    try {
+      const limpo = String(nomeEv).trim().replace(/[\/\\]/g, "-");
+      const it = pastaMaeEventos().getFoldersByName(limpo);
+      while (it.hasNext()) {
+        moverPastaParaLixeira(it.next());
+      }
+    } catch (e) {}
+  }
+  // 4) Remove arquivo de imagem de capa caso tenha sido salvo avulso no Drive
+  const idImg = idArquivoDrive(imgUrl);
+  if (idImg) {
+    try { DriveApp.getFileById(idImg).setTrashed(true); } catch (e) {}
+  }
+  // 5) Limpa abas dedicadas (inscrições i_<id> e chaveamento jogos_<id>) e registros órfãos nas planilhas
+  if (evId) {
+    try {
+      const ssI = ssInsc();
+      const shI = ssI.getSheetByName(nomeAba(evId));
+      if (shI) ssI.deleteSheet(shI);
+      const shJ = ssI.getSheetByName(nomeAbaJogos(evId));
+      if (shJ) ssI.deleteSheet(shJ);
+    } catch (e) {}
+    try {
+      const shIdx = indice(), vIdx = shIdx.getDataRange().getValues();
+      for (let r = vIdx.length - 1; r >= 1; r--) {
+        if (String(vIdx[r][1] || "").trim() === evId) shIdx.deleteRow(r + 1);
+      }
+    } catch (e) {}
+    try {
+      const shCol = aba("colocacoes"), vCol = shCol.getDataRange().getValues();
+      const hCol = vCol[0] ? vCol[0].map(String) : [];
+      const idxEvCol = hCol.indexOf("evento_id");
+      if (idxEvCol >= 0) {
+        for (let r = vCol.length - 1; r >= 1; r--) {
+          if (String(vCol[r][idxEvCol] || "").trim() === evId) shCol.deleteRow(r + 1);
+        }
+      }
+    } catch (e) {}
+  }
+}
 
 function pastaMaeEventos() {
   try {
@@ -251,7 +340,7 @@ function fotosPasta(u, limite) {
     const arq = [], it = DriveApp.getFolderById(id).getFiles();
     while (it.hasNext()) { const f = it.next(); if (/^image\//.test(f.getMimeType())) arq.push({nome:f.getName(), id:f.getId()}); }
     arq.sort((a,b) => a.nome.localeCompare(b.nome, undefined, {numeric:true}));
-    r = arq.slice(0, max).map(f => ({nome:f.nome, thumb:"https://drive.google.com/thumbnail?id=" + f.id + "&sz=w800", link:"https://drive.google.com/file/d/" + f.id + "/view"}));
+    r = arq.slice(0, max).map(f => ({id:f.id, nome:f.nome, thumb:"https://drive.google.com/thumbnail?id=" + f.id + "&sz=w800", link:"https://drive.google.com/file/d/" + f.id + "/view"}));
   } catch (e) { return []; }
   try { c.put(k, JSON.stringify(r), 180); } catch (e) {}
   return r;
@@ -453,9 +542,51 @@ function admin(p) {
       if (+p.row < 2) return {ok:0};
       const sh = aba(ab), h = cabecalho(sh), vals = sh.getRange(+p.row, 1, 1, h.length).getValues()[0];
       const nomeItem = vals[h.indexOf("nome")] || vals[h.indexOf("titulo")] || vals[h.indexOf("nome_equipe")] || ("linha " + p.row);
+      if (ab === "eventos") {
+        const evId = String(vals[h.indexOf("id")] || "").trim();
+        const nomeEv = String(vals[h.indexOf("nome")] || "").trim();
+        const pastaEvUrl = String(vals[h.indexOf("pasta_evento_url")] || "").trim();
+        const pastaFotosUrl = String(vals[h.indexOf("pasta_fotos_url")] || "").trim();
+        const imgUrl = String(vals[h.indexOf("imagem_url")] || "").trim();
+        excluirRecursosDoEvento(evId, nomeEv, pastaEvUrl, pastaFotosUrl, imgUrl);
+      } else if (ab === "feed") {
+        const imgFeed = String(vals[h.indexOf("imagem_url")] || "").trim();
+        const idImgF = idArquivoDrive(imgFeed);
+        if (idImgF) { try { DriveApp.getFileById(idImgF).setTrashed(true); } catch (e) {} }
+      }
       sh.deleteRow(+p.row);
-      registrarAuditoria(usr, "Exclusão (" + ab + ")", usr + " excluiu '" + nomeItem + "' da aba " + ab);
+      registrarAuditoria(usr, "Exclusão (" + ab + ")", usr + " excluiu '" + nomeItem + "' da aba " + ab + (ab === "eventos" ? " (incluindo pastas/arquivos do Drive e abas vinculadas)" : ""));
       limpa(); return {ok:1};
+    }
+    if (p.acao === "excluirFoto") {
+      const fid = idArquivoDrive(p.foto_id || p.link || p.thumb);
+      if (!fid) return {ok:0, msg:"Não foi possível identificar o arquivo da foto no Google Drive."};
+      let nomeArq = p.nome || fid;
+      try {
+        const arq = DriveApp.getFileById(fid);
+        nomeArq = arq.getName() || nomeArq;
+        arq.setTrashed(true);
+      } catch (e) {
+        return {ok:0, msg:"Não foi possível remover a foto no Drive. Verifique as permissões."};
+      }
+      const idPastaLimpar = idPasta(p.pasta);
+      if (idPastaLimpar) {
+        c.remove("f" + idPastaLimpar + "_4");
+        c.remove("f" + idPastaLimpar + "_60");
+      }
+      if (p.evento_id) {
+        const evFoto = ler("eventos").find(e => e.id === p.evento_id);
+        if (evFoto && evFoto.pasta_fotos_url) {
+          const idPF = idPasta(evFoto.pasta_fotos_url);
+          if (idPF) {
+            c.remove("f" + idPF + "_4");
+            c.remove("f" + idPF + "_60");
+          }
+        }
+      }
+      registrarAuditoria(usr, "Exclusão de Foto", usr + " removeu a foto '" + nomeArq + "' do evento '" + (p.evento_nome || p.evento_id || "") + "'");
+      limpa();
+      return {ok:1};
     }
     if (p.acao === "salvar" && ["eventos","feed","colocacoes"].indexOf(ab) >= 0) {
       const sh = aba(ab), h = cabecalho(sh), d = p.dados || {};
@@ -641,6 +772,12 @@ function admin(p) {
     if (p.acao === "inscExcluir" && rows.length) {
       const nomeEq = rows[0].time || rows[0].nome || cod;
       const sh = abaInsc(ev.id, false); rows.slice().reverse().forEach(r => sh.deleteRow(r._row));
+      try {
+        const shIdx = indice(), vIdx = shIdx.getDataRange().getValues();
+        for (let r = vIdx.length - 1; r >= 1; r--) {
+          if (String(vIdx[r][0] || "").trim().toUpperCase() === cod) shIdx.deleteRow(r + 1);
+        }
+      } catch (eIdx) {}
       registrarAuditoria(usr, "Exclusão de Inscrição", usr + " excluiu a inscrição de '" + nomeEq + "' (" + cod + ") do evento '" + ev.nome + "'");
       limpa(); return {ok:1};
     }
