@@ -5,132 +5,133 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&family=Barlow:wght@400;600&display=swap">
 <style>
 :root{--paper:#f7f4ed;--ink:#16202e;--navy:#1a365d;--green:#10b981;--line:#d8d2c4;--mut:#5b6472;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-*{box-sizing:border-box}html{scroll-padding-top:80px}
-body{margin:0;background:var(--paper);color:var(--ink);font:18px/1.55 Barlow,system-ui,sans-serif}
-h1,h2,h3{font-family:"Barlow Condensed",Impact,sans-serif;text-transform:uppercase;letter-spacing:.01em;line-height:1.05;margin:0}
-h1{font-size:clamp(40px,8vw,76px);font-weight:800}h2{font-size:34px;font-weight:800;color:var(--navy);padding-bottom:8px;border-bottom:3px solid var(--navy);margin:44px 0 18px}h3{font-size:24px;font-weight:600}
-a{color:var(--navy)}.mut{color:var(--mut);font-size:16px}
+*{box-sizing:border-box}html{scroll-padding-top:70px;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 Barlow,system-ui,sans-serif}
+h1,h2,h3{font-family:"Barlow Condensed",Impact,sans-serif;text-transform:uppercase;letter-spacing:.01em;line-height:1.08;margin:0}
+h1{font-size:clamp(32px,7vw,64px);font-weight:800}h2{font-size:26px;font-weight:800;color:var(--navy);padding-bottom:6px;border-bottom:2px solid var(--navy);margin:28px 0 14px}h3{font-size:21px;font-weight:600}
+a{color:var(--navy)}.mut{color:var(--mut);font-size:14px}
 header{background:var(--paper);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:9}
-.top{background:var(--navy);color:#cbd5e1;font-size:14px;padding:4px 16px}
-.hd{max-width:1120px;margin:auto;padding:8px 16px;display:flex;flex-wrap:wrap;gap:4px 24px;align-items:center;justify-content:space-between}
-.brand{font:800 24px/1 "Barlow Condensed",sans-serif;text-transform:uppercase;color:var(--navy);text-decoration:none;display:flex;align-items:center;gap:12px}
-.logo{height:62px;width:auto;display:block;object-fit:contain}
-nav{display:flex;gap:20px}nav a{min-height:48px;display:flex;align-items:center;text-decoration:none;font-weight:600;color:var(--ink);border-bottom:3px solid transparent}nav a.on{border-color:var(--green)}
-.btn{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:0 24px;background:var(--green);color:#022c1e;font:600 18px Barlow,sans-serif;border:0;border-radius:2px;text-decoration:none;cursor:pointer}
-.btn.o{background:transparent;color:var(--navy);border:2px solid var(--navy)}
-a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #d97706;outline-offset:2px}
-main{max-width:1120px;margin:auto;padding:24px 16px}
-.hero{display:grid;gap:28px;grid-template-columns:1fr;align-items:center}@media(min-width:860px){.hero{grid-template-columns:1.1fr .9fr}}
-.eb{font-weight:600;letter-spacing:.12em;text-transform:uppercase;font-size:14px;color:var(--mut);margin-bottom:10px}
-.row{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
-.ph{aspect-ratio:4/3;display:flex;align-items:flex-end;padding:14px;color:#fff;font:800 34px/1 "Barlow Condensed",sans-serif;text-transform:uppercase;background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.06) 0 14px,transparent 14px 28px)}
+.top{background:var(--navy);color:#cbd5e1;font-size:13px;padding:4px 16px}
+.hd{max-width:1120px;margin:auto;padding:6px 14px;display:flex;flex-wrap:wrap;gap:4px 20px;align-items:center;justify-content:space-between}
+.brand{font:800 22px/1 "Barlow Condensed",sans-serif;text-transform:uppercase;color:var(--navy);text-decoration:none;display:flex;align-items:center;gap:10px}
+.logo{height:54px;width:auto;display:block;object-fit:contain}
+nav{display:flex;gap:16px}nav a{min-height:42px;display:flex;align-items:center;text-decoration:none;font-weight:600;color:var(--ink);border-bottom:3px solid transparent;font-size:15px}nav a.on{border-color:var(--green)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:0 16px;background:var(--green);color:#022c1e;font:600 15px Barlow,sans-serif;border:0;border-radius:6px;text-decoration:none;cursor:pointer;white-space:nowrap}
+.btn.o{background:#fff;color:var(--navy);border:1.5px solid var(--navy)}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #d97706;outline-offset:2px}
+main{max-width:1120px;margin:auto;padding:18px 14px}
+.hero{display:grid;gap:20px;grid-template-columns:1fr;align-items:center}@media(min-width:860px){.hero{grid-template-columns:1.1fr .9fr}}
+.eb{font-weight:600;letter-spacing:.1em;text-transform:uppercase;font-size:12px;color:var(--mut);margin-bottom:6px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;align-items:center}
+.ph{aspect-ratio:4/3;display:flex;align-items:flex-end;padding:14px;color:#fff;font:800 30px/1 "Barlow Condensed",sans-serif;text-transform:uppercase;background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.06) 0 14px,transparent 14px 28px)}
 .fi img,.fi iframe{width:100%;aspect-ratio:4/3;object-fit:cover;border:0;display:block;background:#000}
-.ev{display:grid;grid-template-columns:76px 1fr;gap:16px;padding:16px 0;border-bottom:1px solid var(--line);text-decoration:none;color:inherit}
+.ev{display:grid;grid-template-columns:68px 1fr;gap:14px;padding:12px 0;border-bottom:1px solid var(--line);text-decoration:none;color:inherit}
 .ev:hover h3{text-decoration:underline}
-.db{background:var(--navy);color:#fff;text-align:center;padding:8px 0;font:800 36px/1 "Barlow Condensed",sans-serif}.db small{display:block;font:600 14px Barlow;letter-spacing:.1em;text-transform:uppercase;color:#a7f3d0}
-.st{display:inline-block;font:600 14px Barlow;text-transform:uppercase;letter-spacing:.06em;padding:2px 8px;border:2px solid;margin-bottom:4px}
-.st.ab{background:var(--green);border-color:var(--green);color:#022c1e}.st.ne{background:#e0f2fe;border-color:#0284c7;color:#075985}.st.br{border-color:#b45309;color:#92400e}.st.en{border-color:#6b7280;color:#4b5563}
-.g3{display:grid;gap:20px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}.fb{padding:10px 0}.fb p{margin:4px 0}
+.db{background:var(--navy);color:#fff;text-align:center;padding:6px 0;font:800 30px/1 "Barlow Condensed",sans-serif;border-radius:4px}.db small{display:block;font:600 12px Barlow;letter-spacing:.08em;text-transform:uppercase;color:#a7f3d0}
+.st{display:inline-block;font:700 11px Barlow;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border:1.5px solid;border-radius:4px;margin-bottom:3px}
+.st.ab{background:var(--green);border-color:var(--green);color:#022c1e}.st.ne{background:#e0f2fe;border-color:#0284c7;color:#075985}.st.br{border-color:#b45309;color:#92400e;background:#fef3c7}.st.en{border-color:#9ca3af;color:#4b5563;background:#f3f4f6}
+.g3{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}.fb{padding:8px 0}.fb p{margin:4px 0}
 .avs{border-left:4px solid var(--green);padding:6px 14px;background:#fff}
-.num{background:var(--navy);color:#fff;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1px;margin-top:44px}.num div{padding:22px;border-left:1px solid rgba(255,255,255,.2)}.num b{display:block;font:800 52px/1 "Barlow Condensed",sans-serif;color:#6ee7b7}
-.bar{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.chip{min-height:48px;padding:0 16px;background:transparent;border:2px solid var(--navy);color:var(--navy);font:600 17px Barlow;cursor:pointer;border-radius:2px}.chip.on{background:var(--navy);color:#fff}
-input,select{width:100%;min-height:52px;font:18px Barlow;padding:0 12px;border:2px solid #8a93a0;border-radius:2px;background:#fff}
-label{display:block;font-weight:600;margin:14px 0 4px}
-.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:18px 0;padding:14px 0;border-block:1px solid var(--line)}.kv b{display:block;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
-table{width:100%;border-collapse:collapse}td,th{text-align:left;padding:10px;border-bottom:1px solid var(--line)}
+.num{background:var(--navy);color:#fff;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin-top:32px;border-radius:6px;overflow:hidden}.num div{padding:16px 12px;border-left:1px solid rgba(255,255,255,.15);text-align:center;font-size:14px}.num b{display:block;font:800 clamp(28px,6vw,46px)/1 "Barlow Condensed",sans-serif;color:#6ee7b7;margin-bottom:4px}
+.bar{display:flex;gap:6px;margin:10px 0;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}.chip{min-height:34px;padding:0 12px;background:#fff;border:1.5px solid #cbd5e1;color:var(--navy);font:600 13.5px Barlow;cursor:pointer;border-radius:6px;white-space:nowrap;display:inline-flex;align-items:center;gap:5px}.chip.on{background:var(--navy);border-color:var(--navy);color:#fff}
+input,select{width:100%;min-height:40px;font:15px Barlow;padding:0 10px;border:1.5px solid #94a3b8;border-radius:6px;background:#fff}
+label{display:block;font-weight:600;font-size:14px;margin:10px 0 3px}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0;padding:12px 0;border-block:1px solid var(--line)}.kv b{display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+table{width:100%;border-collapse:collapse}td,th{text-align:left;padding:8px;border-bottom:1px solid var(--line);font-size:14px}
 iframe.ch{width:100%;height:420px;border:1px solid var(--line);background:#fff}
-form{background:#fff;border:1px solid var(--line);padding:20px;max-width:720px}.f2{display:grid;gap:0 16px;grid-template-columns:1fr}@media(min-width:700px){.f2{grid-template-columns:1fr 1fr}}
-.safe{border-left:4px solid var(--green);background:#ecfdf5;padding:10px 14px;margin:12px 0;max-width:720px}
-.err{color:#b91c1c;font-weight:600;margin-top:10px;display:none}.ck{display:flex;gap:10px;align-items:flex-start;margin-top:16px}.ck input{width:28px;min-height:28px;margin-top:4px}
-.m{position:fixed;inset:0;background:rgba(22,32,46,.95);display:none;align-items:center;justify-content:center;z-index:99;padding:20px}.m.on{display:flex}.m div{background:#fff;padding:30px;max-width:480px}
-footer{background:var(--navy);color:#dbe4f0;padding:28px 16px 90px;margin-top:48px}footer>div{max-width:1120px;margin:auto}footer a{color:#6ee7b7}
-.realizacao{background:#f7f4ed;color:var(--ink);border-radius:4px;padding:18px 24px;margin-bottom:22px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:18px 36px;border-bottom:4px solid var(--green)}
-.realizacao-lbl{font:700 20px/1.2 Barlow,sans-serif;color:#222}
-.realizacao-logos{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:20px 36px}
-.realizacao-logos img{height:64px;width:auto;object-fit:contain;display:block}
-.wa{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));background:#128c4a;color:#fff;min-height:52px;padding:0 18px;display:flex;align-items:center;font-weight:600;text-decoration:none;border-radius:2px;z-index:8;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+form{background:#fff;border:1px solid var(--line);border-radius:6px;padding:16px;max-width:720px}.f2{display:grid;gap:0 14px;grid-template-columns:1fr}@media(min-width:700px){.f2{grid-template-columns:1fr 1fr}}
+.safe{border-left:4px solid var(--green);background:#ecfdf5;padding:10px 12px;margin:10px 0;max-width:720px;font-size:14px;border-radius:0 6px 6px 0}
+.err{color:#b91c1c;font-weight:600;margin-top:8px;display:none;font-size:14px}.ck{display:flex;gap:10px;align-items:flex-start;margin-top:12px}.ck input{width:22px;min-height:22px;margin-top:2px}
+.m{position:fixed;inset:0;background:rgba(15,23,42,.88);display:none;align-items:center;justify-content:center;z-index:99;padding:12px}.m.on{display:flex}.m div{background:#fff;padding:20px;max-width:460px;border-radius:8px}
+footer{background:var(--navy);color:#dbe4f0;padding:22px 14px 80px;margin-top:36px}footer>div{max-width:1120px;margin:auto;text-align:center}footer a{color:#6ee7b7}
+.realizacao{background:#f7f4ed;color:var(--ink);border-radius:6px;padding:14px 18px;margin-bottom:12px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:14px 28px;border-bottom:3px solid var(--green)}
+.realizacao-lbl{font:700 17px/1.2 Barlow,sans-serif;color:#222}
+.realizacao-logos{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:16px 28px}
+.realizacao-logos img{height:56px;width:auto;object-fit:contain;display:block}
+.wa{position:fixed;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));background:#128c4a;color:#fff;min-height:42px;padding:0 14px;display:flex;align-items:center;font:600 14px Barlow,sans-serif;text-decoration:none;border-radius:22px;z-index:8;box-shadow:0 2px 8px rgba(0,0,0,.3)}
 .pg{display:none}.pg.on{display:block}
-.btn[disabled]{background:#cbd5e1;color:#475569;cursor:not-allowed}.st.es{background:#b91c1c;border-color:#b91c1c;color:#fff}.prot{font:800 28px/1.2 "Barlow Condensed",sans-serif;color:var(--navy);margin:12px 0;word-break:break-all}.m div{text-align:center}.m .btn{width:100%;margin-top:10px}
-.at{border:1px solid var(--line);background:#fff;padding:6px 14px 14px;margin:16px 0}.at legend{font:800 22px "Barlow Condensed",sans-serif;text-transform:uppercase;color:var(--navy);padding:0 6px}.g4{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}.fp{display:block}.fp img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
-@media(max-width:600px){.logo{height:48px}.realizacao-logos img{height:50px}}textarea{width:100%;font:18px Barlow;padding:8px 12px;border:2px solid #8a93a0;border-radius:2px;background:#fff}.ar{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}.tb{display:flex;gap:8px}.sm{min-height:44px}
-.hd>.btn{min-height:48px}nav{gap:14px}@media(min-width:1000px){.hd{flex-wrap:nowrap}.hd>.btn{white-space:nowrap}}.cols{display:grid;gap:28px;grid-template-columns:1fr}@media(min-width:900px){.cols{grid-template-columns:1.6fr 1fr}}
+.btn[disabled]{background:#cbd5e1;color:#475569;cursor:not-allowed}.st.es{background:#b91c1c;border-color:#b91c1c;color:#fff}.prot{font:800 26px/1.2 "Barlow Condensed",sans-serif;color:var(--navy);margin:10px 0;word-break:break-all}.m div{text-align:center}.m .btn{width:100%;margin-top:8px}
+.at{border:1px solid var(--line);background:#fff;padding:6px 12px 12px;margin:12px 0;border-radius:6px}.at legend{font:800 19px "Barlow Condensed",sans-serif;text-transform:uppercase;color:var(--navy);padding:0 6px}.g4{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(145px,1fr))}.fp{display:block}.fp img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;border-radius:4px}
+@media(max-width:600px){.logo{height:44px}.realizacao-logos img{height:44px}}textarea{width:100%;font:15px Barlow;padding:8px 10px;border:1.5px solid #94a3b8;border-radius:6px;background:#fff}.ar{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:6px 0;flex-wrap:wrap}.tb{display:flex;gap:6px;flex-wrap:wrap}.sm{min-height:32px;font-size:13px;padding:0 10px}
+.hd>.btn{min-height:40px}nav{gap:12px}@media(min-width:1000px){.hd{flex-wrap:nowrap}.hd>.btn{white-space:nowrap}}.cols{display:grid;gap:24px;grid-template-columns:1fr}@media(min-width:900px){.cols{grid-template-columns:1.6fr 1fr}}
 .nw{display:grid;gap:14px;padding:16px 0;border-bottom:1px solid var(--line)}@media(min-width:600px){.nw:has(img){grid-template-columns:200px 1fr}}.nw img{width:100%;aspect-ratio:4/3;object-fit:cover}.nw p{margin:4px 0}
 .cr{display:grid;grid-template-columns:84px 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);text-decoration:none;color:inherit}.cr img,.cr .ph{width:84px;aspect-ratio:1;object-fit:cover;font-size:13px;padding:6px}.cr h3{font-size:20px}
 .cta{background:var(--navy);color:#fff;padding:20px;margin-top:16px}.cta h3{color:#fff}.band{background:var(--navy);color:#fff;padding:32px 20px;margin-top:40px}.band h2{color:#fff;border:0;margin:6px 0}.band .btn.o{color:#fff;border-color:#fff}
-.cd{display:block;background:#fff;border:1px solid var(--line);text-decoration:none;color:inherit}.cd:hover{border-color:var(--navy)}.cd img,.cd .ph{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}.cb{padding:12px 14px}.cc{background:var(--navy);color:#fff;padding:14px;text-align:center;font-weight:600}
-.st.an{border-color:#047857;color:#047857}.fb2{display:grid;gap:12px;grid-template-columns:1fr;background:#fff;border:1px solid var(--line);padding:14px;margin:14px 0}@media(min-width:760px){.fb2{grid-template-columns:1fr 1fr 1.4fr}}.fb2 label{margin:0}
-.stp{display:flex;align-items:center;gap:12px;margin:24px 0 8px}.stp span{background:var(--navy);color:#fff;min-width:40px;height:40px;display:flex;align-items:center;justify-content:center;font:800 22px "Barlow Condensed",sans-serif}.stp h2{border:0;margin:0;padding:0;font-size:28px}
-.tm{border:1px solid var(--navy);background:#f1f5fb;padding:4px 16px 8px;margin:8px 0}.tm summary{font-weight:600;cursor:pointer;color:var(--navy);min-height:44px;display:flex;align-items:center}
-.card2{background:#fff;border:1px solid var(--line);padding:16px;margin:16px 0}.cod{display:flex;gap:10px}.cod input{font:800 30px "Barlow Condensed",sans-serif;letter-spacing:.25em;text-transform:uppercase;text-align:center}.cod .btn{white-space:nowrap}
-.cn{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:16px 0}.cn b{font:800 24px "Barlow Condensed",sans-serif;text-transform:uppercase;text-align:center}.cw{display:none}.cg{display:grid;gap:8px;grid-template-columns:1fr}.dp{display:none}
-.dc{background:#fff;border:1px solid var(--line);padding:10px 12px;min-height:56px;display:flex;gap:12px;align-items:flex-start}.dc:not(.tem){background:transparent;border-style:dashed;min-height:46px;opacity:.65}.dc.hoje{border:2px solid var(--green);opacity:1}
-.dn{min-width:54px}.dn b{display:block;font:800 28px/1 "Barlow Condensed",sans-serif}.dn span{font-size:13px;color:var(--mut);text-transform:uppercase}.dv{flex:1;min-width:0}
-.de{display:block;text-decoration:none;color:var(--ink);border-left:4px solid var(--navy);padding:6px 10px;background:#eef3fb;margin-bottom:6px}.de.ab{border-color:var(--green);background:#ecfdf5}.de.ne{border-color:#0284c7;background:#e0f2fe}.de.es{border-color:#b91c1c;background:#fef2f2}.de small{display:block;color:var(--mut)}
-@media(min-width:760px){.cw{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;text-align:center;font-weight:600;color:var(--mut);margin-bottom:6px}.cg{grid-template-columns:repeat(7,1fr)}.dp{display:block}.dc{flex-direction:column;gap:6px;min-height:110px}.dn span{display:none}.de{font-size:15px;padding:4px 8px}}
+.cd{display:block;background:#fff;border:1px solid var(--line);border-radius:6px;overflow:hidden;text-decoration:none;color:inherit}.cd:hover{border-color:var(--navy)}.cd img,.cd .ph{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}.cb{padding:12px}.cc{background:var(--navy);color:#fff;padding:10px;text-align:center;font:600 14px Barlow,sans-serif}
+.st.an{border-color:#047857;color:#047857}.fb2{display:grid;gap:10px;grid-template-columns:1fr;background:#fff;border:1px solid var(--line);border-radius:6px;padding:12px;margin:12px 0}@media(min-width:760px){.fb2{grid-template-columns:1fr 1fr 1.4fr}}.fb2 label{margin:0}
+.stp{display:flex;align-items:center;gap:10px;margin:16px 0 6px}.stp span{background:var(--navy);color:#fff;min-width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:800 16px "Barlow Condensed",sans-serif}.stp h2{border:0;margin:0;padding:0;font-size:21px}
+.tm{border:1px solid var(--navy);background:#f1f5fb;padding:4px 12px 8px;margin:8px 0;border-radius:6px}.tm summary{font-weight:600;cursor:pointer;color:var(--navy);min-height:38px;display:flex;align-items:center}
+.card2{background:#fff;border:1px solid var(--line);border-radius:6px;padding:12px;margin:10px 0}.cod{display:flex;gap:8px}.cod input{font:800 24px "Barlow Condensed",sans-serif;letter-spacing:.2em;text-transform:uppercase;text-align:center}.cod .btn{white-space:nowrap}
+.cn{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:12px 0}.cn b{font:800 22px "Barlow Condensed",sans-serif;text-transform:uppercase;text-align:center}.cw{display:none}.cg{display:grid;gap:6px;grid-template-columns:1fr}.dp{display:none}
+.dc{background:#fff;border:1px solid var(--line);border-radius:4px;padding:8px 10px;min-height:48px;display:flex;gap:10px;align-items:flex-start}.dc:not(.tem){background:transparent;border-style:dashed;min-height:40px;opacity:.65}.dc.hoje{border:2px solid var(--green);opacity:1}
+.dn{min-width:48px}.dn b{display:block;font:800 24px/1 "Barlow Condensed",sans-serif}.dn span{font-size:12px;color:var(--mut);text-transform:uppercase}.dv{flex:1;min-width:0}
+.de{display:block;text-decoration:none;color:var(--ink);border-left:4px solid var(--navy);padding:5px 8px;background:#eef3fb;margin-bottom:4px;border-radius:0 4px 4px 0;font-size:14px}.de.ab{border-color:var(--green);background:#ecfdf5}.de.ne{border-color:#0284c7;background:#e0f2fe}.de.es{border-color:#b91c1c;background:#fef2f2}.de small{display:block;color:var(--mut);font-size:12px}
+@media(min-width:760px){.cw{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center;font-weight:600;color:var(--mut);margin-bottom:4px}.cg{grid-template-columns:repeat(7,1fr)}.dp{display:block}.dc{flex-direction:column;gap:4px;min-height:98px}.dn span{display:none}}
 .m{overflow:auto}.m div{max-height:92vh;overflow:auto}
-/* ===== BARRA SUPERIOR DE STATUS ADMIN & ISOLAMENTO DE LAYOUT ===== */
-#admin-bar{background:#0f172a;color:#f8fafc;border-bottom:3px solid var(--green);padding:8px 16px;font-size:15px}
-#admin-bar .ab-wrap{max-width:1120px;margin:auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px}
-#admin-bar .ab-badge{background:var(--green);color:#022c1e;font-weight:800;padding:2px 8px;border-radius:2px;text-transform:uppercase;font-size:13px;margin-right:6px;letter-spacing:.04em}
-#admin-bar .ab-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-#admin-bar .ab-btn{min-height:36px;padding:0 14px;font:600 14px Barlow,sans-serif;border-radius:2px;border:1px solid #475569;background:#1e293b;color:#fff;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}
-#admin-bar .ab-btn:hover{background:#334155}
+/* ===== PAINEL ADMIN MINIMALISTA & MOBILE-FIRST ===== */
+#admin-bar{background:#0f172a;color:#f8fafc;border-bottom:2px solid var(--green);padding:6px 12px;font-size:13px}
+#admin-bar .ab-wrap{max-width:1120px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:8px}
+#admin-bar .ab-badge{background:var(--green);color:#022c1e;font-weight:800;padding:1px 6px;border-radius:3px;text-transform:uppercase;font-size:11px;margin-right:5px}
+#admin-bar .ab-actions{display:flex;gap:6px;align-items:center}
+#admin-bar .ab-btn{min-height:28px;padding:0 10px;font:600 12.5px Barlow,sans-serif;border-radius:4px;border:1px solid #475569;background:#1e293b;color:#fff;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}
 #admin-bar .ab-btn.painel{background:var(--green);color:#022c1e;border-color:var(--green)}
 #admin-bar .ab-btn.sair{background:#dc2626;color:#fff;border-color:#dc2626}
-.admin-mode-banner{background:#0f172a;color:#e2e8f0;border-left:5px solid var(--green);padding:12px 16px;margin-bottom:18px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;border-radius:2px}
-.admin-mode-banner b{color:#6ee7b7}
-.qctrl{background:#f8fafc;border:1px solid var(--line);border-left:4px solid var(--navy);padding:12px 14px;margin:6px 0 14px;display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));align-items:end}
-.qctrl label{margin:0;font-size:14px;color:var(--navy)}
-.qctrl input,.qctrl select{min-height:42px;font-size:15px;padding:0 8px}
-.qctrl .btn{min-height:42px;font-size:15px;padding:0 14px}
-/* ===== SISTEMA NATIVO DE CHAVEAMENTO E TORNEIOS (ADMIN & PÚBLICO) ===== */
-.btn-torneio{background:linear-gradient(135deg,#0f172a 0%,#1a365d 100%);color:#fff;border:2px solid var(--green);font:800 18px "Barlow Condensed",sans-serif;letter-spacing:.04em;text-transform:uppercase;padding:0 22px;min-height:52px;display:inline-flex;align-items:center;gap:8px;cursor:pointer;border-radius:3px;box-shadow:0 3px 10px rgba(16,185,129,.22)}
-.btn-torneio:hover{background:#0f172a;border-color:#34d399}
-.m-torneio>div{max-width:780px;width:100%;text-align:left;padding:24px;border-top:5px solid var(--green)}
-.pres-bar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;background:#0f172a;color:#fff;padding:10px 14px;border-radius:3px;margin:10px 0}
-.pres-bar b{color:#6ee7b7;font:800 22px "Barlow Condensed",sans-serif;letter-spacing:.03em}
-.pres-list{max-height:220px;overflow-y:auto;border:1px solid var(--line);background:#f8fafc;padding:8px;display:grid;gap:6px;grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
-.pres-item{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);padding:8px 10px;border-radius:2px;cursor:pointer;font-weight:600;margin:0;font-size:15px}
-.pres-item input{width:22px;min-height:22px;margin:0;accent-color:var(--green)}
-.fmt-grid{display:grid;gap:12px;grid-template-columns:1fr;margin:12px 0}@media(min-width:640px){.fmt-grid{grid-template-columns:repeat(3,1fr)}}
-.fmt-card{border:2px solid var(--line);background:#fff;padding:14px;border-radius:3px;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;gap:6px}
-.fmt-card:hover{border-color:var(--navy)}
-.fmt-card.on{border-color:var(--green);background:#ecfdf5;box-shadow:0 0 0 2px rgba(16,185,129,.25)}
-.fmt-card h4{font:800 21px "Barlow Condensed",sans-serif;text-transform:uppercase;color:var(--navy);margin:0;display:flex;align-items:center;justify-content:space-between}
-.fmt-card p{margin:0;font-size:14px;color:var(--mut);line-height:1.35}
-.calc-box{background:#eff6ff;border-left:4px solid #0284c7;color:#0c4a6e;padding:12px 14px;margin:12px 0;font-size:16px;border-radius:2px}
-.t-nav{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0;border-bottom:2px solid var(--line);padding-bottom:10px}
-.t-tab{min-height:44px;padding:0 18px;font:700 16px Barlow,sans-serif;border:2px solid var(--navy);background:#fff;color:var(--navy);cursor:pointer;border-radius:2px}
-.t-tab.on{background:var(--navy);color:#fff}
-.match-grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));margin:14px 0}
-.match-card{background:#fff;border:1px solid var(--line);border-top:4px solid var(--navy);padding:14px;border-radius:3px;display:flex;flex-direction:column;gap:10px}
+.adm-hdr{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:4px 0 8px}
+.adm-hdr h2{margin:0;border:0;padding:0;font-size:22px}
+.adm-more{margin-top:8px;border-top:1px dashed var(--line);padding-top:6px}
+.adm-more summary{font:600 13px Barlow,sans-serif;color:var(--mut);cursor:pointer;user-select:none;padding:4px 0;list-style:none;display:inline-flex;align-items:center;gap:4px}
+.adm-more summary::-webkit-details-marker{display:none}
+.qctrl{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:10px;margin-top:6px;display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));align-items:end}
+.qctrl label{margin:0;font-size:12.5px;color:var(--navy)}
+.qctrl input,.qctrl select{min-height:34px;font-size:13.5px;padding:0 8px}
+.qctrl .btn{min-height:34px;font-size:13.5px;padding:0 12px}
+/* ===== SISTEMA NATIVO DE CHAVEAMENTO E TORNEIOS (COMPACTO & INTUITIVO) ===== */
+.btn-torneio{background:var(--navy);color:#fff;border:1.5px solid var(--green);font:700 14px Barlow,sans-serif;padding:0 14px;min-height:36px;display:inline-flex;align-items:center;gap:6px;cursor:pointer;border-radius:6px}
+.btn-torneio:hover{background:#0f172a}
+.m-torneio>div{max-width:680px;width:100%;text-align:left;padding:16px;border-top:4px solid var(--green)}
+.pres-bar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;background:#0f172a;color:#fff;padding:8px 12px;border-radius:6px;margin:8px 0;font-size:14px}
+.pres-bar b{color:#6ee7b7;font:800 18px "Barlow Condensed",sans-serif}
+.pres-list{max-height:190px;overflow-y:auto;border:1px solid var(--line);background:#f8fafc;padding:6px;border-radius:6px;display:grid;gap:5px;grid-template-columns:repeat(auto-fill,minmax(175px,1fr))}
+.pres-item{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid #e2e8f0;padding:6px 8px;border-radius:4px;cursor:pointer;font-weight:600;margin:0;font-size:13.5px}
+.pres-item input{width:18px;min-height:18px;margin:0;accent-color:var(--green)}
+.fmt-grid{display:grid;gap:8px;grid-template-columns:1fr;margin:8px 0}@media(min-width:600px){.fmt-grid{grid-template-columns:repeat(3,1fr)}}
+.fmt-card{border:1.5px solid var(--line);background:#fff;padding:10px 12px;border-radius:6px;cursor:pointer;display:flex;flex-direction:column;gap:4px}
+.fmt-card.on{border-color:var(--green);background:#ecfdf5}
+.fmt-card h4{font:800 17px "Barlow Condensed",sans-serif;text-transform:uppercase;color:var(--navy);margin:0}
+.fmt-card p{margin:0;font-size:12.5px;color:var(--mut);line-height:1.3}
+.calc-box{background:#eff6ff;border-left:3px solid #0284c7;color:#0c4a6e;padding:8px 12px;margin:8px 0;font-size:13.5px;border-radius:0 6px 6px 0}
+.t-nav{display:flex;gap:6px;margin:10px 0;border-bottom:1px solid var(--line);padding-bottom:8px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.t-tab{min-height:34px;padding:0 12px;font:600 13.5px Barlow,sans-serif;border:1.5px solid #cbd5e1;background:#fff;color:var(--navy);cursor:pointer;border-radius:6px;white-space:nowrap}
+.t-tab.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.match-grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));margin:10px 0}
+.match-card{background:#fff;border:1px solid var(--line);border-top:3px solid var(--navy);padding:10px;border-radius:6px;display:flex;flex-direction:column;gap:6px}
 .match-card.done{border-top-color:var(--green);background:#fcfffd}
-.match-card.bye{border-top-color:#94a3b8;background:#f8fafc;opacity:.9}
-.mc-hdr{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;text-transform:uppercase;color:var(--mut);letter-spacing:.04em}
-.mc-team{display:grid;grid-template-columns:1fr 78px;gap:10px;align-items:center;padding:6px 8px;border-radius:2px;background:#f8fafc;border:1px solid #e2e8f0}
+.match-card.bye{border-top-color:#94a3b8;background:#f8fafc;opacity:.88}
+.mc-hdr{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;font-weight:700;text-transform:uppercase;color:var(--mut)}
+.mc-team{display:grid;grid-template-columns:1fr 64px;gap:8px;align-items:center;padding:4px 8px;border-radius:4px;background:#f8fafc;border:1px solid #e2e8f0}
 .mc-team.win{background:#ecfdf5;border-color:var(--green);font-weight:700;color:#065f46}
-.mc-team span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:16px}
-.score-inp{min-height:42px!important;height:42px;text-align:center;font:800 22px "Barlow Condensed",sans-serif!important;padding:0 4px!important;background:#fff}
-.win-badge{display:inline-block;background:var(--green);color:#022c1e;font:800 12px Barlow,sans-serif;text-transform:uppercase;padding:2px 6px;border-radius:2px;margin-left:6px}
-.brk-scroll{display:flex;gap:18px;overflow-x:auto;padding:8px 4px 18px;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}
-.brk-col{min-width:275px;max-width:310px;flex:0 0 285px;scroll-snap-align:start;display:flex;flex-direction:column;gap:12px}
-.brk-col-hdr{background:var(--navy);color:#fff;padding:8px 12px;font:800 20px "Barlow Condensed",sans-serif;text-transform:uppercase;letter-spacing:.04em;border-bottom:3px solid var(--green);border-radius:2px}
-.brk-match{background:#fff;border:1px solid var(--line);border-left:4px solid var(--navy);border-radius:2px;padding:10px 12px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.mc-team span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14.5px}
+.score-inp{min-height:34px!important;height:34px;text-align:center;font:800 18px "Barlow Condensed",sans-serif!important;padding:0 2px!important;background:#fff}
+.win-badge{display:inline-block;background:var(--green);color:#022c1e;font:800 10.5px Barlow,sans-serif;text-transform:uppercase;padding:1px 5px;border-radius:3px;margin-left:4px}
+.brk-scroll{display:flex;gap:12px;overflow-x:auto;padding:6px 2px 14px;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}
+.brk-col{min-width:240px;max-width:270px;flex:0 0 245px;scroll-snap-align:start;display:flex;flex-direction:column;gap:8px}
+.brk-col-hdr{background:var(--navy);color:#fff;padding:6px 10px;font:800 16px "Barlow Condensed",sans-serif;text-transform:uppercase;letter-spacing:.03em;border-bottom:2px solid var(--green);border-radius:4px}
+.brk-match{background:#fff;border:1px solid var(--line);border-left:3px solid var(--navy);border-radius:4px;padding:8px 10px}
 .brk-match.done{border-left-color:var(--green)}
-.brk-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;gap:8px;font-size:16px}
+.brk-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;gap:6px;font-size:14.5px}
 .brk-row+.brk-row{border-top:1px dashed var(--line)}
 .brk-row.win{font-weight:700;color:#065f46}
-.brk-sc{font:800 20px "Barlow Condensed",sans-serif;background:#f1f5f9;min-width:34px;text-align:center;padding:2px 8px;border-radius:2px}
+.brk-sc{font:800 17px "Barlow Condensed",sans-serif;background:#f1f5f9;min-width:28px;text-align:center;padding:1px 6px;border-radius:3px}
 .brk-row.win .brk-sc{background:var(--green);color:#022c1e}
-.tb-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;background:#fff;border:1px solid var(--line);margin:12px 0;border-radius:2px}
-.tb-standings{width:100%;border-collapse:collapse;min-width:520px}
-.tb-standings th{background:var(--navy);color:#fff;font:700 14px Barlow,sans-serif;text-transform:uppercase;padding:10px 8px;text-align:center}
+.tb-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;background:#fff;border:1px solid var(--line);margin:8px 0;border-radius:6px}
+.tb-standings{width:100%;border-collapse:collapse;min-width:440px}
+.tb-standings th{background:var(--navy);color:#fff;font:700 12px Barlow,sans-serif;text-transform:uppercase;padding:7px 6px;text-align:center}
 .tb-standings th:nth-child(2),.tb-standings td:nth-child(2){text-align:left}
-.tb-standings td{padding:9px 8px;text-align:center;border-bottom:1px solid var(--line);font-size:16px}
+.tb-standings td{padding:7px 6px;text-align:center;border-bottom:1px solid var(--line);font-size:14px}
 .tb-standings tr.qual{background:#f0fdf4}
-.tb-standings tr.qual td:first-child{border-left:4px solid var(--green);font-weight:800;color:#065f46}
-@media(max-width:700px){.top{display:none}header{position:static}.hd{justify-content:flex-start}.hd>.btn{display:none}h1{font-size:40px}h2{font-size:28px}.row{flex-direction:column}.row .btn{width:100%}.cod{flex-direction:column}main{padding-bottom:96px}footer{padding-bottom:150px}
-#nav{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);z-index:20;gap:0;padding-bottom:env(safe-area-inset-bottom,0px)}#nav a{flex:1;justify-content:center;text-align:center;font-size:12px;letter-spacing:-.01em;min-height:58px;border-bottom:0;border-top:4px solid transparent;padding:0 2px}#nav a.on{border-top-color:var(--green)}.wa{bottom:calc(72px + env(safe-area-inset-bottom,0px));min-height:48px;padding:0 14px;font-size:15px}}
+.tb-standings tr.qual td:first-child{border-left:3px solid var(--green);font-weight:800;color:#065f46}
+@media(max-width:700px){.top{display:none}header{position:static}.hd{justify-content:flex-start}.hd>.btn{display:none}h1{font-size:32px}h2{font-size:22px}.num div{padding:12px 6px;font-size:12px}main{padding:14px 12px 86px}footer{padding-bottom:110px}
+#nav{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);z-index:20;gap:0;padding-bottom:env(safe-area-inset-bottom,0px)}#nav a{flex:1;justify-content:center;text-align:center;font-size:11.5px;letter-spacing:-.01em;min-height:52px;border-bottom:0;border-top:3px solid transparent;padding:0 2px}#nav a.on{border-top-color:var(--green)}.wa{bottom:calc(62px + env(safe-area-inset-bottom,0px));min-height:38px;padding:0 12px;font-size:13px}}
 </style></head><body>
 <header><div id="admin-bar" hidden></div><div class="top">Prefeitura de Duque de Caxias · Secretaria Municipal de Esportes e Lazer (SMEL)</div><div class="hd"><a class="brand" href="#inicio"><img class="logo" src="logo-caxias-mais-esporte.png" alt="Projeto Caxias Mais Esporte"></a>
 <nav id="nav"><a href="#inicio" data-p="inicio">Início</a><a href="#competicoes" data-p="competicoes">Competições</a><a href="#calendario" data-p="calendario">Calendário</a><a href="#midia" data-p="midia">Mídia</a><a href="#inscricoes" data-p="inscricoes">Inscrições</a></nav><a class="btn" href="#inscricoes">Inscreva-se</a>
@@ -140,7 +141,7 @@ footer{background:var(--navy);color:#dbe4f0;padding:28px 16px 90px;margin-top:48
 </main>
 <footer><div>
 <div class="realizacao"><span class="realizacao-lbl">Uma realização de:</span><div class="realizacao-logos"><img src="logo-prefeitura-smel.png" alt="Prefeitura de Duque de Caxias - Secretaria Municipal de Esporte e Lazer"><img src="logo-caxias-mais-esporte.png" alt="Projeto Caxias Mais Esporte"></div></div>
-<b>CAXIAS MAIS ESPORTE</b> · Secretaria Municipal de Esporte e Lazer · Prefeitura de Duque de Caxias · 2026<br>Telefone: <span id="ftel"></span> · E-mail: <span id="fmail"></span><br>Ginásios: <span id="fgym"></span><br>Emergência: SAMU 192 · Bombeiros 193 · Polícia 190<br><a class="wa-link" target="_blank" rel="noopener">Precisa de ajuda para se inscrever? Chame no WhatsApp</a><br><a href="#admin" id="f-admin-link" style="color:#a7b4c8;font-size:14px;display:inline-block;padding:12px 0">Acesso Servidores</a></div></footer>
+<a href="#admin" id="f-admin-link" style="color:#a7b4c8;font-size:13px;display:inline-block;padding:6px 0;text-decoration:none">Acesso Servidores</a></div></footer>
 <a class="wa wa-link" target="_blank" rel="noopener">Ajuda pelo WhatsApp</a>
 <div class="m" id="modal" role="dialog" aria-modal="true"><div><h2 style="margin-top:0">Inscrição Enviada com Sucesso!</h2><p>A equipe da Secretaria de Esportes irá conferir os documentos e confirmar a vaga no seu WhatsApp.</p><div>Seu código de acesso (guarde!):</div><div class="prot" id="cod"></div><p class="mut">Com ele você consulta e edita sua inscrição em Inscrições › Minha inscrição.</p><div class="mut">Protocolo: <b id="prot"></b></div><a class="btn" id="wsh" target="_blank" rel="noopener">Compartilhar Comprovante no WhatsApp</a><button class="btn o" id="ok">Entendi</button></div></div>
 <div class="m m-torneio" id="modal-torneio" role="dialog" aria-modal="true"><div id="modal-torneio-body"></div></div>
@@ -254,11 +255,29 @@ const fo=f=>`<a class="fp"${su(f.link)?` href="${esc(su(f.link))}" target="_blan
 const byDate=(a,b)=>String(a.data_inicio).localeCompare(b.data_inicio);
 const card=(e,href)=>{const k=stk(e);return`<a class="cd" href="${href||"#evento/"+esc(e.id)}">${su(e.imagem_url)?`<img src="${esc(su(e.imagem_url))}" alt="${esc(e.nome)}" loading="lazy" onerror="this.outerHTML=ph('${esc(e.modalidade).replace(/'/g,"\\'")}')">`:ph(e.modalidade)}<div class="cb"><span class="st ${k}">${stl[k]}</span><div class="eb" style="margin:6px 0 2px">${esc(e.modalidade)} · ${esc(e.categoria)}</div><h3>${esc(e.nome)}</h3><div class="mut">${dt(e.data_inicio)}${e.data_fim&&e.data_fim!==e.data_inicio?" a "+dt(e.data_fim):""} · ${esc(e.local_evento)}</div></div>${k==="ab"?'<div class="cc">Inscrever-se →</div>':k==="ne"?'<div class="cc" style="background:#0369a1">Inscrições no evento →</div>':""}</a>`};
 const cr=e=>{const k=stk(e);return`<a class="cr" href="#evento/${esc(e.id)}">${su(e.imagem_url)?`<img src="${esc(su(e.imagem_url))}" alt="" loading="lazy">`:ph(e.modalidade)}<div><span class="st ${k}">${stl[k]}</span><h3>${esc(e.nome)}</h3><div class="mut">${esc(e.modalidade)} · ${dt(e.data_inicio)}</div></div></a>`};
-function home(){const ab=D.eventos.filter(e=>["ab","ne","es"].includes(stk(e))).sort(byDate),m=D.home_fotos||[];
+function carregarMapaAtletas(){try{const r=localStorage.getItem("smel_atletas_map");return r?JSON.parse(r):{}}catch(e){return{}}}
+let ATLETAS_MAP=carregarMapaAtletas();
+function salvarAtletasEv(evId,qtd){if(!evId)return;ATLETAS_MAP[evId]=+qtd||0;try{localStorage.setItem("smel_atletas_map",JSON.stringify(ATLETAS_MAP))}catch(e){}}
+function calcularStatsReais(){
+  const evs=D.eventos||[];
+  const realizados=evs.filter(e=>stk(e)==="en").length;
+  const ativos=evs.filter(e=>stk(e)!=="en").length;
+  let somaEv=0;
+  evs.forEach(e=>{
+    if(e.total_atletas!==undefined&&e.total_atletas!=="")salvarAtletasEv(e.id,+e.total_atletas);
+    if(ATLETAS_MAP[e.id]!==undefined)somaEv+=+ATLETAS_MAP[e.id]||0;
+    else if(e.total_atletas!==undefined&&e.total_atletas!=="")somaEv+=+e.total_atletas||0;
+    else if(+e.inscritos>0)somaEv+=(+e.inscritos)*Math.max(1,+e.min_atletas||1);
+  });
+  const srvAtletas=(D.stats&&typeof D.stats.atletas==="number")?D.stats.atletas:0;
+  const atletas=Math.max(srvAtletas,somaEv);
+  return{realizados,ativos,atletas};
+}
+function home(){const ab=D.eventos.filter(e=>["ab","ne","es"].includes(stk(e))).sort(byDate),m=D.home_fotos||[],st=calcularStatsReais();
 $("#inicio").innerHTML=`<div class="hero"><div><div class="eb">Portal Oficial do Caxias Mais Esporte</div><h1>Esporte para todos</h1><p>Veja o que vem por aí, confira os resultados e inscreva sua equipe.</p></div>${m[0]?fo(m[0]):""}</div>
 <h2>O que está rolando</h2>${ab.length?`<div class="g3">${ab.map(e=>card(e)).join("")}</div>`:'<p class="mut">Nenhuma inscrição aberta agora. Veja o Calendário para os próximos eventos.</p>'}
 ${m.length>1?`<h2>Nos nossos eventos</h2><div class="g4">${m.slice(1).map(fo).join("")}</div>`:""}
-<div class="num"><div><b>${CFG.STATS.c}</b>comunidades atendidas</div><div><b>${CFG.STATS.t}</b>torneios realizados</div><div><b>${CFG.STATS.a}</b>atletas participantes</div></div>`}
+<div class="num"><div><b id="st-real">${st.realizados}</b>eventos realizados</div><div><b id="st-ativ">${st.ativos}</b>eventos ativos</div><div><b id="st-atl">${st.atletas}</b>atletas participantes</div></div>`}
 const chips=(a,k)=>["",...a].map(v=>`<button type="button" class="chip${F[k]===v?" on":""}" data-k="${k}" data-v="${esc(v)}">${esc(v||"Todos")}</button>`).join("");
 let CM=null;const MESN=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"],DSEM=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
 document.addEventListener("click",e=>{const b=e.target.closest("[data-cm]");if(b){CM.m+=+b.dataset.cm;if(CM.m<0){CM.m=11;CM.y--}if(CM.m>11){CM.m=0;CM.y++}calendario()}});
@@ -315,7 +334,7 @@ const esg=e=>+e.max_vagas>0&&+e.inscritos>=+e.max_vagas;
 const lim=e=>{const mx=Math.max(1,+e.max_atletas||1);return[Math.min(mx,Math.max(1,+e.min_atletas||1)),mx]};
 function chUrl(v){const t=String(v||"").trim();if(!t||t.startsWith("SMEL_TORNEIO:"))return"";const m=t.match(/src\s*=\s*["']([^"']+)["']/i)||t.match(/(?:https?:)?\/\/[^\s"'<>]+/i);if(!m)return"";let u=(m[1]||m[0]).trim();if(u.startsWith("//"))u="https:"+u;if(!/^https?:\/\//i.test(u))u="https://"+u;
 try{const x=new URL(u);if(!/(^|\.)challonge\.com$/i.test(x.hostname))return"";let p=x.pathname.replace(/\/+$/,"");if(!/\/module$/.test(p))p+="/module";return"https://"+x.hostname+p}catch(e){return""}}
-function sucesso(pr,e,time,at,cod){$("#prot").textContent=pr;$("#cod").textContent=cod||"";const t=["*Comprovante de Inscrição*","Protocolo: "+pr,"Evento: "+e.nome,"Data do evento: "+dt(e.data_inicio),time?"Time: "+time:"","Atletas: "+at.map(a=>a.nome).join(", "),"Enviado em: "+new Date().toLocaleDateString("pt-BR"),"Situação: Em análise"].filter(Boolean).join("\n");
+function sucesso(pr,e,time,at,cod){if(e&&e.id)salvarAtletasEv(e.id,(+ATLETAS_MAP[e.id]||0)+(at?at.length:1));$("#prot").textContent=pr;$("#cod").textContent=cod||"";const t=["*Comprovante de Inscrição*","Protocolo: "+pr,"Evento: "+e.nome,"Data do evento: "+dt(e.data_inicio),time?"Time: "+time:"","Atletas: "+at.map(a=>a.nome).join(", "),"Enviado em: "+new Date().toLocaleDateString("pt-BR"),"Situação: Em análise"].filter(Boolean).join("\n");
 $("#wsh").href="https://wa.me/?text="+encodeURIComponent(t);$("#modal").classList.add("on")}
 function inscricao(id,modo){const e=D.eventos.find(x=>x.id===id);
 if(e&&stk(e)==="ne"){
@@ -348,16 +367,30 @@ busy=false;sb.disabled=false;sb.textContent=tx}}
 document.addEventListener("click",e=>{const c=e.target.closest(".chip");if(c){F[c.dataset.k]=c.dataset.v;lista()}const h=e.target.closest("[data-f]");if(h)F.st=h.dataset.f});
 document.addEventListener("input",e=>{const i=e.target,d=i.value.replace(/\D/g,"");if((i.dataset.n||i.name)==="cpf")i.value=d.slice(0,11).replace(/(\d{3})(\d)/,"$1.$2").replace(/(\d{3})(\d)/,"$1.$2").replace(/(\d{3})(\d{1,2})$/,"$1-$2");if((i.dataset.n||i.name)==="telefone"){const n=d.slice(0,11);i.value=n.length>6?`(${n.slice(0,2)}) ${n.slice(2,n.length-4)}-${n.slice(-4)}`:n.length>2?`(${n.slice(0,2)}) ${n.slice(2)}`:n}});
 let cur="";function nav(h){try{location.hash=h}catch(e){}route(h.replace(/^#/,""))}
-function route(h){h=h??location.hash.slice(1);cur=h;(D.eventos||[]).forEach(normEv);renderAdminBar();if(STALE&&!/^admin/.test(h)){STALE=false;return api({acao:"publico"}).then(d=>{if(d&&Array.isArray(d.eventos)){d.eventos.forEach(normEv);D=d}route(h)}).catch(()=>route(h))}const[p0,id,modo]=(h||"inicio").split("/"),p=p0==="eventos"?"competicoes":p0,pg=["inicio","competicoes","evento","inscricao","inscricoes","calendario","midia","admin"].includes(p)?p:"inicio";if(pg==="inicio")home();if(pg==="competicoes")lista();if(pg==="evento")evento(id);if(pg==="inscricao")inscricao(id,modo);if(pg==="inscricoes")inscricoes();if(pg==="midia")midia();if(pg==="calendario")calendario();if(pg==="admin")admin();
+function salvarCachePublico(d){try{localStorage.setItem("smel_pub_cache_v2",JSON.stringify(d))}catch(e){}}
+function lerCachePublico(){try{const r=localStorage.getItem("smel_pub_cache_v2");return r?JSON.parse(r):null}catch(e){return null}}
+function route(h){h=h??location.hash.slice(1);cur=h;(D.eventos||[]).forEach(normEv);renderAdminBar();
+if(STALE&&!/^admin/.test(h)){
+  STALE=false;
+  api({acao:"publico"}).then(d=>{if(d&&Array.isArray(d.eventos)){d.eventos.forEach(normEv);D=d;salvarCachePublico(d);if(!/^admin/.test(cur))route(cur)}}).catch(()=>{});
+}
+const[p0,id,modo]=(h||"inicio").split("/"),p=p0==="eventos"?"competicoes":p0,pg=["inicio","competicoes","evento","inscricao","inscricoes","calendario","midia","admin"].includes(p)?p:"inicio";if(pg==="inicio")home();if(pg==="competicoes")lista();if(pg==="evento")evento(id);if(pg==="inscricao")inscricao(id,modo);if(pg==="inscricoes")inscricoes();if(pg==="midia")midia();if(pg==="calendario")calendario();if(pg==="admin")admin();
 document.querySelectorAll(".pg").forEach(s=>s.classList.toggle("on",s.id===pg));document.querySelectorAll("#nav a").forEach(a=>a.classList.toggle("on",a.dataset.p===({evento:"competicoes",inscricao:"inscricoes"}[pg]||pg)));scrollTo(0,0)}
 
-/* ===== CONFIGURAÇÃO DO PAINEL ADMINISTRATIVO E SESSÃO PERSISTENTE ===== */
+/* ===== CONFIGURAÇÃO DO PAINEL ADMINISTRATIVO E SESSÃO PERSISTENTE + CACHE INSTANTÂNEO ===== */
 const STATUS_OPCOES=["Em breve","Aberto","Inscrição feita apenas no evento","Vagas esgotadas","Encerrado"];
 const SC={
-eventos:{t:"Eventos",r:"nome",s:["nome","status","data_inicio"],f:[["nome","Nome do evento"],["modalidade","Esporte"],["categoria","Categoria"],["local_evento","Local"],["data_inicio","Data de início","date"],["data_fim","Data final","date"],["prazo_inscricao","Inscrições até","date"],["status","Situação","sel",STATUS_OPCOES],["min_atletas","Mínimo de atletas por inscrição","number"],["max_atletas","Máximo de atletas por inscrição","number"],["max_vagas","Máximo de vagas (times/atletas; vazio = sem limite)","number"],["descricao","Descrição","area"],["regulamento_url","Link do regulamento (PDF)"],["link_challonge_embed","Link ou código da tabela (Challonge)"],["pasta_fotos_url","Link da pasta pública de fotos no Google Drive"],["imagem_url","Link da imagem de capa (ou anexe abaixo)"]]},
-inscricoes:{t:"Inscrições",ev:1},
-colocacoes:{t:"Classificação",ev:1,r:"nome_equipe",s:["colocacao","nome_equipe"],f:[["colocacao","Lugar (1, 2, 3...)","number"],["nome_equipe","Nome do time"]]},
-auditoria:{t:"Auditoria (Logs)"}};
+eventos:{t:"📅 Eventos",r:"nome",s:["nome","status","data_inicio"],f:[["nome","Nome do evento"],["modalidade","Esporte"],["categoria","Categoria"],["local_evento","Local"],["data_inicio","Data de início","date"],["data_fim","Data final","date"],["prazo_inscricao","Inscrições até","date"],["status","Situação","sel",STATUS_OPCOES],["min_atletas","Mínimo de atletas por inscrição","number"],["max_atletas","Máximo de atletas por inscrição","number"],["max_vagas","Máximo de vagas (times/atletas; vazio = sem limite)","number"],["descricao","Descrição","area"],["regulamento_url","Link do regulamento (PDF)"],["link_challonge_embed","Link ou código da tabela (Challonge)"],["pasta_fotos_url","Link da pasta pública de fotos no Google Drive"],["imagem_url","Link da imagem de capa (ou anexe abaixo)"]]},
+inscricoes:{t:"📋 Inscritos & Torneio",ev:1},
+colocacoes:{t:"🏅 Pódio Final",ev:1,r:"nome_equipe",s:["colocacao","nome_equipe"],f:[["colocacao","Lugar (1, 2, 3...)","number"],["nome_equipe","Nome do time"]]},
+auditoria:{t:"🛡️ Histórico"}};
+
+const ADM_CACHE={eventos:null,inscricoes:{},colocacoes:null,auditoria:null,evsList:null};
+function invalidarCacheAdmin(aba,evId){
+  if(!aba||aba==="eventos")ADM_CACHE.eventos=null;
+  if(!aba||aba==="colocacoes")ADM_CACHE.colocacoes=null;
+  if(!aba||aba==="inscricoes"){if(evId)delete ADM_CACHE.inscricoes[evId];else ADM_CACHE.inscricoes={}}
+}
 
 const INATIVIDADE_MAX_MS = 15 * 60 * 1000; /* 15 minutos de inatividade encerra a sessão */
 let A={
@@ -366,17 +399,18 @@ let A={
   tab:"eventos",
   ev:"",
   msgSessao:""
-},STALE=false;
+},STALE=false,_lastTouchMs=0;
 
 function salvarSessao(tok,user){
   A.tok=tok||"";
   A.user=user||"servidor";
   A.msgSessao="";
+  _lastTouchMs=Date.now();
   try{
     if(A.tok){
       sessionStorage.setItem("smel_tok",A.tok);
       sessionStorage.setItem("smel_user",A.user);
-      sessionStorage.setItem("smel_last",String(Date.now()));
+      sessionStorage.setItem("smel_last",String(_lastTouchMs));
     }else{
       sessionStorage.removeItem("smel_tok");
       sessionStorage.removeItem("smel_user");
@@ -396,16 +430,19 @@ function encerrarSessao(motivo){
 
 function tocarAtividade(){
   if(!A.tok)return;
+  const now=Date.now();
+  if(now-_lastTouchMs<15000)return; /* Throttle de 15s para zero travamento no celular */
+  _lastTouchMs=now;
   try{
     const last=+(sessionStorage.getItem("smel_last")||0);
-    if(last&&Date.now()-last>INATIVIDADE_MAX_MS){
+    if(last&&now-last>INATIVIDADE_MAX_MS){
       encerrarSessao("Sua sessão foi encerrada automaticamente após 15 minutos de inatividade por segurança.");
       return;
     }
-    sessionStorage.setItem("smel_last",String(Date.now()));
+    sessionStorage.setItem("smel_last",String(now));
   }catch(e){}
 }
-["click","keydown","mousemove","touchstart"].forEach(evName=>document.addEventListener(evName,tocarAtividade,{passive:true}));
+["click","keydown","touchstart"].forEach(evName=>document.addEventListener(evName,tocarAtividade,{passive:true}));
 setInterval(()=>{
   if(!A.tok)return;
   try{
@@ -426,9 +463,9 @@ function renderAdminBar(){
     return;
   }
   bar.hidden=false;
-  if(fl)fl.textContent="Painel Administrativo (Sessão Ativa)";
+  if(fl)fl.textContent="Painel Admin (Conectado)";
   const noAdmin=cur==="admin";
-  bar.innerHTML=`<div class="ab-wrap"><div><span class="ab-badge">Admin SMEL</span>Conectado como: <b>${esc(A.user||"servidor")}</b> (SMEL)</div><div class="ab-actions">${noAdmin?`<a class="ab-btn" href="#inicio">Ver Portal Público</a>`:`<a class="ab-btn painel" href="#admin">Painel Admin</a>`}<button type="button" class="ab-btn sair" id="ab-logout">Encerrar Sessão</button></div></div>`;
+  bar.innerHTML=`<div class="ab-wrap"><div><span class="ab-badge">SMEL</span><b>${esc(A.user||"servidor")}</b></div><div class="ab-actions">${noAdmin?`<a class="ab-btn" href="#inicio">← Ver Site</a>`:`<a class="ab-btn painel" href="#admin">Painel Admin</a>`}<button type="button" class="ab-btn sair" id="ab-logout">Sair</button></div></div>`;
   const btnOut=$("#ab-logout");
   if(btnOut)btnOut.onclick=()=>encerrarSessao();
 }
@@ -437,7 +474,14 @@ const call=async p=>{
   tocarAtividade();
   const r=await api({...p,token:A.tok});
   if(r&&r.ok){
-    if(p.acao==="salvar"||p.acao==="excluir"||p.acao==="uploadFotos")STALE=true;
+    if(p.acao==="salvar"||p.acao==="excluir"||p.acao==="uploadFotos"){
+      STALE=true;
+      invalidarCacheAdmin(p.aba,p.evento_id);
+    }
+    if(p.acao==="inscAdmin"||p.acao==="inscStatus"||p.acao==="inscExcluir"){
+      STALE=true;
+      invalidarCacheAdmin("inscricoes",p.evento_id);
+    }
     if(p.acao==="salvar"&&p.dados){
       const d=p.dados;
       regLogLocal(A.user,(d._row?"EDITAR_":"CRIAR_")+(p.aba||"REGISTRO").toUpperCase(),`${A.user||"servidor"} ${d._row?"atualizou":"cadastrou"} em ${p.aba}: "${d.nome||d.nome_equipe||d.titulo||d.id||""}"${d.status?` (Situação: ${d.status})`:""}${d.max_vagas!==undefined?` [Vagas: ${d.max_vagas||"sem limite"}]`:""}`);
@@ -456,29 +500,87 @@ const call=async p=>{
   if(r&&r.expirou)salvarSessao("","");
   return r;
 };
-async function admin(){try{await adm()}catch(x){$("#admin").innerHTML=`${barra()}<div class="card2"><p class="err" style="display:block;margin-top:0">Falha de comunicação com o servidor (verifique sua conexão com a internet).</p><button class="btn" type="button" onclick="admin()">Tentar novamente</button></div>`}}
-async function adm(){const el=$("#admin");renderAdminBar();
-if(!A.tok){el.innerHTML=`<h2 style="margin-top:12px">Acesso Servidores</h2>${A.msgSessao?`<div class="safe" style="border-left-color:#d97706;background:#fef3c7;color:#92400e"><b>Aviso de Segurança:</b> ${esc(A.msgSessao)}</div>`:""}<form id="lf" style="max-width:420px"><label for="lg1">Login</label><input id="lg1" autocomplete="username" autocapitalize="none"><label for="pw">Senha</label><input id="pw" type="password" autocomplete="current-password"><div class="err" id="le"></div><div class="row"><button class="btn">Entrar</button></div></form>`;
-$("#lf").onsubmit=async e=>{e.preventDefault();const le=$("#le"),b=e.target.querySelector("button"),st=rlStatus("login_ui",5,900000);le.style.display="none";if(!st.ok){le.textContent=`Muitas tentativas de login. Aguarde ${st.min} min para tentar novamente.`;le.style.display="block";return}b.disabled=true;const lgVal=$("#lg1").value.trim();try{const r=await api({acao:"login",login:lgVal,senha:$("#pw").value});if(r.ok){rlClear("login_ui");regLogLocal(r.login||lgVal,"LOGIN",`${r.login||lgVal} iniciou sessão no painel administrativo`);salvarSessao(r.token,r.login||lgVal);admin()}else{const rest=rlFail("login_ui",5,900000);le.textContent=r.msg||("Login ou senha incorretos."+(rest>0?` Restam ${rest} tentativa(s).`:" Bloqueado por 15 minutos."));le.style.display="block"}}catch(x){le.textContent="Não consegui falar com o servidor. Verifique sua conexão com a internet.";le.style.display="block"}b.disabled=false};return}
+
+let _syncAtletasDone=false;
+async function sincronizarAtletasBackground(){
+  if(_syncAtletasDone||!A.tok)return;
+  _syncAtletasDone=true;
+  try{
+    const evs=D.eventos||[];
+    for(const ev of evs){
+      if(!ev||!ev.id)continue;
+      if(ADM_CACHE.inscricoes[ev.id]){
+        salvarAtletasEv(ev.id,(ADM_CACHE.inscricoes[ev.id].rows||[]).length);
+        continue;
+      }
+      const r=await api({acao:"listar",aba:"inscricoes",evento_id:ev.id,token:A.tok});
+      if(r&&r.ok&&Array.isArray(r.rows)){
+        ADM_CACHE.inscricoes[ev.id]=r;
+        salvarAtletasEv(ev.id,r.rows.length);
+      }
+    }
+    if(cur==="inicio"||!cur)home();
+  }catch(e){}
+}
+
+async function obterDadosAbaAdmin(aba,evId,forcarRede){
+  if(!forcarRede){
+    if(aba==="eventos"&&ADM_CACHE.eventos)return ADM_CACHE.eventos;
+    if(aba==="colocacoes"&&ADM_CACHE.colocacoes)return ADM_CACHE.colocacoes;
+    if(aba==="inscricoes"&&evId&&ADM_CACHE.inscricoes[evId])return ADM_CACHE.inscricoes[evId];
+  }
+  const r=await call({acao:"listar",aba,evento_id:evId});
+  if(r&&r.ok){
+    if(r.eventos&&r.eventos.length)ADM_CACHE.evsList=r.eventos;
+    if(aba==="eventos"){
+      r.rows=(r.rows||[]).map(normEv);
+      ADM_CACHE.eventos=r;
+      D.eventos=r.rows.slice();
+    }else if(aba==="colocacoes"){
+      ADM_CACHE.colocacoes=r;
+    }else if(aba==="inscricoes"){
+      if(evId){
+        ADM_CACHE.inscricoes[evId]=r;
+        salvarAtletasEv(evId,(r.rows||[]).length);
+      }
+    }
+  }
+  return r;
+}
+
+async function admin(forcarRede){try{await adm(forcarRede)}catch(x){$("#admin").innerHTML=`${barra()}<div class="card2"><p class="err" style="display:block;margin-top:0">Falha de comunicação com o servidor (verifique sua conexão com a internet).</p><button class="btn" type="button" onclick="admin(true)">Tentar novamente</button></div>`}}
+async function adm(forcarRede){const el=$("#admin");renderAdminBar();
+if(!A.tok){el.innerHTML=`<h2 style="margin-top:8px">Acesso Servidores</h2>${A.msgSessao?`<div class="safe" style="border-left-color:#d97706;background:#fef3c7;color:#92400e"><b>Aviso:</b> ${esc(A.msgSessao)}</div>`:""}<form id="lf" style="max-width:380px"><label for="lg1">Usuário</label><input id="lg1" autocomplete="username" autocapitalize="none"><label for="pw">Senha</label><input id="pw" type="password" autocomplete="current-password"><div class="err" id="le"></div><div class="row"><button class="btn" style="width:100%">Entrar no Painel</button></div></form>`;
+$("#lf").onsubmit=async e=>{e.preventDefault();const le=$("#le"),b=e.target.querySelector("button"),st=rlStatus("login_ui",5,900000);le.style.display="none";if(!st.ok){le.textContent=`Muitas tentativas. Aguarde ${st.min} min.`;le.style.display="block";return}b.disabled=true;b.textContent="Entrando...";const lgVal=$("#lg1").value.trim();try{const r=await api({acao:"login",login:lgVal,senha:$("#pw").value});if(r.ok){rlClear("login_ui");regLogLocal(r.login||lgVal,"LOGIN",`${r.login||lgVal} iniciou sessão no painel administrativo`);salvarSessao(r.token,r.login||lgVal);sincronizarAtletasBackground();admin()}else{const rest=rlFail("login_ui",5,900000);le.textContent=r.msg||("Login ou senha incorretos."+(rest>0?` Restam ${rest} tentativa(s).`:" Bloqueado por 15 minutos."));le.style.display="block"}}catch(x){le.textContent="Sem conexão com o servidor. Verifique sua internet.";le.style.display="block"}b.disabled=false;b.textContent="Entrar no Painel"};return}
+sincronizarAtletasBackground();
 if(A.tab==="auditoria")return admAudit(el);
-const S=SC[A.tab],r=await call({acao:"listar",aba:A.tab,evento_id:A.ev});if(!r.ok){if(!A.tok)return admin();throw new Error(r.msg)}
-if(A.tab==="inscricoes")return admInsc(el,r);let rows=(r.rows||[]).map(x=>A.tab==="eventos"?normEv(x):x);const E=r.eventos||[];if(S.ev&&A.ev)rows=rows.filter(x=>x.evento_id===A.ev);if(A.tab==="colocacoes")rows.sort((a,b)=>a.colocacao-b.colocacao);
-const nm=id=>(E.find(x=>x.id===id)||{}).nome||"";
+if(A.tab==="inscricoes"&&!A.ev&&(D.eventos||[]).length){A.ev=D.eventos[0].id}
+const S=SC[A.tab];
+const temCache=(A.tab==="eventos"&&ADM_CACHE.eventos)||(A.tab==="colocacoes"&&ADM_CACHE.colocacoes)||(A.tab==="inscricoes"&&A.ev&&ADM_CACHE.inscricoes[A.ev]);
+if(!temCache&&!el.innerHTML.includes("adm-hdr")){
+  el.innerHTML=`${barra()}<p class="mut" style="padding:12px 0">Carregando dados...</p>`;
+}
+const r=await obterDadosAbaAdmin(A.tab,A.ev,forcarRede);
+if(!r||!r.ok){if(!A.tok)return admin();throw new Error((r&&r.msg)||"Erro")}
+if(A.tab==="inscricoes")return admInsc(el,r);
+let rows=(r.rows||[]).map(x=>A.tab==="eventos"?normEv(x):x);
+const E=r.eventos||ADM_CACHE.evsList||(D.eventos||[]).map(e=>({id:e.id,nome:e.nome}));
+if(S.ev&&A.ev)rows=rows.filter(x=>x.evento_id===A.ev);
+if(A.tab==="colocacoes")rows.sort((a,b)=>a.colocacao-b.colocacao);
 el.innerHTML=`${barra()}
-${S.ev?`<label for="es">Evento</label><select id="es"><option value="">${A.tab==="inscricoes"?"Todos os eventos":"Escolha o evento"}</option>${E.map(x=>`<option value="${esc(x.id)}"${A.ev===x.id?" selected":""}>${esc(x.nome)}</option>`).join("")}</select>`:""}
-<div class="row">${S.ev&&!A.ev?'<span class="mut">Escolha um evento para adicionar.</span>':'<button class="btn" data-n="1">Adicionar '+esc(S.t.replace(/s$/,""))+'</button>'}</div>
-${rows.map(x=>`<div class="card2" style="margin:12px 0"><div class="ar" style="border-bottom:0;padding:4px 0"><div><b>${esc(x.nome||x.nome_equipe||"(sem título)")}</b> <span class="st ${A.tab==="eventos"?stk(x):""}" style="margin-left:6px">${esc(A.tab==="eventos"?stl[stk(x)]:(x.status||""))}</span><div class="mut">${S.s.slice(1).map(c=>esc(x[c])).filter(Boolean).join(" · ")}${A.tab==="eventos"&&x.modalidade?` · ${esc(x.modalidade)} (${esc(x.categoria||"Livre")})`:""}</div></div><div class="tb" style="flex-wrap:wrap">${A.tab==="eventos"?`<button class="chip sm" style="border-color:var(--green);background:#ecfdf5;color:#065f46" data-tor="${x._row}">🏆 Configurar / Gerar Torneio</button>`:""}<button class="chip sm" data-e="${x._row}">Editar Completo</button>${A.tab==="eventos"?`<button class="chip sm" data-p="${x._row}">Fotos / Galeria</button><button class="chip sm" data-d="${x._row}">Duplicar</button>`:""}<button class="chip sm" data-x="${x._row}">Excluir</button></div></div>
-${A.tab==="eventos"?`<div class="qctrl" data-qrow="${x._row}">
-<div><label>Situação Rápida<select data-qf="status">${STATUS_OPCOES.map(op=>`<option value="${esc(op)}"${(x.status||"")===op?" selected":""}>${esc(op)}</option>`).join("")}</select></label></div>
-<div><label>Limite de Vagas<input type="number" data-qf="max_vagas" min="0" placeholder="Sem limite" value="${esc(x.max_vagas||"")}"></label></div>
+${S.ev?`<div style="display:flex;gap:8px;align-items:center;margin:8px 0"><select id="es" style="flex:1"><option value="">Escolha o evento...</option>${E.map(x=>`<option value="${esc(x.id)}"${A.ev===x.id?" selected":""}>${esc(x.nome)}</option>`).join("")}</select>${A.ev?`<button class="btn" data-n="1">+ Adicionar</button>`:""}</div>`:`<div class="row" style="margin:8px 0"><button class="btn" data-n="1">+ Novo Evento</button><button class="chip sm" data-sync="1" style="margin-left:auto">↻ Atualizar</button></div>`}
+${rows.map(x=>`<div class="card2"><div class="ar" style="border-bottom:0;padding:0"><div><span class="st ${A.tab==="eventos"?stk(x):""}">${esc(A.tab==="eventos"?stl[stk(x)]:(x.colocacao?x.colocacao+"º Lugar":x.status||""))}</span><div style="font-weight:700;font-size:17px;margin-top:2px">${esc(x.nome||x.nome_equipe||"(sem título)")}</div><div class="mut">${A.tab==="eventos"?`${esc(x.modalidade||"Esporte")} · ${esc(x.categoria||"Livre")} · ${dt(x.data_inicio)}`:""}</div></div><div class="tb">${A.tab==="eventos"?`<button class="chip sm" style="border-color:var(--green);background:#ecfdf5;color:#065f46" data-tor="${x._row}">🏆 Inscritos / Torneio</button><button class="chip sm" data-e="${x._row}">✏️ Editar</button><button class="chip sm" data-p="${x._row}">📷 Fotos</button>`:`<button class="chip sm" data-e="${x._row}">✏️ Editar</button><button class="chip sm" data-x="${x._row}">🗑️ Excluir</button>`}</div></div>
+${A.tab==="eventos"?`<details class="adm-more"><summary>⚙️ Ajuste rápido (situação, vagas, prazo, duplicar ou excluir) ▾</summary><div class="qctrl" data-qrow="${x._row}">
+<div><label>Situação<select data-qf="status">${STATUS_OPCOES.map(op=>`<option value="${esc(op)}"${(x.status||"")===op?" selected":""}>${esc(op)}</option>`).join("")}</select></label></div>
+<div><label>Limite Vagas<input type="number" data-qf="max_vagas" min="0" placeholder="Sem limite" value="${esc(x.max_vagas||"")}"></label></div>
 <div><label>Prazo Inscrição<input type="date" data-qf="prazo_inscricao" value="${esc(dp(x.prazo_inscricao).join("-"))}"></label></div>
-<div><label>Link Pasta Fotos (Drive)<input type="url" data-qf="pasta_fotos_url" placeholder="https://drive.google.com/..." value="${esc(x.pasta_fotos_url||"")}"></label></div>
-<div><button type="button" class="btn" data-qsave="${x._row}" style="width:100%">Aplicar 1-Clique</button></div>
-</div>`:""}</div>`).join("")||'<p class="mut">Nada cadastrado ainda.</p>'}`;
+<div><label>Pasta Fotos (Drive)<input type="url" data-qf="pasta_fotos_url" placeholder="https://drive.google.com/..." value="${esc(x.pasta_fotos_url||"")}"></label></div>
+<div style="display:flex;gap:6px"><button type="button" class="btn" data-qsave="${x._row}" style="flex:1">Salvar</button><button type="button" class="chip sm" data-d="${x._row}" title="Duplicar evento">Duplicar</button><button type="button" class="chip sm" data-x="${x._row}" style="color:#b91c1c;border-color:#fca5a5">Excluir</button></div>
+</div></details>`:""}</div>`).join("")||'<p class="mut">Nenhum registro encontrado.</p>'}`;
 el.onclick=async e=>{const b=e.target.closest("button");if(!b)return;const d=b.dataset;
-if(d.t){A.tab=d.t;admin()}else if(d.out){encerrarSessao()}else if(d.tor){const evAlvo=rows.find(x=>x._row==d.tor);if(evAlvo){A.ev=evAlvo.id;A.tab="inscricoes";const tEx=obterTorneio(evAlvo);A.subTab=tEx&&tEx.partidas&&tEx.partidas.length?"partidas":"inscricoes";A.autoOpenTorneio=!(tEx&&tEx.partidas&&tEx.partidas.length);admin()}}else if(d.n)form(S,{});else if(d.e)form(S,rows.find(x=>x._row==d.e));else if(d.p)formFotos(rows.find(x=>x._row==d.p));else if(d.d){const x=rows.find(y=>y._row==d.d);form(S,{...x,_row:undefined,id:"",status:"Em breve",nome:x.nome+" (cópia)"})}
-else if(d.qsave){const rowId=+d.qsave,orig=rows.find(x=>x._row==rowId),box=el.querySelector(`[data-qrow="${rowId}"]`);if(!orig||!box)return;const stVal=box.querySelector('[data-qf="status"]').value,vgVal=box.querySelector('[data-qf="max_vagas"]').value.trim(),pzVal=box.querySelector('[data-qf="prazo_inscricao"]').value,drVal=box.querySelector('[data-qf="pasta_fotos_url"]').value.trim();b.disabled=true;b.textContent="Salvando...";const novo={...orig,status:stVal,max_vagas:vgVal,prazo_inscricao:pzVal,pasta_fotos_url:drVal};try{const res=await call({acao:"salvar",aba:"eventos",dados:novo});b.disabled=false;b.textContent=res&&res.ok?"Salvo ✓":"Erro";setTimeout(()=>admin(),400)}catch(err){b.disabled=false;b.textContent="Erro de rede"}}
-else if(d.x){if(d.arm!=="1"){b.dataset.arm="1";b.textContent="Confirmar exclusão";b.style.background="#b91c1c";b.style.color="#fff";return}await call({acao:"excluir",aba:A.tab,row:+d.x});admin()}};
+if(d.t){A.tab=d.t;admin()}else if(d.sync){invalidarCacheAdmin(A.tab,A.ev);admin(true)}else if(d.out){encerrarSessao()}else if(d.tor){const evAlvo=rows.find(x=>x._row==d.tor);if(evAlvo){A.ev=evAlvo.id;A.tab="inscricoes";const tEx=obterTorneio(evAlvo);A.subTab=tEx&&tEx.partidas&&tEx.partidas.length?"partidas":"inscricoes";admin()}}else if(d.n)form(S,{});else if(d.e)form(S,rows.find(x=>x._row==d.e));else if(d.p)formFotos(rows.find(x=>x._row==d.p));else if(d.d){const x=rows.find(y=>y._row==d.d);form(S,{...x,_row:undefined,id:"",status:"Em breve",nome:x.nome+" (cópia)"})}
+else if(d.qsave){const rowId=+d.qsave,orig=rows.find(x=>x._row==rowId),box=el.querySelector(`[data-qrow="${rowId}"]`);if(!orig||!box)return;const stVal=box.querySelector('[data-qf="status"]').value,vgVal=box.querySelector('[data-qf="max_vagas"]').value.trim(),pzVal=box.querySelector('[data-qf="prazo_inscricao"]').value,drVal=box.querySelector('[data-qf="pasta_fotos_url"]').value.trim();b.disabled=true;b.textContent="Salvando...";const novo=normEv({...orig,status:stVal,max_vagas:vgVal,prazo_inscricao:pzVal,pasta_fotos_url:drVal});Object.assign(orig,novo);try{const res=await call({acao:"salvar",aba:"eventos",dados:novo});b.disabled=false;b.textContent=res&&res.ok?"Salvo ✓":"Erro";admin()}catch(err){b.disabled=false;b.textContent="Erro"}}
+else if(d.x){if(d.arm!=="1"){b.dataset.arm="1";b.textContent="Confirmar?";b.style.background="#b91c1c";b.style.color="#fff";return}b.disabled=true;await call({acao:"excluir",aba:A.tab,row:+d.x});admin(true)}};
 const es=$("#es");if(es)es.onchange=()=>{A.ev=es.value;admin()}}
 
 /* ===== ABA DE AUDITORIA E REGISTRO DE AÇÕES (LOGS DE ATIVIDADE) ===== */
@@ -521,7 +623,7 @@ $("#cx").onclick=()=>admin();
 const inpCapa=$("#capa_arq");
 if(inpCapa)inpCapa.onchange=async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;try{capaNome=f.name;capaB64=await comprimirImg(f,1200,0.84);$("#capa_prev").innerHTML=`<img src="${capaB64}" alt="Prévia da capa" style="max-width:280px;aspect-ratio:16/9;object-fit:cover;border:2px solid var(--green)"><div class="mut">Imagem pronta para envio (${esc(f.name)})</div>`}catch(err){$("#ae").textContent="Não foi possível carregar a imagem selecionada.";$("#ae").style.display="block"}};
 $("#af").onsubmit=async e=>{e.preventDefault();const b=$("#bsv"),ae=$("#ae");ae.style.display="none";b.disabled=true;b.textContent="Salvando, aguarde...";const d=Object.fromEntries(new FormData(e.target));if(r._row)d._row=r._row;if(S.ev)d.evento_id=r.evento_id||A.ev;if(r.id)d.id=r.id;if(r.pasta_evento_url)d.pasta_evento_url=r.pasta_evento_url;
-try{const x=await call({acao:"salvar",aba:A.tab,dados:d,capa_b64:capaB64,capa_nome:capaNome});b.disabled=false;b.textContent="Salvar";if(!x.ok){if(!A.tok)return admin();ae.textContent=x.msg||"Erro ao salvar.";ae.style.display="block";return}admin()}catch(err){b.disabled=false;b.textContent="Salvar";ae.textContent="Falha de conexão com a internet. Verifique sua rede e clique em Salvar novamente.";ae.style.display="block"}}}
+try{const x=await call({acao:"salvar",aba:A.tab,dados:d,capa_b64:capaB64,capa_nome:capaNome});b.disabled=false;b.textContent="Salvar";if(!x.ok){if(!A.tok)return admin();ae.textContent=x.msg||"Erro ao salvar.";ae.style.display="block";return}ADM_CACHE.eventos=null;if(A.ev)delete ADM_CACHE.colocacoes[A.ev];admin(true)}catch(err){b.disabled=false;b.textContent="Salvar";ae.textContent="Falha de conexão com a internet. Verifique sua rede e clique em Salvar novamente.";ae.style.display="block"}}}
 function formFotos(ev){if(!ev)return admin();const el=$("#admin");let selecionadas=[];
 el.innerHTML=`${barra()}<h2 style="margin-top:12px">Gestão de Galeria e Mídias: ${esc(ev.nome)}</h2><div class="safe">Cole diretamente o link de uma pasta pública do Google Drive abaixo (ideal para a assessoria de imprensa) ou envie as fotos diretamente pela plataforma para a subpasta <b>"Fotos"</b> do evento.</div>
 <form id="f_link_drive" style="max-width:720px;margin-bottom:18px"><label for="inp_pasta_url">Link da pasta pública do Google Drive (Galeria de Fotos)</label><div class="cod"><input id="inp_pasta_url" type="url" style="font:16px Barlow;letter-spacing:0;text-transform:none;text-align:left" placeholder="https://drive.google.com/drive/folders/..." value="${esc(ev.pasta_fotos_url||"")}"><button class="btn" type="submit">Salvar Link do Drive</button></div><div id="ok_link" class="safe" style="display:none;margin-top:10px">Link da pasta do Google Drive atualizado com sucesso!</div></form>
@@ -537,7 +639,7 @@ b.disabled=true;b.textContent="Enviando fotos para o Drive...";
 try{const r=await call({acao:"uploadFotos",evento_id:ev.id,row:ev._row,arquivos:selecionadas});if(r.ok){if(r.pasta_fotos_url)ev.pasta_fotos_url=r.pasta_fotos_url;selecionadas=[];$("#f_arqs").value="";$("#f_prev").innerHTML="";ok.textContent=`${r.enviadas||1} foto(s) enviada(s) com sucesso para a pasta "Fotos"!`;ok.style.display="block";carregarAtuais()}else{if(!A.tok)return admin();er.textContent=r.msg||"Não foi possível enviar as fotos.";er.style.display="block"}}catch(err){er.textContent="Erro ao enviar fotos. Tente novamente.";er.style.display="block"}
 b.disabled=false;b.textContent="Enviar fotos pela plataforma"}}
 const SIT=["Pendente","Aprovada","Recusada"];
-const barra=()=>{const pl=CFG.PLANILHA_URL&&!/COLE_/.test(CFG.PLANILHA_URL);return`<div class="admin-mode-banner"><div><b>Você está no modo de gerenciamento oficial</b> · Secretaria Municipal de Esporte e Lazer (SMEL)</div><div style="font-size:14px">Sessão expira após 15 min de inatividade</div></div><h2 style="margin-top:12px">Painel Administrativo · Servidores</h2><div class="bar">${Object.keys(SC).map(k=>`<button class="chip${A.tab===k?" on":""}" data-t="${k}">${SC[k].t}</button>`).join("")}${pl?`<a class="chip" style="display:inline-flex;align-items:center;text-decoration:none" href="${esc(CFG.PLANILHA_URL)}" target="_blank" rel="noopener noreferrer">Abrir planilha</a>`:""}<button class="chip" data-out="1" style="border-color:#dc2626;color:#dc2626">Encerrar Sessão</button></div>`};
+const barra=()=>{const pl=CFG.PLANILHA_URL&&!/COLE_/.test(CFG.PLANILHA_URL);return`<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:6px"><h2 style="margin:0;border:0;padding:0">Painel de Gestão · SMEL</h2>${pl?`<a class="chip sm" style="text-decoration:none" href="${esc(CFG.PLANILHA_URL)}" target="_blank" rel="noopener noreferrer">📊 Planilha</a>`:""}</div><div class="bar">${Object.keys(SC).map(k=>`<button class="chip${A.tab===k?" on":""}" data-t="${k}">${SC[k].t}</button>`).join("")}<button class="chip" data-out="1" style="border-color:#dc2626;color:#dc2626">Sair</button></div>`};
 const grupos=rows=>{const g={};rows.forEach(r=>{(g[r.codigo]=g[r.codigo]||[]).push(r)});return Object.values(g)};
 
 /* ===== EXPORTAÇÕES OFICIAIS: CSV, EXCEL (.XLS) E SÚMULA DE JOGO (PDF / IMPRESSÃO SEM RG/CPF) ===== */
@@ -1411,30 +1513,65 @@ function renderPainelTorneioAdminHTML(ev,tor,abaAtiva){
 }
 
 async function admInsc(el,r){const E=r.eventos||[],ev=r.evento,rows=r.rows||[],G=grupos(rows),cnt=s=>G.filter(g=>g[0].status_aprovacao===s).length;
+if(ev&&ev.id){ATLETAS_MAP[ev.id]=rows.length;ev.total_atletas=rows.length}
 let vu=0;if(ev){const mx=Math.max(1,+ev.max_atletas||1),at=rows.filter(x=>x.status_aprovacao!=="Recusada");vu=mx>1?new Set(at.map(x=>(x.time||"").toLowerCase())).size:at.length}
 const tor=ev?obterTorneio(ev):null;
 const temTor=!!(tor&&Array.isArray(tor.partidas)&&tor.partidas.length);
 const temClassif=!!(tor&&(tor.formato==="grupos"||tor.formato==="pontos_corridos"));
-const sub=A.subTab||(temTor?"inscricoes":"inscricoes");
-el.innerHTML=`${barra()}<label for="es">Evento</label><select id="es"><option value="">Escolha o evento</option>${E.map(x=>`<option value="${esc(x.id)}"${A.ev===x.id?" selected":""}>${esc(x.nome)}</option>`).join("")}</select>
-${ev?`<div class="card2" style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px"><div><b>${esc(ev.nome)}</b> <span class="mut">(${esc(ev.modalidade||"Esporte")} · Categoria ${esc(ev.categoria||"Livre")})</span><div class="mut">${G.length} inscrição(ões) · ${rows.length} atleta(s) · ${cnt("Pendente")} pendente(s) · ${cnt("Aprovada")} aprovada(s) · ${cnt("Recusada")} recusada(s)${+ev.max_vagas?` · vagas ocupadas: ${vu} de ${esc(ev.max_vagas)}`:""}</div></div><button type="button" class="btn-torneio" data-ia="torneio">[ 🏆 Configurar / Gerar Torneio ]</button></div>
+const sub=A.subTab||"inscricoes";
+el.innerHTML=`${barra()}
+<div style="display:flex;gap:8px;align-items:flex-end;margin-top:8px">
+  <div style="flex:1"><label for="es" style="margin-top:0">Selecione o Evento</label><select id="es"><option value="">Escolha o evento...</option>${E.map(x=>`<option value="${esc(x.id)}"${A.ev===x.id?" selected":""}>${esc(x.nome)}</option>`).join("")}</select></div>
+  ${ev?`<button type="button" class="chip sm" id="btn-ref-insc" title="Atualizar lista" style="min-height:40px">↻</button>`:""}
+</div>
+${ev?`<div class="card2" style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;margin-top:10px">
+  <div>
+    <b style="font-size:16px">${esc(ev.nome)}</b> <span class="mut">(${esc(ev.modalidade||"Esporte")} · ${esc(ev.categoria||"Livre")})</span>
+    <div class="mut" style="font-size:13px;margin-top:2px"><b>${G.length}</b> equipe(s)/inscrição(ões) · <b>${rows.length}</b> atleta(s) · <span style="color:#065f46"><b>${cnt("Aprovada")}</b> aprovada(s)</span> · <span style="color:#92400e"><b>${cnt("Pendente")}</b> pendente(s)</span>${+ev.max_vagas?` · vagas: ${vu}/${esc(ev.max_vagas)}`:""}</div>
+  </div>
+  <button type="button" class="btn-torneio" data-ia="torneio">🏆 Configurar / Gerar Torneio</button>
+</div>
 <div class="t-nav">
-  <button type="button" class="t-tab ${sub==="inscricoes"?"on":""}" data-sub="inscricoes">📋 Inscrições (${G.length})</button>
-  <button type="button" class="t-tab ${sub==="partidas"?"on":""}" data-sub="partidas">⚽ Aba Partidas ${temTor?`(${tor.partidas.length})`:""}</button>
-  ${temClassif||sub==="classificacao"?`<button type="button" class="t-tab ${sub==="classificacao"?"on":""}" data-sub="classificacao">📊 Aba Classificação</button>`:""}
-  ${temTor?`<a class="chip sm" style="margin-left:auto;text-decoration:none;display:inline-flex;align-items:center" href="#evento/${esc(ev.id)}">👁️ Ver Página Pública do Evento</a>`:""}
+  <button type="button" class="t-tab ${sub==="inscricoes"?"on":""}" data-sub="inscricoes">📋 Inscritos (${G.length})</button>
+  <button type="button" class="t-tab ${sub==="partidas"?"on":""}" data-sub="partidas">⚽ Jogos ${temTor?`(${tor.partidas.length})`:""}</button>
+  ${temClassif||sub==="classificacao"?`<button type="button" class="t-tab ${sub==="classificacao"?"on":""}" data-sub="classificacao">📊 Classificação</button>`:""}
+  ${temTor?`<a class="chip sm" style="margin-left:auto;text-decoration:none;display:inline-flex;align-items:center" href="#evento/${esc(ev.id)}">👁️ Ver no Site</a>`:""}
 </div>
 ${sub==="partidas"||sub==="classificacao"?renderPainelTorneioAdminHTML(ev,tor,sub):`
-<div class="row"><button class="btn" data-ia="padrao">Adicionar</button><button class="btn o" data-ia="basica">Inscrição básica</button><button class="btn o" data-ia="csv">Exportar CSV</button><button class="btn o" data-ia="xls">Exportar Excel (.xls)</button><button class="btn" style="background:var(--navy);color:#fff" data-ia="sumula">Imprimir Súmula Oficial (PDF)</button></div>
-<label for="bq">Buscar</label><input id="bq" type="search" placeholder="Nome, time ou código">
-${G.map(g=>`<div class="card2" data-q="${esc(g.map(x=>[x.nome,x.time,x.codigo].join(" ")).join(" ").toLowerCase())}"><b>${esc(g[0].time||g[0].nome)}</b><div class="mut">${g.length} atleta(s) · código <b>${esc(g[0].codigo)}</b> · ${esc(g[0].status_aprovacao)}${g[0].origem&&g[0].origem!=="site"?" · "+esc(g[0].origem):""}</div><div class="mut">${g.map(x=>esc(x.nome)).join(", ")}</div><div class="tb" style="flex-wrap:wrap;margin-top:10px"><button class="chip sm" data-ge="${esc(g[0].codigo)}">Editar</button>${SIT.filter(x=>x!==g[0].status_aprovacao).map(x=>`<button class="chip sm" data-gs="${esc(g[0].codigo)}|${x}">${x==="Aprovada"?"Aprovar":x==="Recusada"?"Recusar":"Voltar a pendente"}</button>`).join("")}<button class="chip sm" data-gx="${esc(g[0].codigo)}">Excluir</button></div></div>`).join("")||'<p class="mut">Nenhuma inscrição neste evento ainda.</p>'}`}`:'<p class="mut">Escolha um evento para ver, configurar o torneio, exportar relatórios/súmulas e gerenciar inscrições.</p>'}`;
+<div class="row" style="margin-top:10px">
+  <button class="btn sm" data-ia="padrao">+ Nova Inscrição</button>
+  <button class="btn o sm" data-ia="basica">+ Inscrição Rápida</button>
+  <button class="btn sm" style="background:var(--navy);color:#fff" data-ia="sumula">🖨️ Súmula (PDF)</button>
+  <button class="chip sm" data-ia="xls">📊 Excel</button>
+  <button class="chip sm" data-ia="csv">📄 CSV</button>
+</div>
+<input id="bq" type="search" placeholder="🔍 Buscar por nome, time ou código..." style="margin-top:8px">
+${G.map(g=>{
+  const st0=g[0].status_aprovacao||"Pendente";
+  const stCls=st0==="Aprovada"?"ab":st0==="Recusada"?"en":"";
+  return`<div class="card2" data-q="${esc(g.map(x=>[x.nome,x.time,x.codigo].join(" ")).join(" ").toLowerCase())}">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+      <div><b>${esc(g[0].time||g[0].nome)}</b> <span class="mut" style="font-size:12px">#${esc(g[0].codigo)}</span></div>
+      <span class="st ${stCls}" style="font-size:11px;padding:2px 7px;margin:0">${esc(st0)}</span>
+    </div>
+    <div class="mut" style="font-size:13px;margin-top:3px">${g.length} atleta(s): ${g.map(x=>esc(x.nome)).join(", ")}</div>
+    <div class="tb" style="flex-wrap:wrap;margin-top:8px">
+      ${st0!=="Aprovada"?`<button class="chip sm" style="border-color:var(--green);color:#065f46;background:#ecfdf5" data-gs="${esc(g[0].codigo)}|Aprovada">✓ Aprovar</button>`:""}
+      ${st0!=="Recusada"?`<button class="chip sm" data-gs="${esc(g[0].codigo)}|Recusada">✕ Recusar</button>`:""}
+      <button class="chip sm" data-ge="${esc(g[0].codigo)}">Editar</button>
+      <button class="chip sm" data-gx="${esc(g[0].codigo)}" style="color:#b91c1c">Excluir</button>
+    </div>
+  </div>`;
+}).join("")||'<p class="mut" style="margin-top:12px">Nenhuma inscrição neste evento ainda.</p>'}`}`:'<p class="mut" style="margin-top:12px">Escolha um evento acima para ver os inscritos, gerar chaveamento ou imprimir a súmula.</p>'}`;
+const btnRefInsc=$("#btn-ref-insc");
+if(btnRefInsc)btnRefInsc.onclick=()=>{delete ADM_CACHE.inscricoes[A.ev];admin(true)};
 el.onclick=async e=>{const b=e.target.closest("button");if(!b)return;const d=b.dataset;
-if(d.t){A.tab=d.t;admin()}else if(d.out){encerrarSessao()}else if(d.sub){A.subTab=d.sub;admin()}else if(d.ia==="torneio")abrirModalTorneio(ev,rows);else if(d.ia==="csv")csvBaixar(ev,rows);else if(d.ia==="xls")excelBaixar(ev,rows);else if(d.ia==="sumula")imprimirSumula(ev,rows);else if(d.ia)formInsc(ev,d.ia,null);
+if(d.t){A.tab=d.t;admin()}else if(d.out){encerrarSessao()}else if(d.sub){A.subTab=d.sub;admInsc(el,r)}else if(d.ia==="torneio")abrirModalTorneio(ev,rows);else if(d.ia==="csv")csvBaixar(ev,rows);else if(d.ia==="xls")excelBaixar(ev,rows);else if(d.ia==="sumula")imprimirSumula(ev,rows);else if(d.ia)formInsc(ev,d.ia,null);
 else if(d.torAvancar&&tor){
-  b.disabled=true;b.textContent="Atualizando chave...";
+  b.disabled=true;b.textContent="Atualizando...";
   preencherFinaisDosGrupos(tor);
   await persistirTorneio(ev,tor,"atualizarPlacar",{resumo:"Avanço dos classificados dos grupos para o Mata-Mata"});
-  A.subTab="partidas";admin();
+  A.subTab="partidas";admInsc(el,r);
 }
 else if(d.salvarJogo&&tor){
   const idJ=d.salvarJogo,jg=tor.partidas.find(x=>String(x.id_jogo)===String(idJ));
@@ -1460,14 +1597,14 @@ else if(d.salvarJogo&&tor){
   if(jg.etapa==="mata_mata"&&venc&&venc!=="EMPATE"){
     propagarVencedorMataMata(tor.partidas,jg,venc);
   }
-  // Se todos os jogos da fase de grupos terminaram, preenche automaticamente os classificados do mata-mata
   if(tor.formato==="grupos"&&jg.etapa==="grupos"){
     const jgsGrp=tor.partidas.filter(x=>x.etapa==="grupos");
     if(jgsGrp.length&&jgsGrp.every(x=>x.status_jogo==="finalizado")){
       preencherFinaisDosGrupos(tor);
     }
   }
-  await persistirTorneio(ev,tor,"atualizarPlacar",{
+  admInsc(el,r);
+  persistirTorneio(ev,tor,"atualizarPlacar",{
     id_jogo:jg.id_jogo,
     placar_a:jg.placar_a,
     placar_b:jg.placar_b,
@@ -1475,11 +1612,21 @@ else if(d.salvarJogo&&tor){
     status_jogo:jg.status_jogo,
     resumo:`${jg.time_a} ${jg.placar_a} x ${jg.placar_b} ${jg.time_b}`
   });
-  admin();
 }
 else if(d.ge){const g=G.find(x=>x[0].codigo===d.ge);formInsc(ev,g[0].origem==="admin-basica"?"basica":"padrao",g)}
-else if(d.gs){const[c,st]=d.gs.split("|");await call({acao:"inscStatus",evento_id:ev.id,codigo:c,status:st});admin()}
-else if(d.gx){if(d.arm!=="1"){b.dataset.arm="1";b.textContent="Confirmar exclusão";b.style.background="#b91c1c";b.style.color="#fff";return}await call({acao:"inscExcluir",evento_id:ev.id,codigo:d.gx});admin()}};
+else if(d.gs){
+  const[c,st]=d.gs.split("|");
+  rows.forEach(rw=>{if(rw.codigo===c)rw.status_aprovacao=st});
+  admInsc(el,r);
+  call({acao:"inscStatus",evento_id:ev.id,codigo:c,status:st});
+}
+else if(d.gx){
+  if(d.arm!=="1"){b.dataset.arm="1";b.textContent="Confirmar?";b.style.background="#b91c1c";b.style.color="#fff";return}
+  const codEx=d.gx;
+  r.rows=rows.filter(rw=>rw.codigo!==codEx);
+  admInsc(el,r);
+  call({acao:"inscExcluir",evento_id:ev.id,codigo:codEx});
+}};
 $("#es").onchange=e=>{A.ev=e.target.value;admin()};
 const bq=$("#bq");if(bq)bq.oninput=e=>{const v=e.target.value.toLowerCase();el.querySelectorAll("[data-q]").forEach(c=>{c.hidden=!c.dataset.q.includes(v)})};
 if(A.autoOpenTorneio&&ev){A.autoOpenTorneio=false;abrirModalTorneio(ev,rows)}}
@@ -1498,13 +1645,13 @@ if(bas){at=[...el.querySelectorAll("#at .ab")].map(x=>({nome:x.querySelector("[d
 else{const v=coletar(e.target,MN,MX);if(v.msg)msg=v.msg;else{at=v.at;if(MX>1&&!time)msg="Informe o nome do time."}}
 if(msg){er.textContent=msg;er.style.display="block";return}
 const b=e.target.querySelector("[type=submit]");b.disabled=true;b.textContent="Salvando, aguarde...";
-try{const x=await call({acao:"inscAdmin",evento_id:ev.id,codigo:c0.codigo||"",modo:bas?"basica":"padrao",time,instagram_time:($("#ig")||{}).value||"",atletas:at,status:$("#si").value});if(x.ok)admin();else{if(!A.tok)return admin();er.textContent=x.msg||"Erro ao salvar.";er.style.display="block"}}catch(x){er.textContent="Não foi possível salvar agora. Tente novamente.";er.style.display="block"}
+try{const x=await call({acao:"inscAdmin",evento_id:ev.id,codigo:c0.codigo||"",modo:bas?"basica":"padrao",time,instagram_time:($("#ig")||{}).value||"",atletas:at,status:$("#si").value});if(x.ok){delete ADM_CACHE.inscricoes[ev.id];admin(true)}else{if(!A.tok)return admin();er.textContent=x.msg||"Erro ao salvar.";er.style.display="block"}}catch(x){er.textContent="Não foi possível salvar agora. Tente novamente.";er.style.display="block"}
 b.disabled=false;b.textContent="Salvar"}}
 addEventListener("hashchange",()=>{if(location.hash.slice(1)!==cur)route()});document.addEventListener("click",e=>{const a=e.target.closest('a[href^="#"]');if(a){e.preventDefault();nav(a.getAttribute("href"))}});$("#ok").onclick=()=>{$("#modal").classList.remove("on");nav("#inicio")};
 document.querySelectorAll(".wa-link").forEach(a=>a.href="https://wa.me/"+CFG.WHATSAPP+"?text="+encodeURIComponent("Olá! Preciso de ajuda com o portal de esportes."));
-$("#ftel").textContent=CFG.TEL;$("#fmail").textContent=CFG.EMAIL;$("#fgym").textContent=CFG.GINASIOS;
 (async () => {
-  D = {
+  const cached = lerCachePublico();
+  D = cached || {
     eventos: (DEMO.eventos || []).slice(),
     feed: (DEMO.feed || []).slice(),
     colocacoes: (DEMO.colocacoes || []).slice(),
@@ -1516,7 +1663,11 @@ $("#ftel").textContent=CFG.TEL;$("#fmail").textContent=CFG.EMAIL;$("#fgym").text
     const live = await api({ acao: "publico" });
     if (live && live.eventos && Array.isArray(live.eventos) && live.eventos.length) {
       D = live;
-      route();
+      salvarCachePublico(live);
+      if (cur === "inicio" || cur.startsWith("evento/") || cur === "modalidades" || cur === "resultados" || cur === "noticias") {
+        route();
+      }
+      sincronizarAtletasBackground();
     }
   } catch (err) {
     console.warn("Utilizando dados locais:", err);

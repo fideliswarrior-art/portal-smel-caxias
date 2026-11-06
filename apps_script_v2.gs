@@ -257,12 +257,22 @@ function fotosPasta(u, limite) {
   return r;
 }
 
-// ---- leitura pública (sem dados pessoais; inclui partidas e chaveamento nativo dos eventos) ----
+// ---- leitura pública (sem dados pessoais; inclui partidas, chaveamento nativo e estatísticas reais) ----
 function publico() {
   const c = CacheService.getScriptCache(), k = c.get("pub"); if (k) return JSON.parse(k);
   const lim = r => { delete r._row; return r; };
   const partidas = {};
+  let totalAtletas = 0, realizados = 0, ativos = 0;
+  const abasContadas = {};
+  const ssI = ssInsc();
   const evs = eventos().map(e => {
+    const shI = ssI.getSheetByName(nomeAba(e.id));
+    const qtdAtletasEv = shI ? Math.max(0, shI.getLastRow() - 1) : 0;
+    if (shI) abasContadas[shI.getName()] = 1;
+    totalAtletas += qtdAtletasEv;
+    e.total_atletas = String(qtdAtletasEv);
+    if (/^encerr/i.test(e.status || "")) realizados++;
+    else ativos++;
     e.inscritos = String(aberto(e) && +e.max_vagas > 0 ? vagas(e, ativas(e.id)) : 0);
     const jgs = lerJogos(e.id).map(lim);
     if (jgs.length) {
@@ -271,9 +281,19 @@ function publico() {
     }
     return lim(e);
   });
+  // Soma também eventuais abas de inscrições de eventos anteriores na planilha de inscrições
+  try {
+    ssI.getSheets().forEach(sh => {
+      const nm = sh.getName();
+      if (nm.indexOf("i_") === 0 && !abasContadas[nm]) {
+        totalAtletas += Math.max(0, sh.getLastRow() - 1);
+      }
+    });
+  } catch (e) {}
   const o = {
     eventos: evs,
     partidas: partidas,
+    stats: { realizados: realizados, ativos: ativos, atletas: totalAtletas },
     feed: ler("feed").map(lim), colocacoes: ler("colocacoes").map(lim),
     home_fotos: fotosPasta(PropertiesService.getScriptProperties().getProperty("PASTA_HOME"), 4)
   };
