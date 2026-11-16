@@ -465,11 +465,17 @@ function invalidarCacheAdmin(aba,evId){
 }
 
 const INATIVIDADE_MAX_MS = 15 * 60 * 1000; /* 15 minutos de inatividade encerra a sessão */
+function carregarEstadoAdmin(){try{const s=sessionStorage.getItem("smel_adm_state");return s?JSON.parse(s):{}}catch(e){return{}}}
+function salvarEstadoAdmin(){try{sessionStorage.setItem("smel_adm_state",JSON.stringify({tab:A.tab,ev:A.ev,subTab:A.subTab||"",torModo:A.torModo||"",faseTorneio:A.faseTorneio||""}))}catch(e){}}
+const _stAdm=carregarEstadoAdmin();
 let A={
   tok:sessionStorage.getItem("smel_tok")||"",
   user:sessionStorage.getItem("smel_user")||"",
-  tab:"eventos",
-  ev:"",
+  tab:_stAdm.tab||"eventos",
+  ev:_stAdm.ev||"",
+  subTab:_stAdm.subTab||"",
+  torModo:_stAdm.torModo||"placares",
+  faseTorneio:_stAdm.faseTorneio||"",
   msgSessao:""
 },STALE=false,_lastTouchMs=0;
 
@@ -681,7 +687,7 @@ function confirmarComSenha({titulo,descricao,labelBotao,corBotao,onConfirmar}){
 }
 
 async function admin(forcarRede){try{await adm(forcarRede)}catch(x){$("#admin").innerHTML=`${barra()}<div class="card2"><p class="err" style="display:block;margin-top:0">Falha de comunicação com o servidor (verifique sua conexão com a internet).</p><button class="btn" type="button" onclick="admin(true)">Tentar novamente</button></div>`}}
-async function adm(forcarRede){const el=$("#admin");renderAdminBar();
+async function adm(forcarRede){const el=$("#admin");renderAdminBar();salvarEstadoAdmin();
 if(!A.tok){el.innerHTML=`<h2 style="margin-top:8px">Acesso Servidores</h2>${A.msgSessao?`<div class="safe" style="border-left-color:#d97706;background:#fef3c7;color:#92400e"><b>Aviso:</b> ${esc(A.msgSessao)}</div>`:""}<form id="lf" style="max-width:380px"><label for="lg1">Usuário</label><input id="lg1" autocomplete="username" autocapitalize="none"><label for="pw">Senha</label><input id="pw" type="password" autocomplete="current-password"><div class="err" id="le"></div><div class="row"><button class="btn" style="width:100%">Entrar no Painel</button></div></form>`;
 $("#lf").onsubmit=async e=>{e.preventDefault();const le=$("#le"),b=e.target.querySelector("button"),st=rlStatus("login_ui",5,900000);le.style.display="none";if(!st.ok){le.textContent=`Muitas tentativas. Aguarde ${st.min} min.`;le.style.display="block";return}b.disabled=true;b.textContent="Entrando...";const lgVal=$("#lg1").value.trim();try{const r=await api({acao:"login",login:lgVal,senha:$("#pw").value});if(r.ok){rlClear("login_ui");regLogLocal(r.login||lgVal,"LOGIN",`${r.login||lgVal} iniciou sessão no painel administrativo`);salvarSessao(r.token,r.login||lgVal);sincronizarAtletasBackground();admin()}else{const rest=rlFail("login_ui",5,900000);le.textContent=r.msg||("Login ou senha incorretos."+(rest>0?` Restam ${rest} tentativa(s).`:" Bloqueado por 15 minutos."));le.style.display="block"}}catch(x){le.textContent="Sem conexão com o servidor. Verifique sua internet.";le.style.display="block"}b.disabled=false;b.textContent="Entrar no Painel"};return}
 sincronizarAtletasBackground();
@@ -1840,7 +1846,7 @@ function renderPainelTorneioAdminHTML(ev,tor,abaAtiva){
   `;
 }
 
-async function admInsc(el,r){const E=r.eventos||[],ev=r.evento,rows=r.rows||[],G=grupos(rows),cnt=s=>G.filter(g=>g[0].status_aprovacao===s).length;
+async function admInsc(el,r){salvarEstadoAdmin();const _sy=window.scrollY;const E=r.eventos||[],ev=r.evento,rows=r.rows||[],G=grupos(rows),cnt=s=>G.filter(g=>g[0].status_aprovacao===s).length;
 if(ev&&ev.id){ATLETAS_MAP[ev.id]=rows.length;ev.total_atletas=rows.length}
 let vu=0;if(ev){const mx=Math.max(1,+ev.max_atletas||1),at=rows.filter(x=>x.status_aprovacao!=="Recusada");vu=mx>1?new Set(at.map(x=>(x.time||"").toLowerCase())).size:at.length}
 const tor=ev?obterTorneio(ev):null;
@@ -1936,7 +1942,7 @@ el.onclick=async e=>{
       }
     }
     admInsc(el,r);
-    toast(`✓ Vitória de ${venc} registrada`);
+    toast(`✓ Vitória de ${venc} · salvando na nuvem...`);
     persistirTorneio(ev,tor,"atualizarPlacar",{
       id_jogo:jg.id_jogo,
       placar_a:jg.placar_a,
@@ -1944,7 +1950,7 @@ el.onclick=async e=>{
       vencedor:jg.vencedor,
       status_jogo:jg.status_jogo,
       resumo:`${jg.time_a} ${jg.placar_a||""} x ${jg.placar_b||""} ${jg.time_b} (Vencedor: ${venc})`
-    }).catch(()=>toast("Aviso: salvo no aparelho; sincronize ao recuperar sinal.",true));
+    }).then(()=>toast(`✓ Vitória de ${venc} salva na nuvem!`)).catch(()=>toast("Aviso: salvo no aparelho; sincronize ao recuperar sinal.",true));
   }
   else if(d.salvarJogo&&tor){
     const idJ=d.salvarJogo,jg=tor.partidas.find(x=>String(x.id_jogo)===String(idJ));
@@ -1981,7 +1987,7 @@ el.onclick=async e=>{
       }
     }
     admInsc(el,r);
-    toast(`✓ Placar salvo (${jg.time_a} ${jg.placar_a} x ${jg.placar_b} ${jg.time_b})`);
+    toast(`✓ Placar ${jg.placar_a} x ${jg.placar_b} · salvando na nuvem...`);
     persistirTorneio(ev,tor,"atualizarPlacar",{
       id_jogo:jg.id_jogo,
       placar_a:jg.placar_a,
@@ -1989,7 +1995,7 @@ el.onclick=async e=>{
       vencedor:jg.vencedor,
       status_jogo:jg.status_jogo,
       resumo:`${jg.time_a} ${jg.placar_a} x ${jg.placar_b} ${jg.time_b}`
-    }).catch(()=>toast("Aviso: salvo no aparelho; sincronize ao recuperar sinal.",true));
+    }).then(()=>toast(`✓ Placar ${jg.placar_a} x ${jg.placar_b} salvo na nuvem!`)).catch(()=>toast("Aviso: salvo no aparelho; sincronize ao recuperar sinal.",true));
   }
   else if(d.ge){const g=G.find(x=>x[0].codigo===d.ge);formInsc(ev,g[0].origem==="admin-basica"?"basica":"padrao",g)}
   else if(d.gs){
@@ -2007,8 +2013,9 @@ else if(d.gx){
   toast(`✓ Inscrição #${codEx} excluída`);
   call({acao:"inscExcluir",evento_id:ev.id,codigo:codEx}).catch(()=>toast("Falha de rede ao excluir inscrição.",true));
 }};
-$("#es").onchange=e=>{A.ev=e.target.value;admin()};
+$("#es").onchange=e=>{A.ev=e.target.value;A.subTab="inscricoes";A.faseTorneio="";salvarEstadoAdmin();admin()};
 const bq=$("#bq");if(bq)bq.oninput=debounce(e=>{const v=e.target.value.toLowerCase();el.querySelectorAll("[data-q]").forEach(c=>{c.hidden=!c.dataset.q.includes(v)})},100);
+if(_sy>0)requestAnimationFrame(()=>window.scrollTo(0,_sy));
 if(A.autoOpenTorneio&&ev){A.autoOpenTorneio=false;abrirModalTorneio(ev,rows)}}
 function formInsc(ev,modo,g){const el=$("#admin"),[MN,MX]=lim(ev),c0=g?g[0]:{},bas=modo==="basica";
 const atl=(v,x)=>`<div class="ab card2"><div class="eb">Atleta <span class="n"></span></div><div class="f2"><div><label>Nome${x?"":" *"}<input data-b="nome" value="${esc((v||{}).nome)}" placeholder="Nome do atleta"></label></div><div><label>Idade<input data-b="idade" inputmode="numeric" maxlength="2" value="${esc((v||{}).idade)}" placeholder="Ex.: 12"></label></div></div>${x?'<button type="button" class="chip sm" data-rm="1">Remover este atleta</button>':""}</div>`;
