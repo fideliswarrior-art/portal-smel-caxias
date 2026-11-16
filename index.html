@@ -1956,9 +1956,15 @@ el.onclick=async e=>{
     const idJ=d.salvarJogo,jg=tor.partidas.find(x=>String(x.id_jogo)===String(idJ));
     if(!jg)return;
     const inpA=el.querySelector(`[data-sa="${idJ}"]`),inpB=el.querySelector(`[data-sb="${idJ}"]`);
-    const pa=inpA?inpA.value.trim():"",pb=inpB?inpB.value.trim():"";
-    if(pa===""||pb===""||isNaN(+pa)||isNaN(+pb)){
-      alert("Digite os dois placares numéricos ou toque diretamente no botão [ 🏆 Venceu ] ao lado de quem ganhou.");
+    let pa=inpA?inpA.value.trim():"",pb=inpB?inpB.value.trim():"";
+    if(pa===""&&pb===""){
+      alert("Informe o placar usando os botões + / − ou toque em [ W.O. / Vencedor ].");
+      return;
+    }
+    if(pa==="")pa="0";
+    if(pb==="")pb="0";
+    if(isNaN(+pa)||isNaN(+pb)){
+      alert("Use apenas números no placar.");
       return;
     }
     const na=+pa,nb=+pb;
