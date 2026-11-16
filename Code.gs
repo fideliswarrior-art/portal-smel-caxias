@@ -109,7 +109,7 @@ function idUnico(nome, data, usados) {
 
 // Eventos: gera o "id" se faltar e encerra automaticamente eventos cuja data já passou.
 function eventos() {
-  const sh = aba("eventos"), ev = ler("eventos"), h = cabecalho(sh);
+  const sh = aba("eventos"), ev = lerSh(sh, ABAS.eventos), h = cabecalho(sh);
   const colId = h.indexOf("id") + 1, colSt = h.indexOf("status") + 1, u = {}, hj = hoje();
   ev.forEach(e => { if (e.id) u[e.id] = 1; });
   ev.forEach(e => {
@@ -364,39 +364,52 @@ function fotosPasta(u, limite) {
   return r;
 }
 
-// ---- leitura pública (sem dados pessoais; inclui partidas, chaveamento nativo e estatísticas reais) ----
+// ---- leitura pública otimizada (baixa latência, sem N+1 leituras desnecessárias e cache de 10 min invalidado em tempo real) ----
 function publico() {
   const c = CacheService.getScriptCache(), k = c.get("pub"); if (k) return JSON.parse(k);
   const lim = r => { delete r._row; return r; };
   const partidas = {};
   let totalAtletas = 0, realizados = 0, ativos = 0;
-  const abasContadas = {};
   const ssI = ssInsc();
+  const mapaAbas = {};
+  try {
+    ssI.getSheets().forEach(sh => {
+      const nm = sh.getName();
+      mapaAbas[nm] = sh;
+      if (nm.indexOf("i_") === 0) {
+        totalAtletas += Math.max(0, sh.getLastRow() - 1);
+      }
+    });
+  } catch (e) {}
   const evs = eventos().map(e => {
-    const shI = ssI.getSheetByName(nomeAba(e.id));
+    const shI = mapaAbas[nomeAba(e.id)];
     const qtdAtletasEv = shI ? Math.max(0, shI.getLastRow() - 1) : 0;
-    if (shI) abasContadas[shI.getName()] = 1;
-    totalAtletas += qtdAtletasEv;
     e.total_atletas = String(qtdAtletasEv);
     if (/^encerr/i.test(e.status || "")) realizados++;
     else ativos++;
-    e.inscritos = String(aberto(e) && +e.max_vagas > 0 ? vagas(e, ativas(e.id)) : 0);
-    const jgs = lerJogos(e.id).map(lim);
+    if (aberto(e) && +e.max_vagas > 0 && shI && qtdAtletasEv > 0) {
+      const rowsAtivas = lerSh(shI, INSC).filter(i => i.status_aprovacao !== "Recusada");
+      e.inscritos = String(vagas(e, rowsAtivas));
+    } else {
+      e.inscritos = "0";
+    }
+    // Lê chaveamento direto do JSON espelhado na linha do evento (0 leituras extras de aba); só abre aba jogos_<id> se não houver espelho
+    let jgs = [];
+    const ch = String(e.link_challonge_embed || "").trim();
+    if (ch.indexOf("SMEL_TORNEIO:") === 0) {
+      try {
+        const obj = JSON.parse(ch.slice("SMEL_TORNEIO:".length));
+        if (obj && Array.isArray(obj.partidas)) jgs = obj.partidas;
+      } catch (errJ) {}
+    } else if (mapaAbas[nomeAbaJogos(e.id)]) {
+      jgs = lerSh(mapaAbas[nomeAbaJogos(e.id)], JOGOS).map(lim);
+    }
     if (jgs.length) {
       partidas[e.id] = jgs;
       e.partidas = jgs;
     }
     return lim(e);
   });
-  // Soma também eventuais abas de inscrições de eventos anteriores na planilha de inscrições
-  try {
-    ssI.getSheets().forEach(sh => {
-      const nm = sh.getName();
-      if (nm.indexOf("i_") === 0 && !abasContadas[nm]) {
-        totalAtletas += Math.max(0, sh.getLastRow() - 1);
-      }
-    });
-  } catch (e) {}
   const o = {
     eventos: evs,
     partidas: partidas,
@@ -404,7 +417,7 @@ function publico() {
     feed: ler("feed").map(lim), colocacoes: ler("colocacoes").map(lim),
     home_fotos: fotosPasta(PropertiesService.getScriptProperties().getProperty("PASTA_HOME"), 4)
   };
-  try { c.put("pub", JSON.stringify(o), 60); } catch (e) {}
+  try { c.put("pub", JSON.stringify(o), 600); } catch (e) {}
   return o;
 }
 
@@ -430,14 +443,20 @@ function checar(ev, p, ins, o) {
   return {at, time};
 }
 
+// Escrita em lote (Batch Write) para máxima performance no Google Sheets
 function gravar(ev, v, o) {
-  const sh = abaInsc(ev.id, true), h = cabecalho(sh), col = k => h.indexOf(k) + 1, rows = o.rows || [];
+  const sh = abaInsc(ev.id, true), h = cabecalho(sh), rows = o.rows || [];
   const campos = ["nome","idade","telefone","cpf","email","rede_social"];
-  v.at.forEach((a, i) => { if (!rows[i]) return; const r = rows[i]._row;
-    campos.forEach(k => { if (col(k)) sh.getRange(r, col(k)).setValue(cel(a[k])); });
-    if (col("time")) sh.getRange(r, col("time")).setValue(cel(v.time));
-    if (col("instagram_time")) sh.getRange(r, col("instagram_time")).setValue(cel(v.igt));
-    if (o.status && col("status_aprovacao")) sh.getRange(r, col("status_aprovacao")).setValue(o.status); });
+  v.at.forEach((a, i) => {
+    if (!rows[i]) return;
+    const rObj = Object.assign({}, rows[i]);
+    campos.forEach(k => { rObj[k] = cel(a[k]); });
+    rObj.time = cel(v.time);
+    rObj.instagram_time = cel(v.igt);
+    if (o.status) rObj.status_aprovacao = o.status;
+    const linha = h.map(k => rObj[k] === undefined ? "" : rObj[k]);
+    sh.getRange(rows[i]._row, 1, 1, h.length).setValues([linha]);
+  });
   for (let i = rows.length - 1; i >= v.at.length; i--) sh.deleteRow(rows[i]._row);
   if (v.at.length > rows.length) {
     const b = rows[0] ? {data_envio:rows[0].data_envio, codigo:rows[0].codigo, protocolo:rows[0].protocolo, status_aprovacao:o.status || rows[0].status_aprovacao, origem:rows[0].origem, termo:rows[0].termo}
@@ -508,20 +527,40 @@ function editar(p) {
   } finally { lock.releaseLock(); }
 }
 
-// ---- Acesso Servidores: login pela aba "usuarios" com Rate Limit ----
+// ---- Criptografia SHA-256 com Salt para senhas de servidores ----
+function hashSenha(login, senha) {
+  const raw = "SMEL_CAXIAS_SALT_V1:" + String(login || "").trim().toLowerCase() + ":" + String(senha || "").trim();
+  const digest = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, raw, Utilities.Charset.UTF_8);
+  return "sha256:" + digest.map(b => ((b < 0 ? b + 256 : b).toString(16)).padStart(2, "0")).join("");
+}
+
+// ---- Acesso Servidores: login pela aba "usuarios" com Rate Limit e Auto-Upgrade SHA-256 ----
 function login(p) {
   const c = CacheService.getScriptCache(), lg = String(p.login || "").trim().toLowerCase(), kf = "falha_" + lg, kg = "falha_geral";
   if (!lg || !p.senha) return {ok:0, msg:"Informe login e senha."};
   if (!verificarRateLimit(kf, 5, 900) || !verificarRateLimit(kg, 15, 900)) {
     return {ok:0, msg:"Muitas tentativas de login. Aguarde 15 minutos e tente novamente."};
   }
-  const u = ler("usuarios").find(x => x.login.trim().toLowerCase() === lg && x.senha.trim() === String(p.senha).trim());
+  const shU = aba("usuarios"), listaU = lerSh(shU, ABAS.usuarios);
+  const senhaLimpa = String(p.senha).trim(), hashEsperado = hashSenha(lg, senhaLimpa);
+  const u = listaU.find(x => {
+    if (x.login.trim().toLowerCase() !== lg) return false;
+    const sArm = x.senha.trim();
+    return sArm === hashEsperado || sArm === senhaLimpa;
+  });
   if (!u) {
     Utilities.sleep(500);
     const tent = registrarFalhaRateLimit(kf, 900);
     registrarFalhaRateLimit(kg, 900);
     const rest = Math.max(0, 5 - tent);
     return {ok:0, msg:"Login ou senha incorretos." + (rest > 0 ? " Restam " + rest + " tentativa(s)." : " Bloqueado por 15 minutos.")};
+  }
+  // Auto-upgrade transparente: se a senha estava em texto puro na planilha, converte automaticamente para hash SHA-256
+  if (u.senha.trim() !== hashEsperado && u._row) {
+    try {
+      const colSenha = cabecalho(shU).indexOf("senha") + 1;
+      if (colSenha > 0) shU.getRange(u._row, colSenha).setValue(hashEsperado);
+    } catch (eHash) {}
   }
   limparRateLimit(kf);
   const t = Utilities.getUuid() + Utilities.getUuid();
@@ -552,6 +591,16 @@ function admin(p) {
     if (ab === "jogos") { const ev = p.evento_id ? eventos().find(e => e.id === p.evento_id) : null; return {ok:1, rows:ev ? lerJogos(ev.id) : [], eventos:evl(), evento:ev || null}; }
     if (ab === "inscricoes") { const ev = p.evento_id ? eventos().find(e => e.id === p.evento_id) : null; return {ok:1, rows:ev ? lerInsc(ev.id) : [], eventos:evl(), evento:ev || null}; }
     if (["eventos","feed","colocacoes"].indexOf(ab) < 0) return {ok:0, msg:"Aba inválida."};
+    if (ab === "eventos") {
+      const ssI = ssInsc(), mapaAbas = {};
+      try { ssI.getSheets().forEach(sh => { mapaAbas[sh.getName()] = sh; }); } catch (e) {}
+      const evRows = eventos().map(e => {
+        const shI = mapaAbas[nomeAba(e.id)];
+        e.total_atletas = String(shI ? Math.max(0, shI.getLastRow() - 1) : 0);
+        return e;
+      });
+      return {ok:1, rows:evRows, eventos:evRows.map(e => ({id:e.id, nome:e.nome}))};
+    }
     return {ok:1, rows:ler(ab), eventos:evl()};
   }
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
@@ -795,7 +844,12 @@ function admin(p) {
     if (p.acao === "inscStatus" && rows.length) {
       const sh = abaInsc(ev.id, false), col = cabecalho(sh).indexOf("status_aprovacao") + 1;
       if (["Pendente","Aprovada","Recusada"].indexOf(p.status) < 0) return {ok:0, msg:"Situação inválida."};
-      rows.forEach(r => sh.getRange(r._row, col).setValue(p.status));
+      const ord = rows.slice().sort((a, b) => a._row - b._row);
+      if (ord[ord.length - 1]._row - ord[0]._row + 1 === ord.length) {
+        sh.getRange(ord[0]._row, col, ord.length, 1).setValues(ord.map(() => [p.status]));
+      } else {
+        ord.forEach(r => sh.getRange(r._row, col).setValue(p.status));
+      }
       const nomeEq = rows[0].time || rows[0].nome || cod;
       registrarAuditoria(usr, "Status de Inscrição", usr + " alterou a inscrição de '" + nomeEq + "' (" + cod + ") para " + p.status + " no evento '" + ev.nome + "'");
       limpa(); return {ok:1};

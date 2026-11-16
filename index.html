@@ -155,7 +155,8 @@ footer{background:var(--navy);color:#dbe4f0;padding:22px 14px 80px;margin-top:36
 .tb-standings tr.qual td:first-child{border-left:3px solid var(--green);font-weight:800;color:#065f46}
 .foto-adm-card{background:#fff;border:1px solid var(--line);border-radius:6px;padding:6px;display:flex;flex-direction:column;gap:6px}
 .foto-adm-card img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:4px;display:block}
-@media(max-width:700px){.top{display:none}header{position:static}.hd{justify-content:flex-start}.hd>.btn{display:none}h1{font-size:32px}h2{font-size:22px}.num div{padding:12px 6px;font-size:12px}main{padding:14px 12px 86px}footer{padding-bottom:110px}
+.smel-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#0f172a;color:#fff;padding:10px 18px;border-radius:999px;font:700 13.5px Barlow,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:120;border:1.5px solid var(--green);pointer-events:none;transition:opacity .2s}
+@media(max-width:700px){.top{display:none}header{position:static}.hd{justify-content:flex-start}.hd>.btn{display:none}h1{font-size:32px}h2{font-size:22px}.num div{padding:12px 6px;font-size:12px}main{padding:14px 12px 86px}footer{padding-bottom:110px}.smel-toast{bottom:calc(68px + env(safe-area-inset-bottom,0px))}
 #nav{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);z-index:20;gap:0;padding-bottom:env(safe-area-inset-bottom,0px)}#nav a{flex:1;justify-content:center;text-align:center;font-size:11.5px;letter-spacing:-.01em;min-height:52px;border-bottom:0;border-top:3px solid transparent;padding:0 2px}#nav a.on{border-top-color:var(--green)}.wa{bottom:calc(62px + env(safe-area-inset-bottom,0px));min-height:38px;padding:0 12px;font-size:13px}}
 </style></head><body>
 <header><div id="admin-bar" hidden></div><div class="top">Prefeitura de Duque de Caxias · Secretaria Municipal de Esportes e Lazer (SMEL)</div><div class="hd"><a class="brand" href="#inicio"><img class="logo" src="logo-caxias-mais-esporte.png" alt="Projeto Caxias Mais Esporte"></a>
@@ -168,6 +169,7 @@ footer{background:var(--navy);color:#dbe4f0;padding:22px 14px 80px;margin-top:36
 <div class="realizacao"><span class="realizacao-lbl">Uma realização de:</span><div class="realizacao-logos"><img src="logo-prefeitura-smel.png" alt="Prefeitura de Duque de Caxias - Secretaria Municipal de Esporte e Lazer"><img src="logo-caxias-mais-esporte.png" alt="Projeto Caxias Mais Esporte"></div></div>
 <a href="#admin" id="f-admin-link" style="color:#a7b4c8;font-size:13px;display:inline-block;padding:6px 0;text-decoration:none">Acesso Servidores</a></div></footer>
 <a class="wa wa-link" target="_blank" rel="noopener">Ajuda pelo WhatsApp</a>
+<div id="smel-toast" class="smel-toast" hidden></div>
 <div class="m" id="modal" role="dialog" aria-modal="true"><div><h2 style="margin-top:0">Inscrição Enviada com Sucesso!</h2><p>A equipe da Secretaria de Esportes irá conferir os documentos e confirmar a vaga no seu WhatsApp.</p><div>Seu código de acesso (guarde!):</div><div class="prot" id="cod"></div><p class="mut">Com ele você consulta e edita sua inscrição em Inscrições › Minha inscrição.</p><div class="mut">Protocolo: <b id="prot"></b></div><a class="btn" id="wsh" target="_blank" rel="noopener">Compartilhar Comprovante no WhatsApp</a><button class="btn o" id="ok">Entendi</button></div></div>
 <div class="m m-torneio" id="modal-torneio" role="dialog" aria-modal="true"><div id="modal-torneio-body"></div></div>
 <script>
@@ -219,14 +221,29 @@ async function comprimirCapaSegura(file){
   if(b64.length>40000)b64=await comprimirImg(file,540,0.65);
   return b64;
 }
+let _toastTimer=null;
+function toast(msg,erro){
+  const el=$("#smel-toast");
+  if(!el)return;
+  el.textContent=msg;
+  el.style.borderColor=erro?"#f87171":"var(--green)";
+  el.hidden=false;
+  clearTimeout(_toastTimer);
+  _toastTimer=setTimeout(()=>{el.hidden=true},2600);
+}
 const DS=CFG.SCRIPT_URL;
 async function api(p){
   if(!DS||(p.acao==="listar"&&p.aba==="auditoria"&&p.token==="demo"))return demo(p);
   const reqPayload=p.acao==="salvar"&&p.aba==="eventos"&&p.dados?{...p,dados:prepDadosEv(p.dados)}:p;
+  const bodyStr=JSON.stringify(reqPayload);
   let lastErr;
-  for(let tent=0;tent<2;tent++){
+  for(let tent=0;tent<3;tent++){
+    const ctrl=typeof AbortController!=="undefined"?new AbortController():null;
+    const tId=ctrl?setTimeout(()=>ctrl.abort(),22000):null;
     try{
-      const r=await fetch(DS,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify(reqPayload)}),j=await r.json();
+      const r=await fetch(DS,{method:"POST",headers:{"Content-Type":"text/plain"},body:bodyStr,signal:ctrl?ctrl.signal:undefined});
+      if(tId)clearTimeout(tId);
+      const j=await r.json();
       if(j&&j.protocol&&!("ok"in j)&&!("eventos"in j))return demo(p);
       if(j&&!j.ok&&p.acao==="listar"&&p.aba==="auditoria")return demo(p);
       if(j&&Array.isArray(j.eventos))j.eventos.forEach(normEv);
@@ -234,8 +251,9 @@ async function api(p){
       if(j&&j.evento)normEv(j.evento);
       return j;
     }catch(e){
+      if(tId)clearTimeout(tId);
       lastErr=e;
-      if(tent===0)await new Promise(rs=>setTimeout(rs,700));
+      if(tent<2)await new Promise(rs=>setTimeout(rs,450*(tent+1)));
     }
   }
   if(p.acao!=="publico"&&(!A.tok||A.tok==="demo"||p.acao==="listar"))return demo(p);
@@ -281,12 +299,12 @@ const stl={ab:"Inscrições abertas",ne:"Inscrições no evento",es:"Vagas esgot
 const ev=e=>{const p=dp(e.data_inicio),k=stk(e);return`<a class="ev" href="#evento/${esc(e.id)}"><div class="db">${p[2]||"–"}<small>${MES[+p[1]-1]||""}</small></div><div><span class="st ${k}">${stl[k]}</span><h3>${esc(e.nome)}</h3><div class="mut">${esc(e.modalidade)} · ${esc(e.categoria)} · ${esc(e.local_evento)}</div></div></a>`};
 const fcard=f=>{const t=(f.tipo||"").toLowerCase();let m="";
  if(t==="video"){const y=yt(f.url);m=y?`<iframe src="${y}" title="${esc(f.titulo)}" loading="lazy" allowfullscreen></iframe>`:ph("Vídeo")}
- else m=su(f.url)?`<img src="${esc(su(f.url))}" alt="${esc(f.titulo)}" loading="lazy">`:ph(f.titulo);
+ else m=su(f.url)?`<img src="${esc(su(f.url))}" alt="${esc(f.titulo)}" loading="lazy" decoding="async">`:ph(f.titulo);
  return`<article class="fi">${m}<div class="fb"><div class="mut">${dt(f.data)}</div><h3>${esc(f.titulo)}</h3><p>${esc(f.legenda)}</p></div></article>`};
-const fo=f=>`<a class="fp"${su(f.link)?` href="${esc(su(f.link))}" target="_blank" rel="noopener"`:""}>${su(f.thumb)?`<img src="${esc(su(f.thumb))}" alt="${esc(f.nome)}" loading="lazy">`:ph("Foto do evento")}</a>`;
+const fo=f=>`<a class="fp"${su(f.link)?` href="${esc(su(f.link))}" target="_blank" rel="noopener"`:""}>${su(f.thumb)?`<img src="${esc(su(f.thumb))}" alt="${esc(f.nome)}" loading="lazy" decoding="async">`:ph("Foto do evento")}</a>`;
 const byDate=(a,b)=>String(a.data_inicio).localeCompare(b.data_inicio);
-const card=(e,href)=>{const k=stk(e);return`<a class="cd" href="${href||"#evento/"+esc(e.id)}">${su(e.imagem_url)?`<img src="${esc(su(e.imagem_url))}" alt="${esc(e.nome)}" loading="lazy" onerror="this.outerHTML=ph('${esc(e.modalidade).replace(/'/g,"\\'")}')">`:ph(e.modalidade)}<div class="cb"><span class="st ${k}">${stl[k]}</span><div class="eb" style="margin:6px 0 2px">${esc(e.modalidade)} · ${esc(e.categoria)}</div><h3>${esc(e.nome)}</h3><div class="mut">${dt(e.data_inicio)}${e.data_fim&&e.data_fim!==e.data_inicio?" a "+dt(e.data_fim):""} · ${esc(e.local_evento)}</div></div>${k==="ab"?'<div class="cc">Inscrever-se →</div>':k==="ne"?'<div class="cc" style="background:#0369a1">Inscrições no evento →</div>':""}</a>`};
-const cr=e=>{const k=stk(e);return`<a class="cr" href="#evento/${esc(e.id)}">${su(e.imagem_url)?`<img src="${esc(su(e.imagem_url))}" alt="" loading="lazy">`:ph(e.modalidade)}<div><span class="st ${k}">${stl[k]}</span><h3>${esc(e.nome)}</h3><div class="mut">${esc(e.modalidade)} · ${dt(e.data_inicio)}</div></div></a>`};
+const card=(e,href)=>{const k=stk(e);return`<a class="cd" href="${href||"#evento/"+esc(e.id)}">${su(e.imagem_url)?`<img src="${esc(su(e.imagem_url))}" alt="${esc(e.nome)}" loading="lazy" decoding="async" onerror="this.outerHTML=ph('${esc(e.modalidade).replace(/'/g,"\\'")}')">`:ph(e.modalidade)}<div class="cb"><span class="st ${k}">${stl[k]}</span><div class="eb" style="margin:6px 0 2px">${esc(e.modalidade)} · ${esc(e.categoria)}</div><h3>${esc(e.nome)}</h3><div class="mut">${dt(e.data_inicio)}${e.data_fim&&e.data_fim!==e.data_inicio?" a "+dt(e.data_fim):""} · ${esc(e.local_evento)}</div></div>${k==="ab"?'<div class="cc">Inscrever-se →</div>':k==="ne"?'<div class="cc" style="background:#0369a1">Inscrições no evento →</div>':""}</a>`};
+const cr=e=>{const k=stk(e);return`<a class="cr" href="#evento/${esc(e.id)}">${su(e.imagem_url)?`<img src="${esc(su(e.imagem_url))}" alt="" loading="lazy" decoding="async">`:ph(e.modalidade)}<div><span class="st ${k}">${stl[k]}</span><h3>${esc(e.nome)}</h3><div class="mut">${esc(e.modalidade)} · ${dt(e.data_inicio)}</div></div></a>`};
 function carregarMapaAtletas(){try{const r=localStorage.getItem("smel_atletas_map");return r?JSON.parse(r):{}}catch(e){return{}}}
 let ATLETAS_MAP=carregarMapaAtletas();
 function salvarAtletasEv(evId,qtd){if(!evId)return;ATLETAS_MAP[evId]=+qtd||0;try{localStorage.setItem("smel_atletas_map",JSON.stringify(ATLETAS_MAP))}catch(e){}}
@@ -541,10 +559,15 @@ async function sincronizarAtletasBackground(){
     const evs=D.eventos||[];
     for(const ev of evs){
       if(!ev||!ev.id)continue;
+      if(ev.total_atletas!==undefined&&ev.total_atletas!==""){
+        salvarAtletasEv(ev.id,+ev.total_atletas);
+        continue;
+      }
       if(ADM_CACHE.inscricoes[ev.id]){
         salvarAtletasEv(ev.id,(ADM_CACHE.inscricoes[ev.id].rows||[]).length);
         continue;
       }
+      if(ATLETAS_MAP[ev.id]!==undefined)continue;
       const r=await api({acao:"listar",aba:"inscricoes",evento_id:ev.id,token:A.tok});
       if(r&&r.ok&&Array.isArray(r.rows)){
         ADM_CACHE.inscricoes[ev.id]=r;
@@ -750,13 +773,13 @@ async function admAudit(el){
 
 function form(S,r){const isEv=A.tab==="eventos";let capaB64="",capaNome="";
 $("#admin").innerHTML=`${barra()}<h2 style="margin-top:12px">${r._row?"Editar":"Adicionar"}: ${S.t}</h2><form id="af" style="max-width:720px"><div class="f2">${S.f.map(([n,l,t,o])=>`<div><label>${l}${t==="sel"?`<select name="${n}">${o.map(v=>`<option${r[n]===v?" selected":""}>${v}</option>`).join("")}</select>`:t==="area"?`<textarea name="${n}" rows="4">${esc(r[n])}</textarea>`:`<input name="${n}" type="${t||"text"}" value="${esc(r[n])}"${S.r===n?" required":""}>`}</label></div>`).join("")}</div>
-${isEv?`<fieldset class="at" style="margin-top:18px"><legend>Capa do Evento e Pastas no Google Drive</legend><p class="mut" style="margin:6px 0">Ao salvar o evento, o sistema cria automaticamente uma pasta no Google Drive com o <b>nome do evento</b> e, dentro dela, as subpastas <b>"capa evento"</b> e <b>"Fotos"</b>. Você também pode colar diretamente o link de qualquer pasta pública do Google Drive no campo <b>"Link da pasta pública de fotos no Google Drive"</b> acima.</p><label for="capa_arq">Anexar imagem de capa (será salva na subpasta "capa evento")</label><input type="file" id="capa_arq" accept="image/*" style="padding:10px"><div id="capa_prev" style="margin-top:12px">${su(r.imagem_url)?`<img src="${esc(su(r.imagem_url))}" alt="Capa atual" style="max-width:280px;aspect-ratio:16/9;object-fit:cover;border:1px solid var(--line)">`:""}</div>${su(r.pasta_evento_url)?`<p style="margin-top:10px"><a href="${esc(su(r.pasta_evento_url))}" target="_blank" rel="noopener">Abrir pasta do evento no Google Drive →</a></p>`:""}</fieldset>`:""}
+${isEv?`<fieldset class="at" style="margin-top:18px"><legend>Capa do Evento e Pastas no Google Drive</legend><p class="mut" style="margin:6px 0">Ao salvar o evento, o sistema cria automaticamente uma pasta no Google Drive com o <b>nome do evento</b> e, dentro dela, as subpastas <b>"capa evento"</b> e <b>"Fotos"</b>. Você também pode colar diretamente o link de qualquer pasta pública do Google Drive no campo <b>"Link da pasta pública de fotos no Google Drive"</b> acima.</p><label for="capa_arq">Anexar imagem de capa (será salva na subpasta "capa evento")</label><input type="file" id="capa_arq" accept="image/*" style="padding:10px"><div id="capa_prev" style="margin-top:12px">${su(r.imagem_url)?`<img src="${esc(su(r.imagem_url))}" alt="Capa atual" loading="lazy" decoding="async" style="max-width:280px;aspect-ratio:16/9;object-fit:cover;border:1px solid var(--line)">`:""}</div>${su(r.pasta_evento_url)?`<p style="margin-top:10px"><a href="${esc(su(r.pasta_evento_url))}" target="_blank" rel="noopener">Abrir pasta do evento no Google Drive →</a></p>`:""}</fieldset>`:""}
 <div class="err" id="ae"></div><div class="row"><button class="btn" id="bsv">Salvar</button><button type="button" class="btn o" id="cx">Cancelar</button></div></form>`;
 $("#cx").onclick=()=>admin();
 const inpCapa=$("#capa_arq");
-if(inpCapa)inpCapa.onchange=async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;try{capaNome=f.name;$("#capa_prev").innerHTML='<div class="mut">Otimizando imagem de capa...</div>';capaB64=await comprimirCapaSegura(f);const inpImgUrl=document.querySelector('#af [name="imagem_url"]');if(inpImgUrl)inpImgUrl.value=capaB64;$("#capa_prev").innerHTML=`<img src="${capaB64}" alt="Prévia da capa" style="max-width:280px;aspect-ratio:16/9;object-fit:cover;border:2px solid var(--green);border-radius:4px"><div class="mut">Imagem pronta para envio (${esc(f.name)})</div>`}catch(err){$("#ae").textContent="Não foi possível carregar a imagem selecionada.";$("#ae").style.display="block"}};
-$("#af").onsubmit=async e=>{e.preventDefault();const b=$("#bsv"),ae=$("#ae");ae.style.display="none";b.disabled=true;b.textContent="Salvando, aguarde...";const d=Object.fromEntries(new FormData(e.target));if(r._row)d._row=r._row;if(S.ev)d.evento_id=r.evento_id||A.ev;if(r.id)d.id=r.id;if(r.pasta_evento_url)d.pasta_evento_url=r.pasta_evento_url;if(capaB64)d.imagem_url=capaB64;
-try{let x=await call({acao:"salvar",aba:A.tab,dados:d,capa_b64:capaB64,capa_nome:capaNome});if(!x||!x.ok){if(!A.tok){b.disabled=false;b.textContent="Salvar";return admin()}if(capaB64){x=await call({acao:"salvar",aba:A.tab,dados:d})}}b.disabled=false;b.textContent="Salvar";if(!x||!x.ok){ae.textContent=(x&&x.msg)||"Erro ao salvar.";ae.style.display="block";return}ADM_CACHE.eventos=null;ADM_CACHE.colocacoes=null;admin(true)}catch(err){b.disabled=false;b.textContent="Salvar";ae.textContent="Falha de conexão com a internet. Verifique sua rede e clique em Salvar novamente.";ae.style.display="block"}}}
+if(inpCapa)inpCapa.onchange=async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;try{capaNome=f.name;$("#capa_prev").innerHTML='<div class="mut">Otimizando imagem de capa...</div>';capaB64=await comprimirCapaSegura(f);$("#capa_prev").innerHTML=`<img src="${capaB64}" alt="Prévia da capa" style="max-width:280px;aspect-ratio:16/9;object-fit:cover;border:2px solid var(--green);border-radius:4px"><div class="mut">Imagem pronta para envio (${esc(f.name)})</div>`}catch(err){$("#ae").textContent="Não foi possível carregar a imagem selecionada.";$("#ae").style.display="block"}};
+$("#af").onsubmit=async e=>{e.preventDefault();const b=$("#bsv"),ae=$("#ae");ae.style.display="none";b.disabled=true;b.textContent="Salvando, aguarde...";const d=Object.fromEntries(new FormData(e.target));if(r._row)d._row=r._row;if(S.ev)d.evento_id=r.evento_id||A.ev;if(r.id)d.id=r.id;if(r.pasta_evento_url)d.pasta_evento_url=r.pasta_evento_url;
+try{let x=await call({acao:"salvar",aba:A.tab,dados:d,capa_b64:capaB64,capa_nome:capaNome});if(!x||!x.ok){if(!A.tok){b.disabled=false;b.textContent="Salvar";return admin()}if(capaB64){d.imagem_url=capaB64;x=await call({acao:"salvar",aba:A.tab,dados:d})}}b.disabled=false;b.textContent="Salvar";if(!x||!x.ok){ae.textContent=(x&&x.msg)||"Erro ao salvar.";ae.style.display="block";return}toast("✓ Salvo com sucesso!");ADM_CACHE.eventos=null;ADM_CACHE.colocacoes=null;admin(true)}catch(err){b.disabled=false;b.textContent="Salvar";ae.textContent="Falha de conexão com a internet. Verifique sua rede e clique em Salvar novamente.";ae.style.display="block"}}}
 function formFotos(ev){if(!ev)return admin();const el=$("#admin");let selecionadas=[],atuaisLista=[];
 el.innerHTML=`${barra()}<h2 style="margin-top:12px">Gestão de Galeria e Mídias: ${esc(ev.nome)}</h2><div class="safe">Envie fotos pelo celular/computador ou remova abaixo qualquer foto enviada por engano (sem precisar acessar o Google Drive).</div>
 <form id="f_link_drive" style="max-width:720px;margin-bottom:14px"><label for="inp_pasta_url">Link da pasta pública do Google Drive (Galeria de Fotos)</label><div class="cod"><input id="inp_pasta_url" type="url" style="font:15px Barlow;letter-spacing:0;text-transform:none;text-align:left" placeholder="https://drive.google.com/drive/folders/..." value="${esc(ev.pasta_fotos_url||"")}"><button class="btn sm" type="submit">Salvar Link</button></div><div id="ok_link" class="safe" style="display:none;margin-top:10px">Link da pasta do Google Drive atualizado com sucesso!</div></form>
@@ -1839,6 +1862,7 @@ el.onclick=async e=>{
       }
     }
     admInsc(el,r);
+    toast(`✓ Vitória de ${venc} registrada`);
     persistirTorneio(ev,tor,"atualizarPlacar",{
       id_jogo:jg.id_jogo,
       placar_a:jg.placar_a,
@@ -1846,7 +1870,7 @@ el.onclick=async e=>{
       vencedor:jg.vencedor,
       status_jogo:jg.status_jogo,
       resumo:`${jg.time_a} ${jg.placar_a||""} x ${jg.placar_b||""} ${jg.time_b} (Vencedor: ${venc})`
-    });
+    }).catch(()=>toast("Aviso: salvo no aparelho; sincronize ao recuperar sinal.",true));
   }
   else if(d.salvarJogo&&tor){
     const idJ=d.salvarJogo,jg=tor.partidas.find(x=>String(x.id_jogo)===String(idJ));
@@ -1883,6 +1907,7 @@ el.onclick=async e=>{
       }
     }
     admInsc(el,r);
+    toast(`✓ Placar salvo (${jg.time_a} ${jg.placar_a} x ${jg.placar_b} ${jg.time_b})`);
     persistirTorneio(ev,tor,"atualizarPlacar",{
       id_jogo:jg.id_jogo,
       placar_a:jg.placar_a,
@@ -1890,21 +1915,23 @@ el.onclick=async e=>{
       vencedor:jg.vencedor,
       status_jogo:jg.status_jogo,
       resumo:`${jg.time_a} ${jg.placar_a} x ${jg.placar_b} ${jg.time_b}`
-    });
+    }).catch(()=>toast("Aviso: salvo no aparelho; sincronize ao recuperar sinal.",true));
   }
   else if(d.ge){const g=G.find(x=>x[0].codigo===d.ge);formInsc(ev,g[0].origem==="admin-basica"?"basica":"padrao",g)}
   else if(d.gs){
     const[c,st]=d.gs.split("|");
     rows.forEach(rw=>{if(rw.codigo===c)rw.status_aprovacao=st});
     admInsc(el,r);
-    call({acao:"inscStatus",evento_id:ev.id,codigo:c,status:st});
+    toast(`✓ Inscrição #${c} marcada como ${st}`);
+    call({acao:"inscStatus",evento_id:ev.id,codigo:c,status:st}).then(res=>{if(!res||!res.ok)toast("Erro ao sincronizar status. Atualizando...",true)}).catch(()=>toast("Falha de rede ao salvar status.",true));
   }
 else if(d.gx){
   if(d.arm!=="1"){b.dataset.arm="1";b.textContent="Confirmar?";b.style.background="#b91c1c";b.style.color="#fff";return}
   const codEx=d.gx;
   r.rows=rows.filter(rw=>rw.codigo!==codEx);
   admInsc(el,r);
-  call({acao:"inscExcluir",evento_id:ev.id,codigo:codEx});
+  toast(`✓ Inscrição #${codEx} excluída`);
+  call({acao:"inscExcluir",evento_id:ev.id,codigo:codEx}).catch(()=>toast("Falha de rede ao excluir inscrição.",true));
 }};
 $("#es").onchange=e=>{A.ev=e.target.value;admin()};
 const bq=$("#bq");if(bq)bq.oninput=e=>{const v=e.target.value.toLowerCase();el.querySelectorAll("[data-q]").forEach(c=>{c.hidden=!c.dataset.q.includes(v)})};
@@ -1924,12 +1951,13 @@ if(bas){at=[...el.querySelectorAll("#at .ab")].map(x=>({nome:x.querySelector("[d
 else{const v=coletar(e.target,MN,MX);if(v.msg)msg=v.msg;else{at=v.at;if(MX>1&&!time)msg="Informe o nome do time."}}
 if(msg){er.textContent=msg;er.style.display="block";return}
 const b=e.target.querySelector("[type=submit]");b.disabled=true;b.textContent="Salvando, aguarde...";
-try{const x=await call({acao:"inscAdmin",evento_id:ev.id,codigo:c0.codigo||"",modo:bas?"basica":"padrao",time,instagram_time:($("#ig")||{}).value||"",atletas:at,status:$("#si").value});if(x.ok){delete ADM_CACHE.inscricoes[ev.id];admin(true)}else{if(!A.tok)return admin();er.textContent=x.msg||"Erro ao salvar.";er.style.display="block"}}catch(x){er.textContent="Não foi possível salvar agora. Tente novamente.";er.style.display="block"}
+try{const x=await call({acao:"inscAdmin",evento_id:ev.id,codigo:c0.codigo||"",modo:bas?"basica":"padrao",time,instagram_time:($("#ig")||{}).value||"",atletas:at,status:$("#si").value});if(x.ok){toast("✓ Inscrição salva!");delete ADM_CACHE.inscricoes[ev.id];admin(true)}else{if(!A.tok)return admin();er.textContent=x.msg||"Erro ao salvar.";er.style.display="block"}}catch(x){er.textContent="Não foi possível salvar agora. Tente novamente.";er.style.display="block"}
 b.disabled=false;b.textContent="Salvar"}}
 addEventListener("hashchange",()=>{if(location.hash.slice(1)!==cur)route()});document.addEventListener("click",e=>{const a=e.target.closest('a[href^="#"]');if(a){e.preventDefault();nav(a.getAttribute("href"))}});$("#ok").onclick=()=>{$("#modal").classList.remove("on");nav("#inicio")};
 document.querySelectorAll(".wa-link").forEach(a=>a.href="https://wa.me/"+CFG.WHATSAPP+"?text="+encodeURIComponent("Olá! Preciso de ajuda com o portal de esportes."));
 (async () => {
   const cached = lerCachePublico();
+  const prevJson = cached ? JSON.stringify(cached) : "";
   D = cached || {
     eventos: (DEMO.eventos || []).slice(),
     feed: (DEMO.feed || []).slice(),
@@ -1940,11 +1968,13 @@ document.querySelectorAll(".wa-link").forEach(a=>a.href="https://wa.me/"+CFG.WHA
 
   try {
     const live = await api({ acao: "publico" });
-    if (live && live.eventos && Array.isArray(live.eventos) && live.eventos.length) {
+    if (live && Array.isArray(live.eventos)) {
+      const liveJson = JSON.stringify(live);
       D = live;
       salvarCachePublico(live);
-      if (cur === "inicio" || cur.startsWith("evento/") || cur === "modalidades" || cur === "resultados" || cur === "noticias") {
-        route();
+      const digitando = document.activeElement && ["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement.tagName);
+      if (liveJson !== prevJson && !/^admin/.test(cur) && !digitando) {
+        route(cur);
       }
       sincronizarAtletasBackground();
     }
