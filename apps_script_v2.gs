@@ -364,9 +364,53 @@ function fotosPasta(u, limite) {
   return r;
 }
 
-// ---- leitura pública otimizada (baixa latência, sem N+1 leituras desnecessárias e cache de 10 min invalidado em tempo real) ----
+// ---- Cache Fracionado (Supera o limite nativo de 100 KB por chave do Google CacheService) ----
+function cachePutBig(c, k, obj, ttl) {
+  try {
+    const s = JSON.stringify(obj), CHUNK = 85000;
+    if (s.length <= CHUNK) {
+      c.put(k, s, ttl || 600);
+      return;
+    }
+    const n = Math.ceil(s.length / CHUNK), map = {};
+    map[k] = "__CHUNKED__:" + n;
+    for (let i = 0; i < n; i++) {
+      map[k + "_" + i] = s.slice(i * CHUNK, (i + 1) * CHUNK);
+    }
+    c.putAll(map, ttl || 600);
+  } catch (e) {}
+}
+function cacheGetBig(c, k) {
+  try {
+    const v = c.get(k);
+    if (!v) return null;
+    if (v.indexOf("__CHUNKED__:") === 0) {
+      const n = +v.split(":")[1] || 0, keys = [];
+      for (let i = 0; i < n; i++) keys.push(k + "_" + i);
+      const parts = c.getAll(keys);
+      let full = "";
+      for (let i = 0; i < n; i++) {
+        if (!parts[k + "_" + i]) return null;
+        full += parts[k + "_" + i];
+      }
+      return JSON.parse(full);
+    }
+    return JSON.parse(v);
+  } catch (e) { return null; }
+}
+function cacheRemoveBig(c, k) {
+  try {
+    const keys = [k];
+    for (let i = 0; i < 8; i++) keys.push(k + "_" + i);
+    c.removeAll(keys);
+  } catch (e) {
+    try { c.remove(k); } catch (e2) {}
+  }
+}
+
+// ---- leitura pública otimizada (baixa latência, sem N+1 leituras desnecessárias e cache fracionado de 10 min) ----
 function publico() {
-  const c = CacheService.getScriptCache(), k = c.get("pub"); if (k) return JSON.parse(k);
+  const c = CacheService.getScriptCache(), cached = cacheGetBig(c, "pub"); if (cached) return cached;
   const lim = r => { delete r._row; return r; };
   const partidas = {};
   let totalAtletas = 0, realizados = 0, ativos = 0;
@@ -417,7 +461,7 @@ function publico() {
     feed: ler("feed").map(lim), colocacoes: ler("colocacoes").map(lim),
     home_fotos: fotosPasta(PropertiesService.getScriptProperties().getProperty("PASTA_HOME"), 4)
   };
-  try { c.put("pub", JSON.stringify(o), 600); } catch (e) {}
+  cachePutBig(c, "pub", o, 600);
   return o;
 }
 
@@ -482,7 +526,7 @@ function inscrever(p) {
     const codigo = novoCodigo(), proto = protocolo();
     gravar(ev, {at:v.at, time:v.time, igt:p.instagram_time}, {codigo, protocolo:proto, origem:"site", termo:"Aceito em " + hoje()});
     indice().appendRow([codigo, ev.id, proto]);
-    CacheService.getScriptCache().remove("pub");
+    cacheRemoveBig(CacheService.getScriptCache(), "pub");
     return {ok:1, protocolo:proto, codigo};
   } finally { lock.releaseLock(); }
 }
@@ -523,7 +567,7 @@ function editar(p) {
     const ins = ativas(ev.id).filter(i => i.codigo.trim().toUpperCase() !== f.codigo);
     const v = checar(ev, {time:f.rows[0].time, atletas:p.atletas}, ins, {editando:true}); if (v.erro) return {ok:0, msg:v.erro};
     gravar(ev, {at:v.at, time:v.time, igt:p.instagram_time}, {rows:f.rows});
-    CacheService.getScriptCache().remove("pub"); return {ok:1};
+    cacheRemoveBig(CacheService.getScriptCache(), "pub"); return {ok:1};
   } finally { lock.releaseLock(); }
 }
 
@@ -565,7 +609,9 @@ function login(p) {
   limparRateLimit(kf);
   const t = Utilities.getUuid() + Utilities.getUuid();
   c.put("tok_" + t, lg, 21600); // sessão máxima de 6 horas no servidor (e 15 min de inatividade no cliente)
-  registrarAuditoria(lg, "Login", lg + " iniciou sessão no painel administrativo");
+  if (p.modo !== "confirmar") {
+    registrarAuditoria(lg, "Login", lg + " iniciou sessão no painel administrativo");
+  }
   return {ok:1, token:t, login:lg};
 }
 
@@ -580,7 +626,7 @@ function admin(p) {
     registrarFalhaRateLimit("falha_tok_admin", 900);
     return {ok:0, msg:"Sessão expirada. Entre novamente.", expirou:1};
   }
-  const ab = p.aba, limpa = () => c.remove("pub"), evl = () => eventos().map(e => ({id:e.id, nome:e.nome}));
+  const ab = p.aba, limpa = () => cacheRemoveBig(c, "pub"), evl = () => eventos().map(e => ({id:e.id, nome:e.nome}));
   if (p.acao === "logout") {
     c.remove("tok_" + p.token);
     registrarAuditoria(usr, "Logout", usr + " encerrou a sessão administrativa");
@@ -603,6 +649,72 @@ function admin(p) {
     }
     return {ok:1, rows:ler(ab), eventos:evl()};
   }
+  // Operações de Google Drive (excluirFoto / uploadFotos) fora do Lock global da planilha para não bloquear inscrições ao vivo
+  if (p.acao === "excluirFoto") {
+    const fid = idArquivoDrive(p.foto_id || p.link || p.thumb);
+    if (!fid) return {ok:0, msg:"Não foi possível identificar o arquivo da foto no Google Drive."};
+    let nomeArq = p.nome || fid;
+    try {
+      const arq = DriveApp.getFileById(fid);
+      nomeArq = arq.getName() || nomeArq;
+      arq.setTrashed(true);
+    } catch (e) {
+      return {ok:0, msg:"Não foi possível remover a foto no Drive. Verifique as permissões."};
+    }
+    const idPastaLimpar = idPasta(p.pasta);
+    if (idPastaLimpar) {
+      c.remove("f" + idPastaLimpar + "_4");
+      c.remove("f" + idPastaLimpar + "_60");
+    }
+    if (p.evento_id) {
+      const evFoto = ler("eventos").find(e => e.id === p.evento_id);
+      if (evFoto && evFoto.pasta_fotos_url) {
+        const idPF = idPasta(evFoto.pasta_fotos_url);
+        if (idPF) {
+          c.remove("f" + idPF + "_4");
+          c.remove("f" + idPF + "_60");
+        }
+      }
+    }
+    registrarAuditoria(usr, "Exclusão de Foto", usr + " removeu a foto '" + nomeArq + "' do evento '" + (p.evento_nome || p.evento_id || "") + "'");
+    limpa();
+    return {ok:1};
+  }
+  if (p.acao === "uploadFotos") {
+    const sh = aba("eventos"), h = cabecalho(sh), evs = lerSh(sh, ABAS.eventos);
+    const ev = evs.find(e => e.id === p.evento_id || String(e._row) === String(p.row));
+    if (!ev) return {ok:0, msg:"Evento não encontrado."};
+    const pst = garantirPastasEvento(ev.nome, ev.pasta_evento_url);
+    let pastaAlvo = pst.pastaFotos;
+    const idF = idPasta(ev.pasta_fotos_url);
+    if (idF) {
+      try { pastaAlvo = DriveApp.getFolderById(idF); } catch (e) { pastaAlvo = pst.pastaFotos; }
+    }
+    const arqs = Array.isArray(p.arquivos) ? p.arquivos : [];
+    if (!arqs.length) return {ok:0, msg:"Nenhuma foto selecionada."};
+    let enviadas = 0;
+    arqs.forEach((arq, idx) => {
+      const salvo = salvarBase64NoDrive(pastaAlvo, arq.b64, arq.nome || ("foto-" + (idx + 1)), false);
+      if (salvo) enviadas++;
+    });
+    const colFotos = h.indexOf("pasta_fotos_url") + 1, colEvUrl = h.indexOf("pasta_evento_url") + 1;
+    const fotosUrlFinal = ev.pasta_fotos_url || pst.fotosUrl;
+    if ((!ev.pasta_fotos_url && colFotos > 0) || (!ev.pasta_evento_url && colEvUrl > 0)) {
+      const lockUp = LockService.getScriptLock(); lockUp.waitLock(15000);
+      try {
+        if (!ev.pasta_fotos_url && colFotos > 0) sh.getRange(ev._row, colFotos).setValue(fotosUrlFinal);
+        if (!ev.pasta_evento_url && colEvUrl > 0) sh.getRange(ev._row, colEvUrl).setValue(pst.eventoUrl);
+      } finally { lockUp.releaseLock(); }
+    }
+    const idLimpar = idPasta(fotosUrlFinal);
+    if (idLimpar) {
+      c.remove("f" + idLimpar + "_4");
+      c.remove("f" + idLimpar + "_60");
+    }
+    registrarAuditoria(usr, "Upload de Fotos", usr + " enviou " + enviadas + " foto(s) para o evento '" + ev.nome + "'");
+    limpa();
+    return {ok:1, enviadas, pasta_fotos_url: fotosUrlFinal};
+  }
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
   try {
     if (p.acao === "excluir" && ["eventos","feed","colocacoes"].indexOf(ab) >= 0) {
@@ -624,36 +736,6 @@ function admin(p) {
       sh.deleteRow(+p.row);
       registrarAuditoria(usr, "Exclusão (" + ab + ")", usr + " excluiu '" + nomeItem + "' da aba " + ab + (ab === "eventos" ? " (incluindo pastas/arquivos do Drive e abas vinculadas)" : ""));
       limpa(); return {ok:1};
-    }
-    if (p.acao === "excluirFoto") {
-      const fid = idArquivoDrive(p.foto_id || p.link || p.thumb);
-      if (!fid) return {ok:0, msg:"Não foi possível identificar o arquivo da foto no Google Drive."};
-      let nomeArq = p.nome || fid;
-      try {
-        const arq = DriveApp.getFileById(fid);
-        nomeArq = arq.getName() || nomeArq;
-        arq.setTrashed(true);
-      } catch (e) {
-        return {ok:0, msg:"Não foi possível remover a foto no Drive. Verifique as permissões."};
-      }
-      const idPastaLimpar = idPasta(p.pasta);
-      if (idPastaLimpar) {
-        c.remove("f" + idPastaLimpar + "_4");
-        c.remove("f" + idPastaLimpar + "_60");
-      }
-      if (p.evento_id) {
-        const evFoto = ler("eventos").find(e => e.id === p.evento_id);
-        if (evFoto && evFoto.pasta_fotos_url) {
-          const idPF = idPasta(evFoto.pasta_fotos_url);
-          if (idPF) {
-            c.remove("f" + idPF + "_4");
-            c.remove("f" + idPF + "_60");
-          }
-        }
-      }
-      registrarAuditoria(usr, "Exclusão de Foto", usr + " removeu a foto '" + nomeArq + "' do evento '" + (p.evento_nome || p.evento_id || "") + "'");
-      limpa();
-      return {ok:1};
     }
     if (p.acao === "salvar" && ["eventos","feed","colocacoes"].indexOf(ab) >= 0) {
       const sh = aba(ab), h = cabecalho(sh), d = p.dados || {};
@@ -705,36 +787,6 @@ function admin(p) {
       const descItem = d.nome || d.titulo || d.nome_equipe || d.id || "";
       registrarAuditoria(usr, (d._row ? "Edição (" : "Criação (") + ab + ")", usr + (d._row ? " atualizou '" : " cadastrou '") + descItem + "'" + (d.status ? " [Status: " + d.status + ", Vagas: " + (d.max_vagas || "sem limite") + "]" : ""));
       limpa(); return {ok:1};
-    }
-    if (p.acao === "uploadFotos") {
-      const sh = aba("eventos"), h = cabecalho(sh), evs = ler("eventos");
-      const ev = evs.find(e => e.id === p.evento_id || String(e._row) === String(p.row));
-      if (!ev) return {ok:0, msg:"Evento não encontrado."};
-      const pst = garantirPastasEvento(ev.nome, ev.pasta_evento_url);
-      let pastaAlvo = pst.pastaFotos;
-      const idF = idPasta(ev.pasta_fotos_url);
-      if (idF) {
-        try { pastaAlvo = DriveApp.getFolderById(idF); } catch (e) { pastaAlvo = pst.pastaFotos; }
-      }
-      const arqs = Array.isArray(p.arquivos) ? p.arquivos : [];
-      if (!arqs.length) return {ok:0, msg:"Nenhuma foto selecionada."};
-      let enviadas = 0;
-      arqs.forEach((arq, idx) => {
-        const salvo = salvarBase64NoDrive(pastaAlvo, arq.b64, arq.nome || ("foto-" + (idx + 1)), false);
-        if (salvo) enviadas++;
-      });
-      const colFotos = h.indexOf("pasta_fotos_url") + 1, colEvUrl = h.indexOf("pasta_evento_url") + 1;
-      const fotosUrlFinal = ev.pasta_fotos_url || pst.fotosUrl;
-      if (!ev.pasta_fotos_url && colFotos > 0) sh.getRange(ev._row, colFotos).setValue(fotosUrlFinal);
-      if (!ev.pasta_evento_url && colEvUrl > 0) sh.getRange(ev._row, colEvUrl).setValue(pst.eventoUrl);
-      const idLimpar = idPasta(fotosUrlFinal);
-      if (idLimpar) {
-        c.remove("f" + idLimpar + "_4");
-        c.remove("f" + idLimpar + "_60");
-      }
-      registrarAuditoria(usr, "Upload de Fotos", usr + " enviou " + enviadas + " foto(s) para o evento '" + ev.nome + "'");
-      limpa();
-      return {ok:1, enviadas, pasta_fotos_url: fotosUrlFinal};
     }
     // ----- chaveamento e gerenciamento de torneios (partidas e placares) -----
     if (p.acao === "salvarPartidas") {

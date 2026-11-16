@@ -1,0 +1,25 @@
+{
+  "name": "Caxias Mais Esporte · SMEL Duque de Caxias",
+  "short_name": "SMEL Esporte",
+  "description": "Portal Oficial de Competições, Inscrições e Resultados da Secretaria Municipal de Esporte e Lazer de Duque de Caxias.",
+  "start_url": "./#inicio",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f4ed",
+  "theme_color": "#1a365d",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "logo-caxias-mais-esporte.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo-caxias-mais-esporte.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

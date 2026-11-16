@@ -1,8 +1,22 @@
 <!DOCTYPE html>
 <html lang="pt-BR"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1a365d">
+<meta name="description" content="Portal Oficial do Projeto Caxias Mais Esporte · Secretaria Municipal de Esporte e Lazer de Duque de Caxias. Competições, calendário, inscrições gratuitas e chaveamento ao vivo.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Caxias Mais Esporte · Secretaria de Esporte e Lazer (SMEL)">
+<meta property="og:description" content="Confira o calendário esportivo, inscreva sua equipe gratuitamente e acompanhe tabelas e resultados em tempo real.">
+<meta property="og:image" content="logo-caxias-mais-esporte.png">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="logo-caxias-mais-esporte.png">
+<link rel="apple-touch-icon" href="logo-caxias-mais-esporte.png">
+<link rel="preconnect" href="https://script.google.com" crossorigin>
+<link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <title>Caxias Mais Esporte · Secretaria de Esportes e Lazer</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&family=Barlow:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&family=Barlow:wght@400;600&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&family=Barlow:wght@400;600&display=swap"></noscript>
 <style>
 :root{--paper:#f7f4ed;--ink:#16202e;--navy:#1a365d;--green:#10b981;--line:#d8d2c4;--mut:#5b6472;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box}html{scroll-padding-top:70px;-webkit-tap-highlight-color:transparent}
@@ -336,10 +350,11 @@ let c="";for(let i=0;i<off;i++)c+='<div class="dp"></div>';
 for(let d=1;d<=nd;d++){const k=`${y}-${pd(m+1)}-${pd(d)}`,l=evs.filter(e=>{const a=dp(e.data_inicio).join("-");return a<=k&&k<=(dp(e.data_fim).join("-")||a)});
 c+=`<div class="dc${l.length?" tem":""}${k===hk?" hoje":""}"><div class="dn"><b>${d}</b><span>${DSEM[new Date(y,m,d).getDay()]}</span></div><div class="dv">${l.map(e=>`<a class="de ${stk(e)}" href="#evento/${esc(e.id)}"><b>${esc(e.nome)}</b><small>${esc(e.modalidade)}${dp(e.data_inicio).join("-")!==k?" · continua":""}</small></a>`).join("")}</div></div>`}
 $("#calendario").innerHTML=`<div class="eb" style="margin-top:8px">Calendário</div><h1 style="font-size:clamp(34px,6vw,54px)">Calendário esportivo</h1><div class="cn"><button class="chip" data-cm="-1">← Anterior</button><b>${MESN[m]} de ${y}</b><button class="chip" data-cm="1">Próximo →</button></div><div class="cw">${DSEM.map(x=>`<span>${x}</span>`).join("")}</div><div class="cg">${c}</div>`}
+const debounce=(fn,ms=120)=>{let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms)}};
 function lista(){const ms=[...new Set(D.eventos.map(e=>e.modalidade).filter(Boolean))].sort();
 $("#competicoes").innerHTML=`<div class="eb" style="margin-top:8px">Competições</div><h1 style="font-size:clamp(34px,6vw,54px)">Calendário esportivo</h1><p>Confira o que está rolando agora, o que vem por aí e o que já aconteceu nas competições da Secretaria.</p>
 <div class="fb2"><label>Situação<select id="fs">${[["","Todas"],["ab","Inscrições abertas"],["es","Vagas esgotadas"],["br","Em breve"],["en","Encerradas"]].map(([v,l])=>`<option value="${v}"${(F.st===v||(v==="ab"&&F.st==="ne"))?" selected":""}>${l}</option>`).join("")}</select></label><label>Modalidade<select id="fm"><option value="">Todas</option>${ms.map(m=>`<option${F.m===m?" selected":""}>${esc(m)}</option>`).join("")}</select></label><label>Buscar<input id="q" type="search" placeholder="Nome, bairro ou esporte" value="${esc(F.q)}"></label></div><div id="el"></div>`;
-$("#fs").onchange=e=>{F.st=e.target.value;els()};$("#fm").onchange=e=>{F.m=e.target.value;els()};$("#q").oninput=e=>{F.q=e.target.value;els()};els()}
+$("#fs").onchange=e=>{F.st=e.target.value;els()};$("#fm").onchange=e=>{F.m=e.target.value;els()};$("#q").oninput=debounce(e=>{F.q=e.target.value;els()},120);els()}
 function els(){const q=F.q.toLowerCase(),matchSt=e=>!F.st||(F.st==="ab"||F.st==="ne"?["ab","ne"].includes(stk(e)):stk(e)===F.st),r=D.eventos.filter(e=>matchSt(e)&&(!F.m||e.modalidade===F.m)&&(!q||(e.nome+e.modalidade+e.local_evento).toLowerCase().includes(q))).sort(byDate);
 $("#el").innerHTML=[["ab","Inscrições abertas"],["es","Vagas esgotadas"],["br","Em breve"],["en","Encerradas"]].map(([k,t])=>{const l=r.filter(e=>k==="ab"?["ab","ne"].includes(stk(e)):stk(e)===k);return l.length?`<h2>${t} <span class="mut">(${l.length})</span></h2><div class="g3">${l.map(e=>card(e)).join("")}</div>`:""}).join("")||'<p class="mut">Nenhuma competição encontrada.</p>'}
 function midia(){const al=D.eventos.filter(e=>su(e.pasta_fotos_url)).sort((a,b)=>byDate(b,a));
@@ -637,7 +652,7 @@ function confirmarComSenha({titulo,descricao,labelBotao,corBotao,onConfirmar}){
     const txtOrig=btn.textContent;
     btn.textContent="Verificando senha...";
     try{
-      const auth=await api({acao:"login",login:A.user||"fidelis",senha:pw});
+      const auth=await api({acao:"login",login:A.user||"fidelis",senha:pw,modo:"confirmar"});
       if(!auth||!auth.ok){
         er.textContent="Senha incorreta. A operação não foi autorizada.";
         er.style.display="block";
@@ -762,12 +777,12 @@ async function admAudit(el){
   </div>`;
   el.onclick=e=>{const b=e.target.closest("button");if(!b)return;if(b.dataset.t){A.tab=b.dataset.t;admin()}else if(b.dataset.out){encerrarSessao()}};
   const aq=$("#aq");
-  if(aq)aq.oninput=e=>{const v=e.target.value.toLowerCase();el.querySelectorAll("#tb-audit tbody tr[data-aq]").forEach(tr=>{tr.hidden=!tr.dataset.aq.includes(v)})};
+  if(aq)aq.oninput=debounce(e=>{const v=e.target.value.toLowerCase();el.querySelectorAll("#tb-audit tbody tr[data-aq]").forEach(tr=>{tr.hidden=!tr.dataset.aq.includes(v)})},100);
   const btnCsv=$("#btn-audit-csv");
   if(btnCsv)btnCsv.onclick=()=>{
     const cols=["data_hora","servidor","acao","detalhes"],q=v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"';
     const txt="\ufeff"+cols.join(";")+"\n"+logs.map(r=>cols.map(k=>q(r[k])).join(";")).join("\n");
-    const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([txt],{type:"text/csv;charset=utf-8"}));a.download="auditoria-smel-"+hojeISO()+".csv";document.body.appendChild(a);a.click();a.remove();
+    const u=URL.createObjectURL(new Blob([txt],{type:"text/csv;charset=utf-8"})),a=document.createElement("a");a.href=u;a.download="auditoria-smel-"+hojeISO()+".csv";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),5000);
   };
 }
 
@@ -842,10 +857,10 @@ const grupos=rows=>{const g={};rows.forEach(r=>{(g[r.codigo]=g[r.codigo]||[]).pu
 
 /* ===== EXPORTAÇÕES OFICIAIS: CSV, EXCEL (.XLS) E SÚMULA DE JOGO (PDF / IMPRESSÃO SEM RG/CPF) ===== */
 function csvBaixar(ev,rows){
-  const c=["codigo","protocolo","time","nome","idade","telefone","cpf","email","rede_social","status_aprovacao","origem"],q=v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"',t="\ufeff"+c.join(";")+"\n"+rows.map(r=>c.map(k=>q(r[k])).join(";")).join("\n"),a=document.createElement("a");
-  a.href=URL.createObjectURL(new Blob([t],{type:"text/csv;charset=utf-8"}));
+  const c=["codigo","protocolo","time","nome","idade","telefone","cpf","email","rede_social","status_aprovacao","origem"],q=v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"',t="\ufeff"+c.join(";")+"\n"+rows.map(r=>c.map(k=>q(r[k])).join(";")).join("\n"),u=URL.createObjectURL(new Blob([t],{type:"text/csv;charset=utf-8"})),a=document.createElement("a");
+  a.href=u;
   a.download=`inscricoes-${(ev.modalidade||"esporte").toLowerCase().replace(/\s+/g,"-")}-${(ev.categoria||"geral").toLowerCase().replace(/\s+/g,"-")}-${ev.id||"evento"}.csv`;
-  document.body.appendChild(a);a.click();a.remove();
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),5000);
   regLogLocal(A.user,"EXPORTAR_CSV",`${A.user||"servidor"} exportou planilha CSV de inscritos do evento "${ev.nome}"`);
 }
 
@@ -857,10 +872,10 @@ function excelBaixar(ev,rows){
     <tr><th>Código</th><th>Protocolo</th><th>Equipe / Time</th><th>Nome do Atleta</th><th>Idade</th><th>Telefone / WhatsApp</th><th>E-mail</th><th>Instagram</th><th>Situação</th></tr>
     ${rows.map(r=>`<tr><td>${esc(r.codigo)}</td><td>${esc(r.protocolo)}</td><td>${esc(r.time||"-")}</td><td>${esc(r.nome)}</td><td>${esc(r.idade)}</td><td>${esc(r.telefone)}</td><td>${esc(r.email)}</td><td>${esc(r.rede_social||r.instagram_time||"-")}</td><td>${esc(r.status_aprovacao)}</td></tr>`).join("")}
   </table></body></html>`;
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(new Blob(["\ufeff"+html],{type:"application/vnd.ms-excel;charset=utf-8"}));
+  const u=URL.createObjectURL(new Blob(["\ufeff"+html],{type:"application/vnd.ms-excel;charset=utf-8"})),a=document.createElement("a");
+  a.href=u;
   a.download=`relatorio-${(ev.modalidade||"esporte").toLowerCase().replace(/\s+/g,"-")}-${(ev.categoria||"geral").toLowerCase().replace(/\s+/g,"-")}.xls`;
-  document.body.appendChild(a);a.click();a.remove();
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),5000);
   regLogLocal(A.user,"EXPORTAR_EXCEL",`${A.user||"servidor"} exportou relatório Excel (.xls) do evento "${ev.nome}"`);
 }
 
@@ -959,6 +974,7 @@ function imprimirSumula(ev,rows){
 /* ===== SISTEMA PRÓPRIO DE CHAVEAMENTO E GERENCIAMENTO DE TORNEIOS (SUBSTITUTO CHALLONGE) ===== */
 function obterTorneio(ev){
   if(!ev||!ev.id)return null;
+  let srv=null,loc=null;
   let ch=String(ev.link_challonge_embed||"").trim();
   if(!ch){
     const evD=(D.eventos||[]).find(x=>x.id===ev.id);
@@ -967,32 +983,39 @@ function obterTorneio(ev){
   if(ch.startsWith("SMEL_TORNEIO:")){
     try{
       const obj=JSON.parse(ch.slice("SMEL_TORNEIO:".length));
-      if(obj&&Array.isArray(obj.partidas)&&obj.partidas.length)return obj;
+      if(obj&&Array.isArray(obj.partidas)&&obj.partidas.length)srv=obj;
     }catch(e){}
   }
-  const jgs=ev.partidas||(D.partidas&&D.partidas[ev.id])||(DEMO.partidas&&DEMO.partidas[ev.id]);
-  if(Array.isArray(jgs)&&jgs.length){
-    const p0=jgs[0]||{};
-    return{
-      formato:p0.formato||"mata_mata",
-      num_grupos:+(p0.num_grupos||2),
-      passam_por_grupo:+(p0.passam_por_grupo||2),
-      times:[],
-      partidas:jgs.map(x=>({...x}))
-    };
+  if(!srv){
+    const jgs=ev.partidas||(D.partidas&&D.partidas[ev.id])||(DEMO.partidas&&DEMO.partidas[ev.id]);
+    if(Array.isArray(jgs)&&jgs.length){
+      const p0=jgs[0]||{};
+      srv={
+        formato:p0.formato||"mata_mata",
+        num_grupos:+(p0.num_grupos||2),
+        passam_por_grupo:+(p0.passam_por_grupo||2),
+        times:[],
+        partidas:jgs.map(x=>({...x}))
+      };
+    }
   }
   try{
     const raw=localStorage.getItem("smel_torneio_"+ev.id);
     if(raw){
-      const loc=JSON.parse(raw);
-      if(loc&&Array.isArray(loc.partidas)&&loc.partidas.length)return loc;
+      const parsed=JSON.parse(raw);
+      if(parsed&&Array.isArray(parsed.partidas)&&parsed.partidas.length)loc=parsed;
     }
   }catch(e){}
-  return null;
+  // Se houver versão local pendente de sincronização mais recente (ex.: placar salvo sem 4G na quadra), preserva a mais recente
+  if(loc&&srv){
+    return (+loc.updated_at||0)>(+srv.updated_at||0)?loc:srv;
+  }
+  return srv||loc||null;
 }
 
 async function persistirTorneio(ev,pacote,acao,extra){
   if(!ev||!ev.id)return{ok:0,msg:"Evento inválido."};
+  pacote.updated_at=Date.now();
   const jsonStr="SMEL_TORNEIO:"+JSON.stringify(pacote);
   try{localStorage.setItem("smel_torneio_"+ev.id,JSON.stringify(pacote))}catch(e){}
   ev.partidas=pacote.partidas;
@@ -1003,35 +1026,62 @@ async function persistirTorneio(ev,pacote,acao,extra){
   if(evLocal){evLocal.partidas=pacote.partidas;evLocal.link_challonge_embed=jsonStr}
   const evDemo=(DEMO.eventos||[]).find(x=>x.id===ev.id);
   if(evDemo){evDemo.partidas=pacote.partidas;evDemo.link_challonge_embed=jsonStr}
-  let res=await call({
-    acao:acao||"salvarPartidas",
-    evento_id:ev.id,
-    formato:pacote.formato,
-    num_grupos:pacote.num_grupos,
-    passam_por_grupo:pacote.passam_por_grupo,
-    times:pacote.times||[],
-    partidas:pacote.partidas,
-    ...(extra||{})
-  });
-  if(!res||!res.ok){
-    // Fallback automático caso o Web App ainda não tenha sido reimplantado com salvarPartidas: grava na coluna link_challonge_embed da planilha eventos
-    let rowEv=ev._row||(evLocal&&evLocal._row);
-    if(!rowEv){
-      try{
-        const lst=await call({acao:"listar",aba:"eventos"});
-        if(lst&&lst.ok&&Array.isArray(lst.rows)){
-          const achou=lst.rows.find(x=>x.id===ev.id);
-          if(achou){rowEv=achou._row;Object.assign(ev,achou,{link_challonge_embed:jsonStr,partidas:pacote.partidas})}
-        }
-      }catch(e){}
+  try{
+    let res=await call({
+      acao:acao||"salvarPartidas",
+      evento_id:ev.id,
+      formato:pacote.formato,
+      num_grupos:pacote.num_grupos,
+      passam_por_grupo:pacote.passam_por_grupo,
+      times:pacote.times||[],
+      partidas:pacote.partidas,
+      ...(extra||{})
+    });
+    if(!res||!res.ok){
+      let rowEv=ev._row||(evLocal&&evLocal._row);
+      if(!rowEv){
+        try{
+          const lst=await call({acao:"listar",aba:"eventos"});
+          if(lst&&lst.ok&&Array.isArray(lst.rows)){
+            const achou=lst.rows.find(x=>x.id===ev.id);
+            if(achou){rowEv=achou._row;Object.assign(ev,achou,{link_challonge_embed:jsonStr,partidas:pacote.partidas})}
+          }
+        }catch(e){}
+      }
+      if(rowEv){
+        res=await call({acao:"salvar",aba:"eventos",dados:{...ev,_row:rowEv,link_challonge_embed:jsonStr}});
+      }
     }
-    if(rowEv){
-      res=await call({acao:"salvar",aba:"eventos",dados:{...ev,_row:rowEv,link_challonge_embed:jsonStr}});
-    }
+    try{localStorage.removeItem("smel_pend_tor_"+ev.id)}catch(e){}
+    STALE=true;
+    return res||{ok:1};
+  }catch(errSync){
+    try{localStorage.setItem("smel_pend_tor_"+ev.id,JSON.stringify({evId:ev.id,pacote,acao:acao||"atualizarPlacar",extra:extra||{}}))}catch(e){}
+    throw errSync;
   }
-  STALE=true;
-  return res||{ok:1};
 }
+
+async function sincronizarTorneiosPendentes(){
+  if(!A.tok||!navigator.onLine)return;
+  try{
+    const keys=[];
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i);
+      if(k&&k.startsWith("smel_pend_tor_"))keys.push(k);
+    }
+    for(const k of keys){
+      const raw=localStorage.getItem(k);
+      if(!raw)continue;
+      const item=JSON.parse(raw);
+      if(item&&item.evId&&item.pacote){
+        const evObj=(D.eventos||[]).find(x=>x.id===item.evId)||{id:item.evId};
+        await persistirTorneio(evObj,item.pacote,item.acao,item.extra);
+        toast("✓ Placar offline sincronizado com a nuvem!");
+      }
+    }
+  }catch(e){}
+}
+window.addEventListener("online",()=>{sincronizarTorneiosPendentes()});
 
 function embaralharTimes(arr){
   const a=arr.slice();
@@ -1934,7 +1984,7 @@ else if(d.gx){
   call({acao:"inscExcluir",evento_id:ev.id,codigo:codEx}).catch(()=>toast("Falha de rede ao excluir inscrição.",true));
 }};
 $("#es").onchange=e=>{A.ev=e.target.value;admin()};
-const bq=$("#bq");if(bq)bq.oninput=e=>{const v=e.target.value.toLowerCase();el.querySelectorAll("[data-q]").forEach(c=>{c.hidden=!c.dataset.q.includes(v)})};
+const bq=$("#bq");if(bq)bq.oninput=debounce(e=>{const v=e.target.value.toLowerCase();el.querySelectorAll("[data-q]").forEach(c=>{c.hidden=!c.dataset.q.includes(v)})},100);
 if(A.autoOpenTorneio&&ev){A.autoOpenTorneio=false;abrirModalTorneio(ev,rows)}}
 function formInsc(ev,modo,g){const el=$("#admin"),[MN,MX]=lim(ev),c0=g?g[0]:{},bas=modo==="basica";
 const atl=(v,x)=>`<div class="ab card2"><div class="eb">Atleta <span class="n"></span></div><div class="f2"><div><label>Nome${x?"":" *"}<input data-b="nome" value="${esc((v||{}).nome)}" placeholder="Nome do atleta"></label></div><div><label>Idade<input data-b="idade" inputmode="numeric" maxlength="2" value="${esc((v||{}).idade)}" placeholder="Ex.: 12"></label></div></div>${x?'<button type="button" class="chip sm" data-rm="1">Remover este atleta</button>':""}</div>`;
@@ -1955,6 +2005,7 @@ try{const x=await call({acao:"inscAdmin",evento_id:ev.id,codigo:c0.codigo||"",mo
 b.disabled=false;b.textContent="Salvar"}}
 addEventListener("hashchange",()=>{if(location.hash.slice(1)!==cur)route()});document.addEventListener("click",e=>{const a=e.target.closest('a[href^="#"]');if(a){e.preventDefault();nav(a.getAttribute("href"))}});$("#ok").onclick=()=>{$("#modal").classList.remove("on");nav("#inicio")};
 document.querySelectorAll(".wa-link").forEach(a=>a.href="https://wa.me/"+CFG.WHATSAPP+"?text="+encodeURIComponent("Olá! Preciso de ajuda com o portal de esportes."));
+if("serviceWorker"in navigator&&location.protocol.startsWith("http")){window.addEventListener("load",()=>{navigator.serviceWorker.register("./sw.js").catch(()=>{})})}
 (async () => {
   const cached = lerCachePublico();
   const prevJson = cached ? JSON.stringify(cached) : "";
@@ -1977,6 +2028,7 @@ document.querySelectorAll(".wa-link").forEach(a=>a.href="https://wa.me/"+CFG.WHA
         route(cur);
       }
       sincronizarAtletasBackground();
+      sincronizarTorneiosPendentes();
     }
   } catch (err) {
     console.warn("Utilizando dados locais:", err);
