@@ -146,18 +146,25 @@ footer{background:var(--navy);color:#dbe4f0;padding:22px 14px 80px;margin-top:36
 .chaves-champ-card{width:100%;background:linear-gradient(135deg,#0f172a,#1a365d);color:#fff;border:2px solid var(--green);border-radius:8px;padding:12px 10px;text-align:center;box-shadow:0 4px 10px rgba(16,185,129,.18)}
 .chaves-champ-card small{display:block;font:700 10.5px Barlow,sans-serif;text-transform:uppercase;letter-spacing:.08em;color:#6ee7b7;margin-bottom:4px}
 .chaves-champ-card b{display:block;font:800 18px/1.15 "Barlow Condensed",sans-serif;color:#fff;word-break:break-word}
-/* Cards de Placar Simples no Admin */
-.match-grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(265px,1fr));margin:10px 0}
-.match-card{background:#fff;border:1.5px solid #cbd5e1;border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:6px}
+/* Cards de Placar Simples no Admin (Mobile-First & À Prova de Leigos) */
+.tor-mode-bar{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.tor-mode-btn{min-height:42px;border:1.5px solid #cbd5e1;background:#fff;color:var(--navy);border-radius:8px;font:700 14px Barlow,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.tor-mode-btn.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.match-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(285px,1fr));margin:10px 0}
+.match-card{background:#fff;border:1.5px solid #cbd5e1;border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px}
 .match-card.done{border-color:var(--green);background:#fcfffd}
 .match-card.bye{border-style:dashed;background:#f8fafc;opacity:.85}
-.mc-hdr{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;font-weight:700;text-transform:uppercase;color:var(--mut);padding-bottom:2px;border-bottom:1px solid #f1f5f9}
-.mc-team{display:grid;grid-template-columns:1fr 56px auto;gap:6px;align-items:center;padding:5px 8px;border-radius:6px;background:#f8fafc;border:1px solid #e2e8f0}
+.mc-hdr{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:700;text-transform:uppercase;color:var(--mut);padding-bottom:4px;border-bottom:1px solid #f1f5f9}
+.mc-team{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:8px 10px;border-radius:8px;background:#f8fafc;border:1px solid #e2e8f0}
 .mc-team.win{background:#ecfdf5;border-color:var(--green);font-weight:700;color:#065f46}
-.mc-team span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}
-.score-inp{min-height:34px!important;height:34px;text-align:center;font:800 18px "Barlow Condensed",sans-serif!important;padding:0 2px!important;background:#fff}
-.btn-win-pick{min-height:32px;padding:0 8px;font:700 11.5px Barlow,sans-serif;border-radius:5px;border:1px solid #cbd5e1;background:#fff;color:var(--navy);cursor:pointer;white-space:nowrap}
-.mc-team.win .btn-win-pick{background:var(--green);border-color:var(--green);color:#022c1e}
+.mc-team-nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:15px;font-weight:600;flex:1;min-width:0}
+.mc-stepper{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.mc-step-btn{width:34px;height:34px;border-radius:6px;border:1px solid #cbd5e1;background:#fff;color:var(--navy);font:800 18px/1 Barlow,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+.mc-step-btn:active{background:#e2e8f0}
+.score-inp{width:44px!important;min-height:34px!important;height:34px;text-align:center;font:800 19px "Barlow Condensed",sans-serif!important;padding:0 2px!important;background:#fff;border-radius:6px}
+.mc-actions{display:flex;gap:6px;align-items:center;margin-top:2px}
+.btn-win-alt{background:transparent;border:1px dashed #94a3b8;color:var(--mut);font:600 12px Barlow,sans-serif;border-radius:6px;padding:6px 10px;cursor:pointer;white-space:nowrap}
+.btn-win-alt:hover{border-color:var(--navy);color:var(--navy)}
 .tie-prompt{background:#fef3c7;border:1px solid #f59e0b;color:#92400e;border-radius:6px;padding:8px;font-size:12.5px;display:none;flex-direction:column;gap:6px}
 .tie-prompt.on{display:flex}
 .tb-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;background:#fff;border:1px solid var(--line);margin:8px 0;border-radius:6px}
@@ -1749,70 +1756,87 @@ function renderPainelTorneioAdminHTML(ev,tor,abaAtiva){
 
   const faseFiltro=A.faseTorneio||"";
   const secoesVisiveis=faseFiltro&&secoes.some(s=>s.titulo===faseFiltro)?secoes.filter(s=>s.titulo===faseFiltro):secoes;
+  const modoTor=A.torModo||"placares";
+  const pendentes=tor.partidas.filter(j=>j.status_jogo!=="finalizado"&&j.status_jogo!=="bye"&&j.time_b!=="BYE").length;
 
   return`
-    ${fasesMata.length?renderArvoreChavesHTML(fasesMata,campeao,true):""}
+    <div class="tor-mode-bar">
+      <button type="button" class="tor-mode-btn ${modoTor==="placares"?"on":""}" data-tor-modo="placares">📝 Lançar Placares ${pendentes?`(${pendentes})`:""}</button>
+      <button type="button" class="tor-mode-btn ${modoTor==="arvore"?"on":""}" data-tor-modo="arvore">🌳 Ver Chaveamento</button>
+    </div>
     ${tor.formato==="grupos"?`
       <div class="safe" style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;max-width:100%">
-        <span>Ao terminar os confrontos dos grupos, toque ao lado para colocar os classificados nas chaves finais:</span>
-        <button type="button" class="btn sm" data-tor-avancar="1">⚡ Preencher Chaves Finais</button>
+        <span>Terminou os grupos? Toque ao lado para avançar os classificados:</span>
+        <button type="button" class="btn sm" data-tor-avancar="1">⚡ Avançar Classificados</button>
       </div>
     `:""}
-    <div style="margin-top:12px">
-      <div class="mut" style="font-size:12.5px;margin-bottom:4px"><b>Lançar Resultados:</b> Digite o placar e toque em <b>Salvar</b>, ou toque direto em <b>🏆 Venceu</b> (ideal para desempate, W.O. ou lutas/modalidades sem placar numérico).</div>
+    ${modoTor==="arvore"?`
+      ${fasesMata.length?renderArvoreChavesHTML(fasesMata,campeao,true):'<div class="card2"><p class="mut">Este formato não possui chaves eliminatórias. Use a aba <b>📊 Classificação</b> para ver a tabela.</p></div>'}
+    `:`
       ${secoes.length>1?`
         <div class="bar" style="margin:6px 0">
-          <button type="button" class="chip sm ${!faseFiltro?"on":""}" data-fase-f="">Todas as Fases (${tor.partidas.length})</button>
+          <button type="button" class="chip sm ${!faseFiltro?"on":""}" data-fase-f="">Todas (${tor.partidas.length})</button>
           ${secoes.map(s=>`<button type="button" class="chip sm ${faseFiltro===s.titulo?"on":""}" data-fase-f="${esc(s.titulo)}">${esc(s.titulo)} (${s.jogos.length})</button>`).join("")}
         </div>
       `:""}
-    </div>
-    ${secoesVisiveis.map(sec=>`
-      <h3 style="margin-top:14px;color:var(--navy);border-bottom:2px solid var(--line);padding-bottom:4px;font-size:18px">${esc(sec.titulo)}</h3>
-      <div class="match-grid">
-        ${sec.jogos.map((j,idxJ)=>{
-          const isBye=j.status_jogo==="bye"||j.time_b==="BYE";
-          const fin=j.status_jogo==="finalizado"||isBye;
-          const wA=fin&&j.vencedor&&j.vencedor===j.time_a;
-          const wB=fin&&j.vencedor&&j.vencedor===j.time_b;
-          const rotuloCard=sec.etapa==="mata_mata"?`Chave ${idxJ+1}`:`Confronto ${idxJ+1}`;
-          return`
-            <div class="match-card ${fin?"done":""} ${isBye?"bye":""}" id="mc-${esc(j.id_jogo)}" data-mc="${esc(j.id_jogo)}">
-              <div class="mc-hdr">
-                <span>${rotuloCard} · ${esc(sec.titulo)}</span>
-                <span style="color:${fin?"#065f46":"var(--mut)"}">${isBye?"Avanço Automático":fin?"✓ Concluído":"Pendente"}</span>
-              </div>
-              <div class="mc-team ${wA?"win":""}">
-                <span title="${esc(j.time_a)}">${wA?"🏆 ":""}${esc(j.time_a||"A definir")}</span>
-                ${isBye?`<b style="text-align:center;color:#065f46;font-size:12px">Avança</b>`:`
-                  <input type="number" min="0" inputmode="numeric" class="score-inp" data-sa="${esc(j.id_jogo)}" placeholder="–" value="${esc(j.placar_a)}">
-                  <button type="button" class="btn-win-pick" data-venceu="${esc(j.id_jogo)}|A" title="Marcar como vencedor">🏆 Venceu</button>
-                `}
-              </div>
-              <div class="mc-team ${wB?"win":""}">
-                <span title="${esc(j.time_b)}">${wB?"🏆 ":""}${esc(isBye?"Folga (Sem adversário)":(j.time_b||"A definir"))}</span>
-                ${isBye?`<span class="mut" style="text-align:center;font-size:12px">–</span>`:`
-                  <input type="number" min="0" inputmode="numeric" class="score-inp" data-sb="${esc(j.id_jogo)}" placeholder="–" value="${esc(j.placar_b)}">
-                  <button type="button" class="btn-win-pick" data-venceu="${esc(j.id_jogo)}|B" title="Marcar como vencedor">🏆 Venceu</button>
-                `}
-              </div>
-              ${!isBye?`
-                <div class="tie-prompt" id="tie-${esc(j.id_jogo)}">
-                  <b>Placar empatado! Quem avançou para a próxima chave?</b>
-                  <div style="display:flex;gap:6px">
-                    <button type="button" class="btn sm" style="flex:1" data-venceu="${esc(j.id_jogo)}|A">🏆 ${esc(j.time_a)}</button>
-                    <button type="button" class="btn sm" style="flex:1" data-venceu="${esc(j.id_jogo)}|B">🏆 ${esc(j.time_b)}</button>
-                  </div>
+      ${secoesVisiveis.map(sec=>`
+        <h3 style="margin-top:14px;color:var(--navy);border-bottom:2px solid var(--line);padding-bottom:4px;font-size:18px">${esc(sec.titulo)}</h3>
+        <div class="match-grid">
+          ${sec.jogos.map((j,idxJ)=>{
+            const isBye=j.status_jogo==="bye"||j.time_b==="BYE";
+            const fin=j.status_jogo==="finalizado"||isBye;
+            const wA=fin&&j.vencedor&&j.vencedor===j.time_a;
+            const wB=fin&&j.vencedor&&j.vencedor===j.time_b;
+            const rotuloCard=sec.etapa==="mata_mata"?`Jogo ${idxJ+1}`:`Confronto ${idxJ+1}`;
+            const tbdA=!j.time_a||j.time_a==="A definir";
+            const tbdB=!j.time_b||j.time_b==="A definir";
+            return`
+              <div class="match-card ${fin?"done":""} ${isBye?"bye":""}" id="mc-${esc(j.id_jogo)}" data-mc="${esc(j.id_jogo)}">
+                <div class="mc-hdr">
+                  <span>${rotuloCard} · ${esc(sec.titulo)}</span>
+                  <span style="color:${fin?"#065f46":"var(--mut)"}">${isBye?"Folga (passa direto)":fin?"✓ Concluído":"Aguardando"}</span>
                 </div>
-                <button type="button" class="btn sm" data-salvar-jogo="${esc(j.id_jogo)}" style="width:100%">
-                  ${fin?"✓ Atualizar Placar":"✓ Salvar Placar"}
-                </button>
-              `:""}
-            </div>
-          `;
-        }).join("")}
-      </div>
-    `).join("")}
+                <div class="mc-team ${wA?"win":""}">
+                  <span class="mc-team-nm" title="${esc(j.time_a)}">${wA?"🏆 ":""}${esc(tbdA?"Aguardando vencedor":j.time_a)}</span>
+                  ${isBye?`<b style="color:#065f46;font-size:12px">Avança</b>`:`
+                    <div class="mc-stepper">
+                      <button type="button" class="mc-step-btn" data-step="${esc(j.id_jogo)}|A|-1" aria-label="Diminuir placar">−</button>
+                      <input type="number" min="0" inputmode="numeric" class="score-inp" data-sa="${esc(j.id_jogo)}" placeholder="0" value="${esc(j.placar_a)}">
+                      <button type="button" class="mc-step-btn" data-step="${esc(j.id_jogo)}|A|1" aria-label="Aumentar placar">+</button>
+                    </div>
+                  `}
+                </div>
+                <div class="mc-team ${wB?"win":""}">
+                  <span class="mc-team-nm" title="${esc(j.time_b)}">${wB?"🏆 ":""}${esc(isBye?"Folga (sem adversário)":(tbdB?"Aguardando vencedor":j.time_b))}</span>
+                  ${isBye?`<span class="mut" style="font-size:12px">–</span>`:`
+                    <div class="mc-stepper">
+                      <button type="button" class="mc-step-btn" data-step="${esc(j.id_jogo)}|B|-1" aria-label="Diminuir placar">−</button>
+                      <input type="number" min="0" inputmode="numeric" class="score-inp" data-sb="${esc(j.id_jogo)}" placeholder="0" value="${esc(j.placar_b)}">
+                      <button type="button" class="mc-step-btn" data-step="${esc(j.id_jogo)}|B|1" aria-label="Aumentar placar">+</button>
+                    </div>
+                  `}
+                </div>
+                ${!isBye?`
+                  <div class="tie-prompt" id="tie-${esc(j.id_jogo)}">
+                    <b>Quem venceu esta partida? (Desempate / W.O.)</b>
+                    <div style="display:flex;gap:6px">
+                      <button type="button" class="btn sm" style="flex:1" data-venceu="${esc(j.id_jogo)}|A">🏆 ${esc(j.time_a)}</button>
+                      <button type="button" class="btn sm" style="flex:1" data-venceu="${esc(j.id_jogo)}|B">🏆 ${esc(j.time_b)}</button>
+                    </div>
+                  </div>
+                  <div class="mc-actions">
+                    <button type="button" class="btn sm" data-salvar-jogo="${esc(j.id_jogo)}" style="flex:1">
+                      ${fin?"✓ Atualizar Placar":"✓ Salvar Placar"}
+                    </button>
+                    <button type="button" class="btn-win-alt" data-wo-toggle="${esc(j.id_jogo)}" title="Escolher vencedor sem placar ou em caso de W.O.">W.O. / Vencedor</button>
+                  </div>
+                `:""}
+              </div>
+            `;
+          }).join("")}
+        </div>
+      `).join("")}
+    `}
   `;
 }
 
@@ -1873,13 +1897,13 @@ el.onclick=async e=>{
   const cardScroll=e.target.closest("[data-scroll-mc]");
   if(cardScroll){
     const idAlvo=cardScroll.dataset.scrollMc;
-    if(A.faseTorneio){A.faseTorneio="";admInsc(el,r)}
+    A.torModo="placares";A.faseTorneio="";admInsc(el,r);
     const mcEl=document.getElementById("mc-"+idAlvo);
     if(mcEl){mcEl.scrollIntoView({behavior:"smooth",block:"center"});mcEl.style.boxShadow="0 0 0 3px var(--green)";setTimeout(()=>{mcEl.style.boxShadow=""},1800)}
     return;
   }
   const b=e.target.closest("button");if(!b)return;const d=b.dataset;
-  if(d.t){A.tab=d.t;admin()}else if(d.out){encerrarSessao()}else if(d.sub){A.subTab=d.sub;admInsc(el,r)}else if(d.faseF!==undefined){A.faseTorneio=d.faseF;admInsc(el,r)}else if(d.ia==="torneio")abrirModalTorneio(ev,rows);else if(d.ia==="csv")csvBaixar(ev,rows);else if(d.ia==="xls")excelBaixar(ev,rows);else if(d.ia==="sumula")imprimirSumula(ev,rows);else if(d.ia)formInsc(ev,d.ia,null);
+  if(d.t){A.tab=d.t;admin()}else if(d.out){encerrarSessao()}else if(d.sub){A.subTab=d.sub;admInsc(el,r)}else if(d.torModo){A.torModo=d.torModo;admInsc(el,r)}else if(d.faseF!==undefined){A.faseTorneio=d.faseF;admInsc(el,r)}else if(d.woToggle){const tBox=document.getElementById("tie-"+d.woToggle);if(tBox)tBox.classList.toggle("on")}else if(d.step){const[idJ,lado,delta]=d.step.split("|"),inp=el.querySelector(`[data-s${lado.toLowerCase()}="${idJ}"]`);if(inp){const v=Math.max(0,(parseInt(inp.value,10)||0)+(+delta));inp.value=String(v)}}else if(d.ia==="torneio")abrirModalTorneio(ev,rows);else if(d.ia==="csv")csvBaixar(ev,rows);else if(d.ia==="xls")excelBaixar(ev,rows);else if(d.ia==="sumula")imprimirSumula(ev,rows);else if(d.ia)formInsc(ev,d.ia,null);
   else if(d.torAvancar&&tor){
     b.disabled=true;b.textContent="Atualizando...";
     preencherFinaisDosGrupos(tor);
