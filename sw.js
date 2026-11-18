@@ -1,4 +1,4 @@
-const CACHE_NAME = "smel-caxias-v4";
+const CACHE_NAME = "smel-caxias-v5";
 const STATIC_ASSETS = [
   "./",
   "./index.html",

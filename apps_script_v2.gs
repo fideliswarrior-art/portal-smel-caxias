@@ -472,10 +472,11 @@ function checar(ev, p, ins, o) {
   const at = (p.atletas || []).filter(a => a && a.nome), time = String(p.time || "").trim(), t = time.toLowerCase();
   if (mx > 1 && !time) return {erro:"Informe o nome do time."};
   if (at.length < mn || at.length > mx) return {erro:"Este evento exige de " + mn + " a " + mx + " atleta(s) por inscrição."};
-  for (const a of at) {
-    const fone = String(a.telefone).replace(/\D/g, ""), idade = +a.idade;
+  for (let i = 0; i < at.length; i++) {
+    const a = at[i], fone = String(a.telefone).replace(/\D/g, ""), idade = +a.idade, em = String(a.email || "").trim();
     if (!cpfOk(a.cpf)) return {erro:"CPF inválido: " + a.cpf};
-    if (!(idade > 0 && idade < 100) || fone.length < 10 || fone.length > 11 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(a.email)) return {erro:"Dados incompletos ou inválidos para " + a.nome + "."};
+    if (!(idade > 0 && idade < 100) || fone.length < 10 || fone.length > 11) return {erro:"Dados incompletos ou inválidos para " + a.nome + "."};
+    if ((i === 0 || em) && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) return {erro:"E-mail inválido para " + a.nome + "."};
   }
   const cpfs = new Set(ins.map(i => i.cpf.replace(/\D/g, ""))), novos = at.map(a => String(a.cpf).replace(/\D/g, ""));
   if (new Set(novos).size !== novos.length) return {erro:"Há CPF repetido na lista de atletas."};
@@ -531,20 +532,36 @@ function inscrever(p) {
   } finally { lock.releaseLock(); }
 }
 
-// ---- Minha inscrição: consultar e editar pelo código ----
-function achar(codigo) {
-  const c = String(codigo || "").trim().toUpperCase(); if (!/^[A-Z][A-Z0-9]{5}$/.test(c)) return null;
-  const l = indice().getDataRange().getValues().find(r => String(r[0]).toUpperCase() === c); if (!l) return null;
-  const rows = lerInsc(String(l[1])).filter(i => i.codigo.trim().toUpperCase() === c);
-  return rows.length ? {rows, evId:String(l[1]), codigo:c} : null;
+// ---- Minha inscrição: consultar e editar pelo código ou CPF ----
+function achar(codigoOuCpf) {
+  const raw = String(codigoOuCpf || "").trim(), c = raw.toUpperCase();
+  if (/^[A-Z][A-Z0-9]{5}$/.test(c)) {
+    const l = indice().getDataRange().getValues().find(r => String(r[0]).toUpperCase() === c); if (!l) return null;
+    const rows = lerInsc(String(l[1])).filter(i => i.codigo.trim().toUpperCase() === c);
+    return rows.length ? {rows, evId:String(l[1]), codigo:c} : null;
+  }
+  const cpfLimpo = raw.replace(/\D/g, "");
+  if (cpfLimpo.length === 11 && cpfOk(cpfLimpo)) {
+    const evs = eventos().slice().reverse();
+    for (let k = 0; k < evs.length; k++) {
+      const lista = lerInsc(evs[k].id);
+      const achou = lista.find(i => String(i.cpf || "").replace(/\D/g, "") === cpfLimpo);
+      if (achou && achou.codigo) {
+        const cod = achou.codigo.trim().toUpperCase();
+        const rows = lista.filter(i => i.codigo.trim().toUpperCase() === cod);
+        return rows.length ? {rows, evId:evs[k].id, codigo:cod} : null;
+      }
+    }
+  }
+  return null;
 }
 function minha(p) {
   if (!verificarRateLimit("falha_cod", 10, 900)) return {ok:0, msg:"Muitas tentativas inválidas. Por segurança, aguarde 15 minutos e tente de novo."};
-  const f = achar(p.codigo);
+  const f = achar(p.codigo || p.cpf);
   if (!f) {
     Utilities.sleep(350);
     registrarFalhaRateLimit("falha_cod", 900);
-    return {ok:0, msg:"Código não encontrado. Confira as 6 letras e números."};
+    return {ok:0, msg:"Inscrição não encontrada. Confira o código (6 caracteres) ou o CPF."};
   }
   const ev = eventos().find(e => e.id === f.evId) || {}, r = f.rows;
   return {ok:1, codigo:f.codigo, protocolo:r[0].protocolo, situacao:r[0].status_aprovacao, editavel:aberto(ev),
@@ -826,7 +843,57 @@ function admin(p) {
       const ev = eventos().find(e => e.id === p.evento_id);
       if (!ev) return {ok:0, msg:"Evento não encontrado."};
       const sh = abaJogos(ev.id, true), h = cabecalho(sh);
-      // Se o cliente enviou a lista completa de partidas (com avanço automático de mata-mata), grava de forma atômica
+      const atuais = lerJogos(ev.id);
+      const compactarJogos = arr => arr.map(x => {
+        const c = {};
+        Object.keys(x).forEach(k => { if (k !== "_row" && x[k] !== "" && x[k] !== undefined && x[k] !== null) c[k] = x[k]; });
+        return c;
+      });
+      const espelhar = listaLimpa => {
+        try {
+          const shEv = aba("eventos"), hEv = cabecalho(shEv), colCh = hEv.indexOf("link_challonge_embed") + 1;
+          if (colCh > 0 && ev._row) {
+            const pacote = {
+              formato: p.formato || (listaLimpa[0] && listaLimpa[0].formato) || "mata_mata",
+              num_grupos: p.num_grupos || 2,
+              passam_por_grupo: p.passam_por_grupo || 2,
+              partidas: compactarJogos(listaLimpa),
+              updated_at: Date.now()
+            };
+            const json = "SMEL_TORNEIO:" + JSON.stringify(pacote);
+            if (json.length < 49500) shEv.getRange(ev._row, colCh).setValue(json);
+          }
+        } catch (eMir2) {}
+      };
+
+      // Merge atômico por id_jogo: preserva placares salvos por outros mesários simultâneos em outras quadras!
+      if (atuais.length && p.id_jogo) {
+        const alvo = atuais.find(x => String(x.id_jogo) === String(p.id_jogo));
+        if (!alvo) return {ok:0, msg:"Partida não encontrada."};
+        if (p.placar_a !== undefined) alvo.placar_a = String(p.placar_a);
+        if (p.placar_b !== undefined) alvo.placar_b = String(p.placar_b);
+        if (p.vencedor !== undefined) alvo.vencedor = String(p.vencedor);
+        alvo.status_jogo = p.status_jogo || "finalizado";
+        const gravarLinha = obj => {
+          const linha = h.map(k => obj[k] === undefined ? "" : cel(obj[k]));
+          sh.getRange(obj._row, 1, 1, h.length).setValues([linha]);
+        };
+        gravarLinha(alvo);
+        if (alvo.proximo_jogo_id && alvo.vencedor && alvo.vencedor !== "EMPATE") {
+          const prox = atuais.find(x => String(x.id_jogo) === String(alvo.proximo_jogo_id));
+          if (prox) {
+            if (String(alvo.proximo_slot).toUpperCase() === "B") prox.time_b = alvo.vencedor;
+            else prox.time_a = alvo.vencedor;
+            gravarLinha(prox);
+          }
+        }
+        const limpas = atuais.map(x => { const o = Object.assign({}, x); delete o._row; return o; });
+        espelhar(limpas);
+        registrarAuditoria(usr, "Atualizar Placar", usr + " registrou placar no evento '" + ev.nome + "' (" + (p.resumo || ("Jogo " + p.id_jogo)) + ")");
+        limpa();
+        return {ok:1, partidas:limpas};
+      }
+
       if (Array.isArray(p.partidas) && p.partidas.length) {
         if (sh.getLastRow() > 1) {
           sh.getRange(2, 1, sh.getLastRow() - 1, Math.max(1, sh.getLastColumn())).clearContent();
@@ -836,29 +903,7 @@ function admin(p) {
           return h.map(k => obj[k] === undefined ? "" : cel(obj[k]));
         });
         sh.getRange(2, 1, novas.length, h.length).setValues(novas);
-        try {
-          const shEv = aba("eventos"), hEv = cabecalho(shEv), colCh = hEv.indexOf("link_challonge_embed") + 1;
-          if (colCh > 0 && ev._row) {
-            const pacote = {formato: p.formato || (p.partidas[0] && p.partidas[0].formato) || "mata_mata", num_grupos: p.num_grupos || 2, passam_por_grupo: p.passam_por_grupo || 2, times: p.times || [], partidas: p.partidas};
-            shEv.getRange(ev._row, colCh).setValue("SMEL_TORNEIO:" + JSON.stringify(pacote));
-          }
-        } catch (eMir2) {}
-      } else {
-        const jgs = lerJogos(ev.id);
-        const alvo = jgs.find(x => String(x.id_jogo) === String(p.id_jogo));
-        if (!alvo) return {ok:0, msg:"Partida não encontrada."};
-        const col = k => h.indexOf(k) + 1;
-        if (col("placar_a")) sh.getRange(alvo._row, col("placar_a")).setValue(cel(p.placar_a));
-        if (col("placar_b")) sh.getRange(alvo._row, col("placar_b")).setValue(cel(p.placar_b));
-        if (col("vencedor")) sh.getRange(alvo._row, col("vencedor")).setValue(cel(p.vencedor));
-        if (col("status_jogo")) sh.getRange(alvo._row, col("status_jogo")).setValue(cel(p.status_jogo || "finalizado"));
-        if (alvo.proximo_jogo_id && p.vencedor && p.vencedor !== "EMPATE") {
-          const prox = jgs.find(x => String(x.id_jogo) === String(alvo.proximo_jogo_id));
-          if (prox) {
-            const slotCol = String(alvo.proximo_slot).toUpperCase() === "B" ? col("time_b") : col("time_a");
-            if (slotCol) sh.getRange(prox._row, slotCol).setValue(cel(p.vencedor));
-          }
-        }
+        espelhar(p.partidas);
       }
       registrarAuditoria(usr, "Atualizar Placar", usr + " registrou placar no evento '" + ev.nome + "' (" + (p.resumo || ("Jogo " + (p.id_jogo || ""))) + ")");
       limpa();
