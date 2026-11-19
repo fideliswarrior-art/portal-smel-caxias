@@ -1,4 +1,4 @@
-const CACHE_NAME = "smel-caxias-v5";
+const CACHE_NAME = "smel-caxias-v6";
 const STATIC_ASSETS = [
   "./",
   "./index.html",
@@ -27,8 +27,8 @@ self.addEventListener("fetch", event => {
   if (req.method !== "GET") return;
   const url = new URL(req.url);
 
-  // Não intercepta chamadas da API do Google Apps Script
-  if (url.hostname.includes("script.google.com") || url.hostname.includes("script.googleusercontent.com")) {
+  // Não intercepta chamadas da API do Google Apps Script nem do Supabase
+  if (url.hostname.includes("script.google.com") || url.hostname.includes("script.googleusercontent.com") || url.hostname.includes("supabase.co")) {
     return;
   }
 

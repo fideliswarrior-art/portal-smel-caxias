@@ -197,6 +197,8 @@ footer{background:var(--navy);color:#dbe4f0;padding:22px 14px 80px;margin-top:36
 /* ===== CONFIGURAÇÃO ===== */
 const CFG={WHATSAPP:"5521999999999",TEL:"(21) 0000-0000",EMAIL:"esportes@duquedecaxias.rj.gov.br",GINASIOS:"Ginásio Central · Ginásio da Vila São Luís",
 STATS:{c:42,t:118,a:3600},
+SUPABASE_URL:"https://btlvtxccstjicqiwppjz.supabase.co",
+SUPABASE_KEY:"sb_publishable_oHW4Y_hs4HVRLTRRDts6Lg_9YmJEX7w",
 SCRIPT_URL:"https://script.google.com/macros/s/AKfycbw8pG93KkAWXq6OkZRTpg20sCjNTLsfT0wH35tUqEgEsaQVVJdlgg72n_wqH0yh9K-7/exec", /* URL do Web App (Apps Script) */
 PLANILHA_URL:"https://docs.google.com/spreadsheets/d/1vRtMEpKMmz2ly2-_pfmziDMQZqQeI8arTa60nEyU97mk7x9CHlGaJO4DH_hvdVxjdIhDOU7frneZEHB/edit" /* atalho "Abrir planilha" dentro do Acesso Servidores */};
 const DEMO={
@@ -252,8 +254,275 @@ function toast(msg,erro){
   clearTimeout(_toastTimer);
   _toastTimer=setTimeout(()=>{el.hidden=true},2600);
 }
+const SB_URL=CFG.SUPABASE_URL,SB_KEY=CFG.SUPABASE_KEY;
+async function sbReq(path,opts={}){
+  const hdr={"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json",...(opts.headers||{})};
+  const r=await fetch(SB_URL+"/rest/v1/"+path,{...opts,headers:hdr});
+  if(!r.ok){const txt=await r.text().catch(()=>"");throw new Error(txt||("HTTP "+r.status))}
+  const ct=r.headers.get("content-type")||"";
+  return ct.includes("json")?r.json():null;
+}
+async function sbUpload(path,b64){
+  const m=String(b64||"").match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
+  if(!m)return"";
+  const bin=atob(m[2]),arr=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
+  const blob=new Blob([arr],{type:m[1]});
+  const r=await fetch(SB_URL+"/storage/v1/object/smel-midias/"+path,{
+    method:"POST",
+    headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":m[1],"x-upsert":"true"},
+    body:blob
+  });
+  if(!r.ok)return"";
+  return SB_URL+"/storage/v1/object/public/smel-midias/"+path;
+}
+async function sbListStorage(prefix){
+  try{
+    const r=await fetch(SB_URL+"/storage/v1/object/list/smel-midias",{
+      method:"POST",
+      headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json"},
+      body:JSON.stringify({prefix,limit:60,sortBy:{column:"name",order:"asc"}})
+    });
+    if(!r.ok)return[];
+    const list=await r.json();
+    return(list||[]).filter(f=>f.name&&!f.name.startsWith(".")).map(f=>{
+      const full=prefix+f.name,url=SB_URL+"/storage/v1/object/public/smel-midias/"+full;
+      return{id:full,nome:f.name,thumb:url,link:url};
+    });
+  }catch(e){return[]}
+}
+async function sbHash(login,senha){
+  const raw="SMEL_CAXIAS_SALT_V1:"+String(login||"").trim().toLowerCase()+":"+String(senha||"").trim();
+  const buf=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(raw));
+  return"sha256:"+Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+async function sbAudit(servidor,acao,detalhes){
+  try{await sbReq("auditoria",{method:"POST",body:JSON.stringify({data_hora:agoraBR(),servidor:servidor||"sistema",acao,detalhes})})}catch(e){}
+}
+const sbSlug=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+
+async function sbApi(p){
+  const ac=p.acao;
+  if(ac==="publico"){
+    const[evs,jgs,cols,fds,inscs,homeF]=await Promise.all([
+      sbReq("eventos?select=*&order=data_inicio.asc"),
+      sbReq("partidas?select=*&order=id.asc"),
+      sbReq("colocacoes?select=*&order=colocacao.asc"),
+      sbReq("feed?select=*&order=id.desc"),
+      sbReq("inscricoes?select=evento_id,time,status_aprovacao"),
+      sbListStorage("home/")
+    ]);
+    const partidas={},cntMap={},vagasMap={};
+    (jgs||[]).forEach(j=>{(partidas[j.evento_id]=partidas[j.evento_id]||[]).push(j)});
+    (inscs||[]).forEach(i=>{
+      cntMap[i.evento_id]=(cntMap[i.evento_id]||0)+1;
+      if(i.status_aprovacao!=="Recusada")(vagasMap[i.evento_id]=vagasMap[i.evento_id]||[]).push(i);
+    });
+    let realizados=0,ativos=0;
+    const eventos=(evs||[]).map(e=>{
+      normEv(e);
+      e.total_atletas=String(cntMap[e.id]||0);
+      if(/^encerr/i.test(e.status||""))realizados++;else ativos++;
+      const vat=vagasMap[e.id]||[];
+      e.inscritos=String(+e.max_atletas>1?new Set(vat.map(x=>(x.time||"").trim().toLowerCase())).size:vat.length);
+      if(partidas[e.id])e.partidas=partidas[e.id];
+      return e;
+    });
+    return{eventos,partidas,stats:{realizados,ativos,atletas:(inscs||[]).length},feed:fds||[],colocacoes:cols||[],home_fotos:homeF};
+  }
+  if(ac==="fotos"){
+    if(!p.pasta)return{ok:1,fotos:[]};
+    const m=String(p.pasta).match(/^sb:\/\/(.+)$/);
+    if(m)return{ok:1,fotos:await sbListStorage(m[1])};
+    return{ok:1,fotos:[]};
+  }
+  if(ac==="inscrever"){
+    const evs=await sbReq("eventos?id=eq."+encodeURIComponent(p.evento_id));
+    const ev=evs&&evs[0];if(!ev)return{ok:0,msg:"Evento não encontrado."};
+    normEv(ev);
+    if(!/^aberto/i.test(ev.status)||jaPassou(ev))return{ok:0,msg:"As inscrições deste evento estão encerradas."};
+    if(p.termo!==true)return{ok:0,msg:"É necessário aceitar o Termo de Responsabilidade."};
+    const ins=await sbReq("inscricoes?evento_id=eq."+encodeURIComponent(ev.id)+"&status_aprovacao=neq.Recusada");
+    const cpfs=new Set((ins||[]).map(i=>String(i.cpf||"").replace(/\D/g,"")));
+    const dup=(p.atletas||[]).find(a=>cpfs.has(String(a.cpf||"").replace(/\D/g,"")));
+    if(dup)return{ok:0,msg:"O CPF "+dup.cpf+" já está inscrito neste evento."};
+    const mx=Math.max(1,+ev.max_atletas||1);
+    const vAtual=mx>1?new Set((ins||[]).map(i=>(i.time||"").trim().toLowerCase())).size:(ins||[]).length;
+    if(+ev.max_vagas>0&&vAtual+1>+ev.max_vagas)return{ok:0,msg:"Vagas esgotadas."};
+    const L="ABCDFGHJKLMNPQRSTUVWXYZ",AL="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    let cod=L[Math.floor(Math.random()*L.length)];for(let i=1;i<6;i++)cod+=AL[Math.floor(Math.random()*AL.length)];
+    const proto="PROTOCOLO-"+new Date().getFullYear()+"-"+String(Math.floor(1000+Math.random()*9000));
+    const rows=(p.atletas||[]).map(a=>({
+      codigo:cod,protocolo:proto,time:p.time||"",instagram_time:p.instagram_time||"",
+      nome:a.nome,idade:String(a.idade||""),telefone:a.telefone||"",cpf:a.cpf,email:a.email||"",rede_social:a.rede_social||"",
+      status_aprovacao:"Pendente",origem:"site",termo:"Aceito em "+hojeISO(),evento_id:ev.id,evento:ev.nome
+    }));
+    await sbReq("inscricoes",{method:"POST",body:JSON.stringify(rows)});
+    return{ok:1,protocolo:proto,codigo:cod};
+  }
+  if(ac==="minha"){
+    const raw=String(p.codigo||p.cpf||"").trim(),c=raw.toUpperCase(),cpfD=raw.replace(/\D/g,"");
+    let rows=[];
+    if(/^[A-Z][A-Z0-9]{5}$/.test(c)){
+      rows=await sbReq("inscricoes?codigo=eq."+encodeURIComponent(c)+"&order=id.asc");
+    }else if(cpfD.length===11){
+      const all=await sbReq("inscricoes?select=*&order=id.desc");
+      const hit=(all||[]).find(i=>String(i.cpf||"").replace(/\D/g,"")===cpfD);
+      if(hit)rows=(all||[]).filter(i=>i.codigo===hit.codigo&&i.evento_id===hit.evento_id);
+    }
+    if(!rows||!rows.length)return{ok:0,msg:"Inscrição não encontrada. Confira o código ou CPF."};
+    const evs=await sbReq("eventos?id=eq."+encodeURIComponent(rows[0].evento_id));
+    const ev=normEv((evs&&evs[0])||{id:rows[0].evento_id,nome:rows[0].evento});
+    const ed=/^aberto/i.test(ev.status||"")&&!jaPassou(ev);
+    return{ok:1,codigo:rows[0].codigo,protocolo:rows[0].protocolo,situacao:rows[0].status_aprovacao,editavel:ed,evento:ev,time:rows[0].time,instagram_time:rows[0].instagram_time,atletas:rows};
+  }
+  if(ac==="editar"){
+    const c=String(p.codigo||"").trim().toUpperCase();
+    const old=await sbReq("inscricoes?codigo=eq."+encodeURIComponent(c)+"&order=id.asc");
+    if(!old||!old.length)return{ok:0,msg:"Código não encontrado."};
+    await sbReq("inscricoes?codigo=eq."+encodeURIComponent(c),{method:"DELETE"});
+    const rows=(p.atletas||[]).map(a=>({
+      codigo:c,protocolo:old[0].protocolo,time:old[0].time||"",instagram_time:p.instagram_time||old[0].instagram_time||"",
+      nome:a.nome,idade:String(a.idade||""),telefone:a.telefone||"",cpf:a.cpf,email:a.email||"",rede_social:a.rede_social||"",
+      status_aprovacao:old[0].status_aprovacao,origem:old[0].origem,termo:old[0].termo,evento_id:old[0].evento_id,evento:old[0].evento
+    }));
+    await sbReq("inscricoes",{method:"POST",body:JSON.stringify(rows)});
+    return{ok:1};
+  }
+  if(ac==="login"){
+    const lg=String(p.login||"").trim().toLowerCase(),pw=String(p.senha||"").trim();
+    if(!lg||!pw)return{ok:0,msg:"Informe login e senha."};
+    const us=await sbReq("usuarios?login=eq."+encodeURIComponent(lg));
+    const u=us&&us[0],h=await sbHash(lg,pw);
+    if(!u||(u.senha!==h&&u.senha!==pw))return{ok:0,msg:"Login ou senha incorretos."};
+    if(u.senha!==h)sbReq("usuarios?id=eq."+u.id,{method:"PATCH",body:JSON.stringify({senha:h})}).catch(()=>{});
+    const tok="sb_"+crypto.randomUUID();
+    if(p.modo!=="confirmar")sbAudit(lg,"Login",lg+" iniciou sessão no painel administrativo");
+    return{ok:1,token:tok,login:lg};
+  }
+  if(ac==="logout"){sbAudit(A.user||"servidor","Logout",(A.user||"servidor")+" encerrou a sessão");return{ok:1}}
+  if(!p.token)return{ok:0,msg:"Sessão expirada. Entre novamente.",expirou:1};
+  const usr=A.user||"servidor";
+  if(ac==="listar"){
+    if(p.aba==="auditoria")return{ok:1,rows:await sbReq("auditoria?order=id.desc&limit=200")};
+    if(p.aba==="inscricoes"){
+      const[evs,rows]=await Promise.all([sbReq("eventos?select=*&order=data_inicio.asc"),p.evento_id?sbReq("inscricoes?evento_id=eq."+encodeURIComponent(p.evento_id)+"&order=id.asc"):Promise.resolve([])]);
+      const ev=(evs||[]).find(e=>e.id===p.evento_id)||null;if(ev)normEv(ev);
+      return{ok:1,rows:rows||[],eventos:(evs||[]).map(e=>({id:e.id,nome:e.nome})),evento:ev};
+    }
+    if(p.aba==="eventos"){
+      const evs=await sbReq("eventos?select=*&order=data_inicio.asc");
+      const rows=(evs||[]).map(e=>{normEv(e);e._row=e.id;return e});
+      return{ok:1,rows,eventos:rows.map(e=>({id:e.id,nome:e.nome}))};
+    }
+    const[evs,rows]=await Promise.all([sbReq("eventos?select=id,nome"),sbReq(p.aba+"?select=*&order=id.asc")]);
+    return{ok:1,rows:(rows||[]).map(r=>({...r,_row:r.id})),eventos:evs||[]};
+  }
+  if(ac==="salvar"){
+    const d={...(p.dados||{})};const rowId=d._row;delete d._row;delete d.total_atletas;delete d.inscritos;delete d.partidas;
+    if(p.aba==="eventos"){
+      if(!d.id)d.id=sbSlug(d.nome)+(d.data_inicio?"-"+String(d.data_inicio).slice(0,4):"")+"-"+String(Date.now()).slice(-4);
+      if(p.capa_b64){
+        const urlCapa=await sbUpload("eventos/"+d.id+"/capa-"+Date.now()+".jpg",p.capa_b64);
+        if(urlCapa)d.imagem_url=urlCapa;
+      }
+      if(!d.pasta_fotos_url)d.pasta_fotos_url="sb://eventos/"+d.id+"/fotos/";
+      await sbReq("eventos",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates"},body:JSON.stringify(d)});
+      sbAudit(usr,(rowId?"Edição":"Criação")+" (eventos)",usr+" salvou '"+(d.nome||d.id)+"'");
+      return{ok:1};
+    }
+    if(rowId)await sbReq(p.aba+"?id=eq."+encodeURIComponent(rowId),{method:"PATCH",body:JSON.stringify(d)});
+    else await sbReq(p.aba,{method:"POST",body:JSON.stringify(d)});
+    sbAudit(usr,(rowId?"Edição":"Criação")+" ("+p.aba+")",usr+" salvou registro em "+p.aba);
+    return{ok:1};
+  }
+  if(ac==="excluir"){
+    await sbReq(p.aba+"?id=eq."+encodeURIComponent(p.row),{method:"DELETE"});
+    sbAudit(usr,"Exclusão ("+p.aba+")",usr+" excluiu registro "+p.row+" de "+p.aba);
+    return{ok:1};
+  }
+  if(ac==="uploadFotos"){
+    const prefix="eventos/"+p.evento_id+"/fotos/";
+    let enviadas=0;
+    for(let i=0;i<(p.arquivos||[]).length;i++){
+      const arq=p.arquivos[i],nm=(Date.now()+i)+"-"+sbSlug(arq.nome||"foto")+".jpg";
+      const u=await sbUpload(prefix+nm,arq.b64);
+      if(u)enviadas++;
+    }
+    const pf="sb://"+prefix;
+    await sbReq("eventos?id=eq."+encodeURIComponent(p.evento_id),{method:"PATCH",body:JSON.stringify({pasta_fotos_url:pf})});
+    sbAudit(usr,"Upload de Fotos",usr+" enviou "+enviadas+" foto(s) para "+p.evento_id);
+    return{ok:1,enviadas,pasta_fotos_url:pf};
+  }
+  if(ac==="excluirFoto"){
+    if(p.foto_id){
+      await fetch(SB_URL+"/storage/v1/object/smel-midias/"+p.foto_id,{method:"DELETE",headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}});
+    }
+    sbAudit(usr,"Exclusão de Foto",usr+" removeu a foto "+(p.nome||p.foto_id));
+    return{ok:1};
+  }
+  if(ac==="salvarPartidas"||ac==="atualizarPlacar"){
+    if(ac==="atualizarPlacar"&&p.id_jogo){
+      await sbReq("partidas?evento_id=eq."+encodeURIComponent(p.evento_id)+"&id_jogo=eq."+encodeURIComponent(p.id_jogo),{
+        method:"PATCH",
+        body:JSON.stringify({placar_a:String(p.placar_a??""),placar_b:String(p.placar_b??""),vencedor:String(p.vencedor||""),status_jogo:p.status_jogo||"finalizado"})
+      });
+      const atuais=await sbReq("partidas?evento_id=eq."+encodeURIComponent(p.evento_id)+"&order=id.asc");
+      const jg=(atuais||[]).find(x=>String(x.id_jogo)===String(p.id_jogo));
+      if(jg&&jg.proximo_jogo_id&&jg.vencedor&&jg.vencedor!=="EMPATE"){
+        const campo=String(jg.proximo_slot).toUpperCase()==="B"?"time_b":"time_a";
+        await sbReq("partidas?evento_id=eq."+encodeURIComponent(p.evento_id)+"&id_jogo=eq."+encodeURIComponent(jg.proximo_jogo_id),{
+          method:"PATCH",body:JSON.stringify({[campo]:jg.vencedor})
+        });
+      }
+      const finalList=await sbReq("partidas?evento_id=eq."+encodeURIComponent(p.evento_id)+"&order=id.asc");
+      sbAudit(usr,"Atualizar Placar",usr+" registrou placar em "+p.evento_id+" ("+(p.resumo||p.id_jogo)+")");
+      return{ok:1,partidas:finalList||[]};
+    }
+    await sbReq("partidas?evento_id=eq."+encodeURIComponent(p.evento_id),{method:"DELETE"});
+    if(Array.isArray(p.partidas)&&p.partidas.length){
+      const lista=p.partidas.map((j,idx)=>({...j,id_jogo:j.id_jogo||("J"+(idx+1)),evento_id:p.evento_id}));
+      await sbReq("partidas",{method:"POST",body:JSON.stringify(lista)});
+    }
+    sbAudit(usr,"Torneio",usr+" salvou tabela de jogos de "+p.evento_id);
+    return{ok:1,total:(p.partidas||[]).length};
+  }
+  if(ac==="inscAdmin"){
+    const cod=p.codigo||(("A"+Math.random().toString(36).slice(2,7)).toUpperCase());
+    const proto="PROTOCOLO-"+new Date().getFullYear()+"-"+String(Math.floor(1000+Math.random()*9000));
+    if(p.codigo)await sbReq("inscricoes?evento_id=eq."+encodeURIComponent(p.evento_id)+"&codigo=eq."+encodeURIComponent(cod),{method:"DELETE"});
+    const rows=(p.atletas||[]).map(a=>({
+      codigo:cod,protocolo:proto,time:p.time||"",instagram_time:p.instagram_time||"",
+      nome:a.nome,idade:String(a.idade||""),telefone:a.telefone||"",cpf:a.cpf||"",email:a.email||"",rede_social:a.rede_social||"",
+      status_aprovacao:p.status||"Aprovada",origem:p.modo==="basica"?"admin-basica":"admin",termo:"Registrado pela Secretaria",evento_id:p.evento_id,evento:""
+    }));
+    await sbReq("inscricoes",{method:"POST",body:JSON.stringify(rows)});
+    sbAudit(usr,(p.codigo?"Edição":"Nova Inscrição"),usr+" salvou inscrição "+cod+" ("+(p.time||rows[0].nome)+")");
+    return{ok:1};
+  }
+  if(ac==="inscStatus"){
+    await sbReq("inscricoes?evento_id=eq."+encodeURIComponent(p.evento_id)+"&codigo=eq."+encodeURIComponent(p.codigo),{method:"PATCH",body:JSON.stringify({status_aprovacao:p.status})});
+    sbAudit(usr,"Status Inscrição",usr+" alterou "+p.codigo+" para "+p.status);
+    return{ok:1};
+  }
+  if(ac==="inscExcluir"){
+    await sbReq("inscricoes?evento_id=eq."+encodeURIComponent(p.evento_id)+"&codigo=eq."+encodeURIComponent(p.codigo),{method:"DELETE"});
+    sbAudit(usr,"Exclusão Inscrição",usr+" excluiu "+p.codigo);
+    return{ok:1};
+  }
+  return{ok:0};
+}
+
 const DS=CFG.SCRIPT_URL;
 async function api(p){
+  if(SB_URL&&SB_KEY){
+    const reqP=p.acao==="salvar"&&p.aba==="eventos"&&p.dados?{...p,dados:prepDadosEv(p.dados)}:p;
+    const j=await sbApi(reqP);
+    if(j&&Array.isArray(j.eventos))j.eventos.forEach(normEv);
+    if(j&&Array.isArray(j.rows)&&p.aba==="eventos")j.rows.forEach(normEv);
+    if(j&&j.evento)normEv(j.evento);
+    return j;
+  }
   if(!DS||(p.acao==="listar"&&p.aba==="auditoria"&&p.token==="demo"))return demo(p);
   const reqPayload=p.acao==="salvar"&&p.aba==="eventos"&&p.dados?{...p,dados:prepDadosEv(p.dados)}:p;
   const bodyStr=JSON.stringify(reqPayload);
