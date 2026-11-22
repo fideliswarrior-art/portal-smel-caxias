@@ -56,7 +56,7 @@ iframe.ch{width:100%;height:420px;border:1px solid var(--line);background:#fff}
 form{background:#fff;border:1px solid var(--line);border-radius:6px;padding:16px;max-width:720px}.f2{display:grid;gap:0 14px;grid-template-columns:1fr}@media(min-width:700px){.f2{grid-template-columns:1fr 1fr}}
 .safe{border-left:4px solid var(--green);background:#ecfdf5;padding:10px 12px;margin:10px 0;max-width:720px;font-size:14px;border-radius:0 6px 6px 0}
 .err{color:#b91c1c;font-weight:600;margin-top:8px;display:none;font-size:14px}.ck{display:flex;gap:10px;align-items:flex-start;margin-top:12px}.ck input{width:22px;min-height:22px;margin-top:2px}
-.m{position:fixed;inset:0;background:rgba(15,23,42,.88);display:none;align-items:center;justify-content:center;z-index:99;padding:12px}.m.on{display:flex}.m div{background:#fff;padding:20px;max-width:460px;border-radius:8px}
+.m{position:fixed;inset:0;background:rgba(15,23,42,.88);display:none;align-items:center;justify-content:center;z-index:99;padding:12px}.m.on{display:flex}.m>div{background:#fff;padding:20px;max-width:460px;border-radius:8px;text-align:center}
 footer{background:var(--navy);color:#dbe4f0;padding:22px 14px 80px;margin-top:36px}footer>div{max-width:1120px;margin:auto;text-align:center}footer a{color:#6ee7b7}
 .realizacao{background:#f7f4ed;color:var(--ink);border-radius:6px;padding:14px 18px;margin-bottom:12px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:14px 28px;border-bottom:3px solid var(--green)}
 .realizacao-lbl{font:700 17px/1.2 Barlow,sans-serif;color:#222}
@@ -64,7 +64,7 @@ footer{background:var(--navy);color:#dbe4f0;padding:22px 14px 80px;margin-top:36
 .realizacao-logos img{height:56px;width:auto;object-fit:contain;display:block}
 .wa{position:fixed;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));background:#128c4a;color:#fff;min-height:42px;padding:0 14px;display:flex;align-items:center;font:600 14px Barlow,sans-serif;text-decoration:none;border-radius:22px;z-index:8;box-shadow:0 2px 8px rgba(0,0,0,.3)}
 .pg{display:none}.pg.on{display:block}
-.btn[disabled]{background:#cbd5e1;color:#475569;cursor:not-allowed}.st.es{background:#b91c1c;border-color:#b91c1c;color:#fff}.prot{font:800 26px/1.2 "Barlow Condensed",sans-serif;color:var(--navy);margin:10px 0;word-break:break-all}.m div{text-align:center}.m .btn{width:100%;margin-top:8px}
+.btn[disabled]{background:#cbd5e1;color:#475569;cursor:not-allowed}.st.es{background:#b91c1c;border-color:#b91c1c;color:#fff}.prot{font:800 26px/1.2 "Barlow Condensed",sans-serif;color:var(--navy);margin:10px 0;word-break:break-all}.m>div .btn{width:100%;margin-top:8px}
 .at{border:1px solid var(--line);background:#fff;padding:6px 12px 12px;margin:12px 0;border-radius:6px}.at legend{font:800 19px "Barlow Condensed",sans-serif;text-transform:uppercase;color:var(--navy);padding:0 6px}.g4{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(145px,1fr))}.fp{display:block}.fp img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;border-radius:4px}
 @media(max-width:600px){.logo{height:44px}.realizacao-logos img{height:44px}}textarea{width:100%;font:15px Barlow;padding:8px 10px;border:1.5px solid #94a3b8;border-radius:6px;background:#fff}.ar{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:6px 0;flex-wrap:wrap}.tb{display:flex;gap:6px;flex-wrap:wrap}.sm{min-height:32px;font-size:13px;padding:0 10px}
 .hd>.btn{min-height:40px}nav{gap:12px}@media(min-width:1000px){.hd{flex-wrap:nowrap}.hd>.btn{white-space:nowrap}}.cols{display:grid;gap:24px;grid-template-columns:1fr}@media(min-width:900px){.cols{grid-template-columns:1.6fr 1fr}}
@@ -81,7 +81,7 @@ footer{background:var(--navy);color:#dbe4f0;padding:22px 14px 80px;margin-top:36
 .dn{min-width:48px}.dn b{display:block;font:800 24px/1 "Barlow Condensed",sans-serif}.dn span{font-size:12px;color:var(--mut);text-transform:uppercase}.dv{flex:1;min-width:0}
 .de{display:block;text-decoration:none;color:var(--ink);border-left:4px solid var(--navy);padding:5px 8px;background:#eef3fb;margin-bottom:4px;border-radius:0 4px 4px 0;font-size:14px}.de.ab{border-color:var(--green);background:#ecfdf5}.de.ne{border-color:#0284c7;background:#e0f2fe}.de.es{border-color:#b91c1c;background:#fef2f2}.de small{display:block;color:var(--mut);font-size:12px}
 @media(min-width:760px){.cw{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center;font-weight:600;color:var(--mut);margin-bottom:4px}.cg{grid-template-columns:repeat(7,1fr)}.dp{display:block}.dc{flex-direction:column;gap:4px;min-height:98px}.dn span{display:none}}
-.m{overflow:auto}.m div{max-height:92vh;overflow:auto}
+.m{overflow:auto}.m>div{max-height:92vh;overflow:auto}
 /* ===== PAINEL ADMIN MINIMALISTA & MOBILE-FIRST ===== */
 #admin-bar{background:#0f172a;color:#f8fafc;border-bottom:2px solid var(--green);padding:6px 12px;font-size:13px}
 #admin-bar .ab-wrap{max-width:1120px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:8px}
@@ -102,8 +102,8 @@ footer{background:var(--navy);color:#dbe4f0;padding:22px 14px 80px;margin-top:36
 /* ===== SISTEMA NATIVO DE CHAVEAMENTO VISUAL (ESTILO ÁRVORE DE CHAVES MOBILE-FIRST & UNIVERSAL) ===== */
 .btn-torneio{background:var(--navy);color:#fff;border:1.5px solid var(--green);font:700 14px Barlow,sans-serif;padding:0 14px;min-height:36px;display:inline-flex;align-items:center;gap:6px;cursor:pointer;border-radius:6px}
 .btn-torneio:hover{background:#0f172a}
-.m-torneio>div{max-width:680px;width:100%;text-align:left;padding:16px;border-top:4px solid var(--green)}
-.pres-bar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;background:#0f172a;color:#fff;padding:8px 12px;border-radius:6px;margin:8px 0;font-size:14px}
+.m-torneio>div{max-width:680px;width:100%;text-align:left!important;padding:16px;border-top:4px solid var(--green)}
+.pres-bar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;background:#0f172a!important;color:#fff!important;padding:10px 12px;border-radius:6px;margin:8px 0;font-size:14px}
 .pres-bar b{color:#6ee7b7;font:800 18px "Barlow Condensed",sans-serif}
 .pres-list{max-height:190px;overflow-y:auto;border:1px solid var(--line);background:#f8fafc;padding:6px;border-radius:6px;display:grid;gap:5px;grid-template-columns:repeat(auto-fill,minmax(175px,1fr))}
 .pres-item{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid #e2e8f0;padding:6px 8px;border-radius:4px;cursor:pointer;font-weight:600;margin:0;font-size:13.5px}
