@@ -2224,12 +2224,85 @@ ${G.map(g=>{
 const btnRefInsc=$("#btn-ref-insc");
 if(btnRefInsc)btnRefInsc.onclick=()=>{delete ADM_CACHE.inscricoes[A.ev];admin(true)};
 el.onclick=async e=>{
+function abrirModalPlacar(ev,tor,idJogo,el,r){
+  const jg=(tor&&tor.partidas||[]).find(x=>String(x.id_jogo)===String(idJogo));
+  if(!jg||jg.status_jogo==="bye"||jg.time_b==="BYE")return;
+  const tbdA=!jg.time_a||jg.time_a==="A definir"||jg.time_a.includes("º Grupo");
+  const tbdB=!jg.time_b||jg.time_b==="A definir"||jg.time_b.includes("º Grupo");
+  if(tbdA||tbdB){toast("Aguardando definição dos dois times para esta partida.",true);return}
+  const mod=$("#modal-torneio"),body=$("#modal-torneio-body");
+  let pa=jg.placar_a!==""?+jg.placar_a:0,pb=jg.placar_b!==""?+jg.placar_b:0;
+  body.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding-bottom:10px">
+      <div>
+        <div class="eb" style="margin:0;color:var(--green)">${esc(jg.fase||"Partida")}</div>
+        <h2 style="margin:2px 0 0;border:0;padding:0;font-size:20px">Lançar Placar</h2>
+      </div>
+      <button type="button" class="chip sm" id="mp-fechar">✕ Fechar</button>
+    </div>
+    <div style="display:grid;gap:10px;margin:14px 0">
+      <div class="mc-team" style="padding:12px">
+        <span class="mc-team-nm" style="font-size:16px">${esc(jg.time_a)}</span>
+        <div class="mc-stepper">
+          <button type="button" class="mc-step-btn" id="mp-am" style="width:42px;height:42px">−</button>
+          <input type="number" min="0" inputmode="numeric" class="score-inp" id="mp-a" value="${pa}" style="width:52px!important;height:42px!important;font-size:22px!important">
+          <button type="button" class="mc-step-btn" id="mp-ap" style="width:42px;height:42px">+</button>
+        </div>
+      </div>
+      <div class="mc-team" style="padding:12px">
+        <span class="mc-team-nm" style="font-size:16px">${esc(jg.time_b)}</span>
+        <div class="mc-stepper">
+          <button type="button" class="mc-step-btn" id="mp-bm" style="width:42px;height:42px">−</button>
+          <input type="number" min="0" inputmode="numeric" class="score-inp" id="mp-b" value="${pb}" style="width:52px!important;height:42px!important;font-size:22px!important">
+          <button type="button" class="mc-step-btn" id="mp-bp" style="width:42px;height:42px">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="err" id="mp-err"></div>
+    <button type="button" class="btn" id="mp-salvar" style="width:100%;min-height:50px;font-size:17px">✓ Salvar Resultado</button>
+    <div style="margin-top:12px;text-align:center">
+      <div class="mut" style="font-size:12px;margin-bottom:6px">Empatou ou foi W.O.? Escolha quem avançou:</div>
+      <div style="display:flex;gap:8px">
+        <button type="button" class="btn o sm" id="mp-wa" style="flex:1">🏆 ${esc(jg.time_a)}</button>
+        <button type="button" class="btn o sm" id="mp-wb" style="flex:1">🏆 ${esc(jg.time_b)}</button>
+      </div>
+    </div>
+  `;
+  const fechar=()=>mod.classList.remove("on");
+  $("#mp-fechar").onclick=fechar;
+  $("#mp-am").onclick=()=>{$("#mp-a").value=Math.max(0,(+$("#mp-a").value||0)-1)};
+  $("#mp-ap").onclick=()=>{$("#mp-a").value=(+$("#mp-a").value||0)+1};
+  $("#mp-bm").onclick=()=>{$("#mp-b").value=Math.max(0,(+$("#mp-b").value||0)-1)};
+  $("#mp-bp").onclick=()=>{$("#mp-b").value=(+$("#mp-b").value||0)+1};
+  const finalizar=(na,nb,venc)=>{
+    jg.placar_a=String(na);jg.placar_b=String(nb);jg.vencedor=venc;jg.status_jogo="finalizado";
+    if(jg.etapa==="mata_mata"&&venc&&venc!=="EMPATE")propagarVencedorMataMata(tor.partidas,jg,venc);
+    if(tor.formato==="grupos"&&jg.etapa==="grupos"){
+      const jgsGrp=tor.partidas.filter(x=>x.etapa==="grupos");
+      if(jgsGrp.length&&jgsGrp.every(x=>x.status_jogo==="finalizado"))preencherFinaisDosGrupos(tor);
+    }
+    fechar();
+    admInsc(el,r);
+    toast(!jg.proximo_jogo_id&&jg.etapa==="mata_mata"&&venc!=="EMPATE"?`🏆 Campeão definido: ${venc}!`:`✓ Placar ${na} x ${nb} salvo!`);
+    persistirTorneio(ev,tor,"atualizarPlacar",{id_jogo:jg.id_jogo,placar_a:jg.placar_a,placar_b:jg.placar_b,vencedor:jg.vencedor,status_jogo:jg.status_jogo,resumo:`${jg.time_a} ${na} x ${nb} ${jg.time_b}`}).catch(()=>{});
+  };
+  $("#mp-salvar").onclick=()=>{
+    const na=Math.max(0,+$("#mp-a").value||0),nb=Math.max(0,+$("#mp-b").value||0);
+    if(na===nb&&jg.etapa==="mata_mata"){
+      $("#mp-err").textContent="No Mata-Mata não pode empatar. Escolha o vencedor abaixo.";
+      $("#mp-err").style.display="block";
+      return;
+    }
+    finalizar(na,nb,na>nb?jg.time_a:nb>na?jg.time_b:"EMPATE");
+  };
+  $("#mp-wa").onclick=()=>finalizar(Math.max(0,+$("#mp-a").value||0),Math.max(0,+$("#mp-b").value||0),jg.time_a);
+  $("#mp-wb").onclick=()=>finalizar(Math.max(0,+$("#mp-a").value||0),Math.max(0,+$("#mp-b").value||0),jg.time_b);
+  mod.classList.add("on");
+}
+
   const cardScroll=e.target.closest("[data-scroll-mc]");
-  if(cardScroll){
-    const idAlvo=cardScroll.dataset.scrollMc;
-    A.torModo="placares";A.faseTorneio="";admInsc(el,r);
-    const mcEl=document.getElementById("mc-"+idAlvo);
-    if(mcEl){mcEl.scrollIntoView({behavior:"smooth",block:"center"});mcEl.style.boxShadow="0 0 0 3px var(--green)";setTimeout(()=>{mcEl.style.boxShadow=""},1800)}
+  if(cardScroll&&tor){
+    abrirModalPlacar(ev,tor,cardScroll.dataset.scrollMc,el,r);
     return;
   }
   const b=e.target.closest("button");if(!b)return;const d=b.dataset;
