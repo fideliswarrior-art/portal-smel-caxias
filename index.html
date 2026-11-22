@@ -1667,6 +1667,7 @@ function abrirModalTorneio(ev,rowsInsc){
     listaEquipes=[...new Set(torAtual.times)];
   }
   let estado={
+    passo:1,
     selecionados:new Set(listaEquipes),
     todasEquipes:listaEquipes.slice(),
     formato:(torAtual&&torAtual.formato)||"mata_mata",
@@ -1679,121 +1680,131 @@ function abrirModalTorneio(ev,rowsInsc){
     const potMM=proxPotencia2(Math.max(2,qtdConf));
     const byesMM=Math.max(0,potMM-qtdConf);
     body.innerHTML=`
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid var(--line);padding-bottom:10px">
         <div>
-          <div class="eb" style="margin:0;color:var(--green)">Modo Decisão Rápida · Beira de Quadra</div>
-          <h2 style="margin:4px 0 0;border:0;padding:0">🏆 Configurar / Gerar Torneio: ${esc(ev.nome)}</h2>
+          <div class="eb" style="margin:0;color:var(--green)">Passo ${estado.passo} de 2 · ${esc(ev.nome)}</div>
+          <h2 style="margin:2px 0 0;border:0;padding:0;font-size:20px">${estado.passo===1?"1. Quem está na quadra?":"2. Formato do Torneio"}</h2>
         </div>
-        <button type="button" class="chip sm" id="mt-fechar" style="min-height:38px">✕ Fechar</button>
+        <button type="button" class="chip sm" id="mt-fechar" style="min-height:36px">✕ Fechar</button>
       </div>
 
-      <div class="stp" style="margin-top:16px"><span>1</span><h2>Confirmação de Presença</h2></div>
-      <p class="mut" style="margin:4px 0 8px">Desmarque quem não compareceu na quadra (sem precisar excluir a inscrição) ou adicione times presentes na hora:</p>
-      <div class="pres-bar">
-        <div>Total confirmados: <b id="mt-cnt">${qtdConf} times</b></div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <button type="button" class="ab-btn" id="mt-all">Marcar todos</button>
-          <button type="button" class="ab-btn" id="mt-none">Desmarcar todos</button>
-          ${pendentes.length?`<button type="button" class="ab-btn painel" id="mt-inc-pend">+ Incluir ${pendentes.length} pendente(s)</button>`:""}
-        </div>
-      </div>
-      <div class="pres-list" id="mt-lista">
-        ${estado.todasEquipes.length?estado.todasEquipes.map((nm,idx)=>`
-          <label class="pres-item">
-            <input type="checkbox" data-tm="${esc(nm)}" ${estado.selecionados.has(nm)?"checked":""}>
-            <span>${idx+1}. ${esc(nm)}</span>
-          </label>
-        `).join(""):'<div class="mut" style="grid-column:1/-1;padding:8px">Nenhuma inscrição com status "Aprovada" ainda. Adicione equipes abaixo ou aprove inscrições.</div>'}
-      </div>
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <input id="mt-novo-time" placeholder="Chegou time na hora? Digite o nome da equipe..." style="min-height:42px;font-size:15px">
-        <button type="button" class="chip sm" id="mt-add-time" style="white-space:nowrap;border-color:var(--green);background:#ecfdf5;color:#065f46">+ Adicionar Time</button>
-      </div>
-
-      <div class="stp" style="margin-top:20px"><span>2</span><h2>Escolha do Formato</h2></div>
-      <div class="fmt-grid">
-        <div class="fmt-card ${estado.formato==="mata_mata"?"on":""}" data-fmt="mata_mata">
-          <h4>⚡ Mata-Mata Direto</h4>
-          <p>Eliminação simples. Calcula automaticamente "BYE" (folga) para completar chave de ${potMM} (${byesMM} folga${byesMM===1?"":"s"}).</p>
-        </div>
-        <div class="fmt-card ${estado.formato==="grupos"?"on":""}" data-fmt="grupos">
-          <h4>🛡️ Fase de Grupos + Finais</h4>
-          <p>Times jogam entre si dentro do grupo e os melhores colocados avançam para o mata-mata final.</p>
-        </div>
-        <div class="fmt-card ${estado.formato==="pontos_corridos"?"on":""}" data-fmt="pontos_corridos">
-          <h4>🔄 Todos Jogam / Pontos Corridos</h4>
-          <p>Sistema de liga ou rodadas somando pontos (Vitória = 3, Empate = 1) sem eliminação precoce.</p>
-        </div>
-      </div>
-
-      ${estado.formato==="grupos"?`
-        <div class="stp" style="margin-top:18px"><span>3</span><h2>Ajuste Automático de Grupos</h2></div>
-        <div class="f2" style="background:#f8fafc;border:1px solid var(--line);padding:12px;border-radius:3px">
-          <div>
-            <label for="mt-ng" style="margin-top:0">Dividir em quantos grupos?</label>
-            <select id="mt-ng">
-              ${[2,3,4,5].map(n=>`<option value="${n}" ${+estado.numGrupos===n?"selected":""}>${n} grupos</option>`).join("")}
-            </select>
-          </div>
-          <div>
-            <label for="mt-pg" style="margin-top:0">Quantos passam por grupo?</label>
-            <select id="mt-pg">
-              <option value="1" ${+estado.passamPorGrupo===1?"selected":""}>Apenas o 1º colocado</option>
-              <option value="2" ${+estado.passamPorGrupo===2?"selected":""}>1º e 2º colocados</option>
-            </select>
+      ${estado.passo===1?`
+        <p class="mut" style="margin:8px 0">Marque os times presentes ou adicione quem chegou na hora:</p>
+        <div class="pres-bar">
+          <div>Confirmados: <b id="mt-cnt">${qtdConf} times</b></div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button type="button" class="ab-btn" id="mt-all">Todos</button>
+            <button type="button" class="ab-btn" id="mt-none">Limpar</button>
+            ${pendentes.length?`<button type="button" class="ab-btn painel" id="mt-inc-pend">+ ${pendentes.length} pendente(s)</button>`:""}
           </div>
         </div>
-        <div class="calc-box" id="mt-calc">${textoMatematicoGrupos(qtdConf,estado.numGrupos,estado.passamPorGrupo)}</div>
-      `:estado.formato==="mata_mata"?`
-        <div class="calc-box" id="mt-calc">
-          Configuração calculada: <b>Chave de ${potMM} posições (${ nomeFaseMataMata(potMM) })</b> com <b>${qtdConf} times confirmados</b>${byesMM>0?` e <b>${byesMM} BYE (folga automática na 1ª fase)</b>`:` (sem necessidade de BYE)`}.
+        <div class="pres-list" id="mt-lista">
+          ${estado.todasEquipes.length?estado.todasEquipes.map((nm,idx)=>`
+            <label class="pres-item">
+              <input type="checkbox" data-tm="${esc(nm)}" ${estado.selecionados.has(nm)?"checked":""}>
+              <span>${idx+1}. ${esc(nm)}</span>
+            </label>
+          `).join(""):'<div class="mut" style="grid-column:1/-1;padding:8px">Nenhum time aprovado ainda. Adicione abaixo:</div>'}
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <input id="mt-novo-time" placeholder="Nome do time que chegou na hora..." style="min-height:42px;font-size:15px">
+          <button type="button" class="chip sm" id="mt-add-time" style="white-space:nowrap;border-color:var(--green);background:#ecfdf5;color:#065f46">+ Adicionar</button>
+        </div>
+        <div class="err" id="mt-err"></div>
+        <div class="row" style="margin-top:16px">
+          <button type="button" class="btn" id="mt-prox" style="width:100%;min-height:50px;font-size:17px">Próximo: Escolher Formato →</button>
         </div>
       `:`
-        <div class="calc-box" id="mt-calc">
-          Configuração calculada: <b>Todos contra Todos (Pontos Corridos)</b> com <b>${qtdConf} times confirmados</b> em tabela única de classificação.
+        <div class="fmt-grid" style="margin-top:12px">
+          <div class="fmt-card ${estado.formato==="mata_mata"?"on":""}" data-fmt="mata_mata">
+            <h4>⚡ Mata-Mata Direto</h4>
+            <p>Quem perder sai. Chave de ${potMM} (${byesMM} folga${byesMM===1?"":"s"}).</p>
+          </div>
+          <div class="fmt-card ${estado.formato==="grupos"?"on":""}" data-fmt="grupos">
+            <h4>🛡️ Grupos + Finais</h4>
+            <p>Jogam no grupo e os melhores vão pro mata-mata.</p>
+          </div>
+          <div class="fmt-card ${estado.formato==="pontos_corridos"?"on":""}" data-fmt="pontos_corridos">
+            <h4>🔄 Pontos Corridos</h4>
+            <p>Todos jogam somando pontos, sem eliminação.</p>
+          </div>
+        </div>
+
+        ${estado.formato==="grupos"?`
+          <div class="f2" style="background:#f8fafc;border:1px solid var(--line);padding:10px;border-radius:6px;margin-top:8px">
+            <div>
+              <label for="mt-ng" style="margin-top:0">Quantos grupos?</label>
+              <select id="mt-ng">
+                ${[2,3,4,5].map(n=>`<option value="${n}" ${+estado.numGrupos===n?"selected":""}>${n} grupos</option>`).join("")}
+              </select>
+            </div>
+            <div>
+              <label for="mt-pg" style="margin-top:0">Quantos passam?</label>
+              <select id="mt-pg">
+                <option value="1" ${+estado.passamPorGrupo===1?"selected":""}>Apenas o 1º</option>
+                <option value="2" ${+estado.passamPorGrupo===2?"selected":""}>1º e 2º colocados</option>
+              </select>
+            </div>
+          </div>
+          <div class="calc-box" id="mt-calc">${textoMatematicoGrupos(qtdConf,estado.numGrupos,estado.passamPorGrupo)}</div>
+        `:estado.formato==="mata_mata"?`
+          <div class="calc-box" id="mt-calc">
+            <b>${qtdConf} times confirmados</b> em chave de <b>${nomeFaseMataMata(potMM)}</b>${byesMM>0?` (${byesMM} folga automática)`:""}.
+          </div>
+        `:`
+          <div class="calc-box" id="mt-calc">
+            <b>${qtdConf} times confirmados</b> em tabela única de Pontos Corridos.
+          </div>
+        `}
+
+        <div class="err" id="mt-err"></div>
+        <div style="display:flex;gap:8px;margin-top:16px">
+          <button type="button" class="btn o" id="mt-voltar" style="min-height:50px">← Voltar</button>
+          <button type="button" class="btn" id="mt-gerar" style="flex:1;min-height:50px;font-size:17px">🎲 Gerar Tabela Agora</button>
         </div>
       `}
-
-      <div class="err" id="mt-err"></div>
-      <div class="row" style="margin-top:18px">
-        <button type="button" class="btn" id="mt-gerar" style="width:100%;font-size:20px;min-height:56px">[ 🎲 Gerar Tabela e Partidas Agora ]</button>
-      </div>
     `;
 
     $("#mt-fechar").onclick=()=>mod.classList.remove("on");
-    $("#mt-all").onclick=()=>{estado.todasEquipes.forEach(t=>estado.selecionados.add(t));renderModal()};
-    $("#mt-none").onclick=()=>{estado.selecionados.clear();renderModal()};
-    const btnPend=$("#mt-inc-pend");
-    if(btnPend)btnPend.onclick=()=>{
-      pendentes.forEach(t=>{if(!estado.todasEquipes.includes(t))estado.todasEquipes.push(t);estado.selecionados.add(t)});
-      renderModal();
-    };
-    const addTime=()=>{
-      const inp=$("#mt-novo-time"),v=(inp.value||"").trim();
-      if(!v)return;
-      if(!estado.todasEquipes.includes(v))estado.todasEquipes.push(v);
-      estado.selecionados.add(v);
-      renderModal();
-    };
-    $("#mt-add-time").onclick=addTime;
-    $("#mt-novo-time").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();addTime()}};
-
-    body.querySelectorAll("#mt-lista input[type=checkbox]").forEach(ck=>{
-      ck.onchange=()=>{
-        const tm=ck.dataset.tm;
-        if(ck.checked)estado.selecionados.add(tm);
-        else estado.selecionados.delete(tm);
-        $("#mt-cnt").textContent=`${estado.selecionados.size} times`;
-        const cBox=$("#mt-calc");
-        if(cBox){
-          const n=estado.selecionados.size,p2=proxPotencia2(Math.max(2,n)),b2=Math.max(0,p2-n);
-          if(estado.formato==="grupos")cBox.innerHTML=textoMatematicoGrupos(n,estado.numGrupos,estado.passamPorGrupo);
-          else if(estado.formato==="mata_mata")cBox.innerHTML=`Configuração calculada: <b>Chave de ${p2} posições (${nomeFaseMataMata(p2)})</b> com <b>${n} times confirmados</b>${b2>0?` e <b>${b2} BYE (folga automática na 1ª fase)</b>`:` (sem necessidade de BYE)`}.`;
-          else cBox.innerHTML=`Configuração calculada: <b>Todos contra Todos (Pontos Corridos)</b> com <b>${n} times confirmados</b> em tabela única de classificação.`;
-        }
+    if(estado.passo===1){
+      $("#mt-all").onclick=()=>{estado.todasEquipes.forEach(t=>estado.selecionados.add(t));renderModal()};
+      $("#mt-none").onclick=()=>{estado.selecionados.clear();renderModal()};
+      const btnPend=$("#mt-inc-pend");
+      if(btnPend)btnPend.onclick=()=>{
+        pendentes.forEach(t=>{if(!estado.todasEquipes.includes(t))estado.todasEquipes.push(t);estado.selecionados.add(t)});
+        renderModal();
       };
-    });
+      const addTime=()=>{
+        const inp=$("#mt-novo-time"),v=(inp.value||"").trim();
+        if(!v)return;
+        if(!estado.todasEquipes.includes(v))estado.todasEquipes.push(v);
+        estado.selecionados.add(v);
+        renderModal();
+      };
+      $("#mt-add-time").onclick=addTime;
+      $("#mt-novo-time").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();addTime()}};
+      body.querySelectorAll("#mt-lista input[type=checkbox]").forEach(ck=>{
+        ck.onchange=()=>{
+          const tm=ck.dataset.tm;
+          if(ck.checked)estado.selecionados.add(tm);
+          else estado.selecionados.delete(tm);
+          $("#mt-cnt").textContent=`${estado.selecionados.size} times`;
+        };
+      });
+      $("#mt-prox").onclick=()=>{
+        const er=$("#mt-err");
+        if(estado.selecionados.size<2){
+          er.textContent="Confirme pelo menos 2 times presentes para continuar.";
+          er.style.display="block";
+          return;
+        }
+        estado.passo=2;
+        renderModal();
+      };
+      return;
+    }
 
+    $("#mt-voltar").onclick=()=>{estado.passo=1;renderModal()};
     body.querySelectorAll(".fmt-card").forEach(card=>{
       card.onclick=()=>{estado.formato=card.dataset.fmt;renderModal()};
     });
@@ -1805,19 +1816,14 @@ function abrirModalTorneio(ev,rowsInsc){
       const er=$("#mt-err");
       er.style.display="none";
       const confirmados=[...estado.selecionados];
-      if(confirmados.length<2){
-        er.textContent="Confirme pelo menos 2 times presentes para gerar o sorteio e as partidas.";
-        er.style.display="block";
-        return;
-      }
       if(estado.formato==="grupos"&&confirmados.length<estado.numGrupos*2){
-        er.textContent=`Para dividir em ${estado.numGrupos} grupos são necessários pelo menos ${estado.numGrupos*2} times confirmados (mínimo de 2 por grupo). Reduza o número de grupos ou escolha Mata-Mata Direto.`;
+        er.textContent=`Para ${estado.numGrupos} grupos são necessários pelo menos ${estado.numGrupos*2} times. Reduza os grupos ou escolha Mata-Mata.`;
         er.style.display="block";
         return;
       }
       const btn=$("#mt-gerar");
       btn.disabled=true;
-      btn.textContent="Sorteando equipes e gerando tabela...";
+      btn.textContent="Sorteando e gerando...";
       try{
         const pacote=construirTorneio(confirmados,estado.formato,estado.numGrupos,estado.passamPorGrupo);
         await persistirTorneio(ev,pacote,"salvarPartidas");
@@ -1825,10 +1831,10 @@ function abrirModalTorneio(ev,rowsInsc){
         A.subTab="partidas";
         admin();
       }catch(e){
-        er.textContent="Erro ao salvar o torneio. Verifique sua conexão e tente novamente.";
+        er.textContent="Erro ao salvar o torneio. Tente novamente.";
         er.style.display="block";
         btn.disabled=false;
-        btn.textContent="[ 🎲 Gerar Tabela e Partidas Agora ]";
+        btn.textContent="🎲 Gerar Tabela Agora";
       }
     };
   }
