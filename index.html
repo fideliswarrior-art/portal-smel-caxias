@@ -18,7 +18,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&family=Barlow:wght@400;600&display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&family=Barlow:wght@400;600&display=swap"></noscript>
 <style>
-:root{--paper:#f7f4ed;--ink:#16202e;--navy:#1a365d;--green:#10b981;--line:#d8d2c4;--mut:#5b6472;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root{--paper:#f8fafc;--ink:#0f172a;--navy:#1a365d;--green:#10b981;--line:#e2e8f0;--mut:#475569;--sh-sm:0 1px 3px rgba(15,23,42,.06);--sh-md:0 6px 20px rgba(15,23,42,.08);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box}html{scroll-padding-top:70px;-webkit-tap-highlight-color:transparent}
 body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 Barlow,system-ui,sans-serif}
 h1,h2,h3{font-family:"Barlow Condensed",Impact,sans-serif;text-transform:uppercase;letter-spacing:.01em;line-height:1.08;margin:0}
@@ -71,11 +71,11 @@ footer{background:var(--navy);color:#dbe4f0;padding:22px 14px 80px;margin-top:36
 .nw{display:grid;gap:14px;padding:16px 0;border-bottom:1px solid var(--line)}@media(min-width:600px){.nw:has(img){grid-template-columns:200px 1fr}}.nw img{width:100%;aspect-ratio:4/3;object-fit:cover}.nw p{margin:4px 0}
 .cr{display:grid;grid-template-columns:84px 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);text-decoration:none;color:inherit}.cr img,.cr .ph{width:84px;aspect-ratio:1;object-fit:cover;font-size:13px;padding:6px}.cr h3{font-size:20px}
 .cta{background:var(--navy);color:#fff;padding:20px;margin-top:16px}.cta h3{color:#fff}.band{background:var(--navy);color:#fff;padding:32px 20px;margin-top:40px}.band h2{color:#fff;border:0;margin:6px 0}.band .btn.o{color:#fff;border-color:#fff}
-.cd{display:block;background:#fff;border:1px solid var(--line);border-radius:6px;overflow:hidden;text-decoration:none;color:inherit}.cd:hover{border-color:var(--navy)}.cd img,.cd .ph{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}.cb{padding:12px}.cc{background:var(--navy);color:#fff;padding:10px;text-align:center;font:600 14px Barlow,sans-serif}
+.cd{display:block;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;text-decoration:none;color:inherit;box-shadow:var(--sh-sm);transition:transform .16s ease,box-shadow .16s ease}.cd:hover{border-color:var(--navy);box-shadow:var(--sh-md)}.cd:active{transform:scale(.985)}.cd img,.cd .ph{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}.cb{padding:14px}.cc{background:var(--navy);color:#fff;padding:11px;text-align:center;font:700 14px Barlow,sans-serif}
 .st.an{border-color:#047857;color:#047857}.fb2{display:grid;gap:10px;grid-template-columns:1fr;background:#fff;border:1px solid var(--line);border-radius:6px;padding:12px;margin:12px 0}@media(min-width:760px){.fb2{grid-template-columns:1fr 1fr 1.4fr}}.fb2 label{margin:0}
 .stp{display:flex;align-items:center;gap:10px;margin:16px 0 6px}.stp span{background:var(--navy);color:#fff;min-width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:800 16px "Barlow Condensed",sans-serif}.stp h2{border:0;margin:0;padding:0;font-size:21px}
 .tm{border:1px solid var(--navy);background:#f1f5fb;padding:4px 12px 8px;margin:8px 0;border-radius:6px}.tm summary{font-weight:600;cursor:pointer;color:var(--navy);min-height:38px;display:flex;align-items:center}
-.card2{background:#fff;border:1px solid var(--line);border-radius:6px;padding:12px;margin:10px 0}.cod{display:flex;gap:8px}.cod input{font:800 24px "Barlow Condensed",sans-serif;letter-spacing:.2em;text-transform:uppercase;text-align:center}.cod .btn{white-space:nowrap}
+.card2{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;margin:10px 0;box-shadow:var(--sh-sm)}.cod{display:flex;gap:8px}.cod input{font:800 24px "Barlow Condensed",sans-serif;letter-spacing:.2em;text-transform:uppercase;text-align:center}.cod .btn{white-space:nowrap}
 .cn{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:12px 0}.cn b{font:800 22px "Barlow Condensed",sans-serif;text-transform:uppercase;text-align:center}.cw{display:none}.cg{display:grid;gap:6px;grid-template-columns:1fr}.dp{display:none}
 .dc{background:#fff;border:1px solid var(--line);border-radius:4px;padding:8px 10px;min-height:48px;display:flex;gap:10px;align-items:flex-start}.dc:not(.tem){background:transparent;border-style:dashed;min-height:40px;opacity:.65}.dc.hoje{border:2px solid var(--green);opacity:1}
 .dn{min-width:48px}.dn b{display:block;font:800 24px/1 "Barlow Condensed",sans-serif}.dn span{font-size:12px;color:var(--mut);text-transform:uppercase}.dv{flex:1;min-width:0}
@@ -102,7 +102,8 @@ footer{background:var(--navy);color:#dbe4f0;padding:22px 14px 80px;margin-top:36
 /* ===== SISTEMA NATIVO DE CHAVEAMENTO VISUAL (ESTILO ÁRVORE DE CHAVES MOBILE-FIRST & UNIVERSAL) ===== */
 .btn-torneio{background:var(--navy);color:#fff;border:1.5px solid var(--green);font:700 14px Barlow,sans-serif;padding:0 14px;min-height:36px;display:inline-flex;align-items:center;gap:6px;cursor:pointer;border-radius:6px}
 .btn-torneio:hover{background:#0f172a}
-.m-torneio>div{max-width:680px;width:100%;text-align:left!important;padding:16px;border-top:4px solid var(--green)}
+.m-torneio>div{max-width:680px;width:100%;text-align:left!important;padding:18px;border-top:4px solid var(--green);border-radius:16px;box-shadow:0 20px 50px rgba(0,0,0,.35)}
+@media(max-width:700px){.m-torneio{padding:0;align-items:flex-end}.m-torneio>div{max-width:100%;border-radius:20px 20px 0 0;max-height:92vh;padding:16px 14px calc(22px + env(safe-area-inset-bottom,0px))}}
 .pres-bar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;background:#0f172a!important;color:#fff!important;padding:10px 12px;border-radius:6px;margin:8px 0;font-size:14px}
 .pres-bar b{color:#6ee7b7;font:800 18px "Barlow Condensed",sans-serif}
 .pres-list{max-height:190px;overflow-y:auto;border:1px solid var(--line);background:#f8fafc;padding:6px;border-radius:6px;display:grid;gap:5px;grid-template-columns:repeat(auto-fill,minmax(175px,1fr))}
@@ -518,6 +519,14 @@ async function sbApi(p){
     sbAudit(usr,"Exclusão Inscrição",usr+" excluiu "+p.codigo);
     return{ok:1};
   }
+  if(ac==="criarServidor"){
+    const lg=String(p.login||"").trim().toLowerCase(),pw=String(p.senha||"").trim();
+    if(!lg||pw.length<4)return{ok:0,msg:"Informe um login e uma senha com pelo menos 4 caracteres."};
+    const h=await sbHash(lg,pw);
+    await sbReq("usuarios",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates"},body:JSON.stringify({login:lg,senha:h})});
+    sbAudit(usr,"Novo Servidor",usr+" cadastrou/atualizou acesso do servidor "+lg);
+    return{ok:1};
+  }
   return{ok:0};
 }
 
@@ -682,7 +691,9 @@ ${k==="ne"?'<div class="safe" style="border-left-color:#0284c7;background:#e0f2f
 ${temTorneioNativo?renderTorneioPublico(e,tor):(u?`<h2>Tabela de Jogos</h2><iframe class="ch" sandbox="allow-scripts allow-same-origin allow-popups" src="${esc(u)}" title="Tabela de ${esc(e.nome)}" loading="lazy"></iframe>`:"")}
 ${cl.length?`<h2>Classificação final</h2><table><tr><th>Lugar</th><th>Equipe</th></tr>${cl.map(c=>`<tr><td><b>${esc(c.colocacao)}º</b></td><td>${esc(c.nome_equipe)}</td></tr>`).join("")}</table>`:""}
 ${gl||k==="en"?`<h2 id="gal">Fotos do evento</h2><div class="g4" id="evf"><p class="mut">${gl?"Carregando fotos...":"Ainda não há fotos publicadas para este evento."}</p></div>${gl?`<div class="row"><a class="btn o" href="${esc(gl)}" target="_blank" rel="noopener">Ver todas e baixar em alta qualidade</a></div>`:""}`:""}`;
-const v=$("#vg");if(v)v.onclick=()=>$("#gal").scrollIntoView({behavior:"smooth"});const bSh=$("#btn-share-ev");if(bSh)bSh.onclick=()=>{const url=location.href,txt=`Confira o evento *${e.nome}* (${e.modalidade}) no Portal Caxias Mais Esporte!`;if(navigator.share){navigator.share({title:e.nome,text:txt,url}).catch(()=>{})}else{window.open("https://wa.me/?text="+encodeURIComponent(txt+"\n"+url),"_blank","noopener")}};const btPub=$("#btn_adm_tor_pub");if(btPub)btPub.onclick=()=>{A.tab="inscricoes";A.ev=e.id;nav("#admin")};const ups=$("#up_srv");if(ups)ups.onclick=()=>{A.tab="eventos";nav("#admin");if(A.tok)setTimeout(()=>formFotos(e),150)};if(gl)api({acao:"fotos",pasta:gl}).then(r=>{const c=$("#evf");if(c)c.innerHTML=(r.fotos||[]).map(fo).join("")||'<p class="mut">Ainda não há fotos nesta pasta.</p>'}).catch(()=>{const c=$("#evf");if(c)c.innerHTML='<p class="mut">Não foi possível carregar as fotos agora.</p>'})}
+const v=$("#vg");if(v)v.onclick=()=>$("#gal").scrollIntoView({behavior:"smooth"});
+const ptQ=$("#pub-tor-q");if(ptQ)ptQ.oninput=debounce(e=>{const val=e.target.value.toLowerCase();document.querySelectorAll("[data-pub-tm]").forEach(c=>{c.hidden=!c.dataset.pubTm.includes(val)})},100);
+document.querySelectorAll("[data-pt-v]").forEach(b=>{b.onclick=()=>{document.querySelectorAll("[data-pt-v]").forEach(x=>x.classList.remove("on"));b.classList.add("on");const modo=b.dataset.ptV,ar=$("#pt-arvore"),ls=$("#pt-lista");if(ar&&ls){ar.hidden=modo!=="arvore";ls.hidden=modo!=="lista"}}});const bSh=$("#btn-share-ev");if(bSh)bSh.onclick=()=>{const url=location.href,txt=`Confira o evento *${e.nome}* (${e.modalidade}) no Portal Caxias Mais Esporte!`;if(navigator.share){navigator.share({title:e.nome,text:txt,url}).catch(()=>{})}else{window.open("https://wa.me/?text="+encodeURIComponent(txt+"\n"+url),"_blank","noopener")}};const btPub=$("#btn_adm_tor_pub");if(btPub)btPub.onclick=()=>{A.tab="inscricoes";A.ev=e.id;nav("#admin")};const ups=$("#up_srv");if(ups)ups.onclick=()=>{A.tab="eventos";nav("#admin");if(A.tok)setTimeout(()=>formFotos(e),150)};if(gl)api({acao:"fotos",pasta:gl}).then(r=>{const c=$("#evf");if(c)c.innerHTML=(r.fotos||[]).map(fo).join("")||'<p class="mut">Ainda não há fotos nesta pasta.</p>'}).catch(()=>{const c=$("#evf");if(c)c.innerHTML='<p class="mut">Não foi possível carregar as fotos agora.</p>'})}
 const cpfOk=c=>{c=String(c).replace(/\D/g,"");if(c.length!==11||/^(\d)\1{10}$/.test(c))return false;for(let t=9;t<11;t++){let n=0;for(let i=0;i<t;i++)n+=+c[i]*(t+1-i);if((n*10)%11%10!==+c[t])return false}return true};
 const esg=e=>+e.max_vagas>0&&+e.inscritos>=+e.max_vagas;
 const lim=e=>{const mx=Math.max(1,+e.max_atletas||1);return[Math.min(mx,Math.max(1,+e.min_atletas||1)),mx]};
@@ -1069,6 +1080,15 @@ async function admAudit(el){
   }catch(e){}
   el.innerHTML=`${barra()}
   <div class="card2"><b>Trilha de Auditoria e Transparência (SMEL)</b><div class="mut">Registro oficial de operações realizadas por servidores autenticados no sistema.</div></div>
+  <div class="card2">
+    <b>👥 Cadastrar ou Atualizar Acesso de Servidor</b>
+    <div class="mut" style="margin-bottom:8px">Crie login e senha criptografada (`SHA-256`) para outros coordenadores operarem o painel na quadra.</div>
+    <form id="f-srv" style="display:flex;gap:8px;flex-wrap:wrap;border:0;padding:0;max-width:100%;box-shadow:none">
+      <input id="srv-lg" placeholder="Login (ex.: joao.smel)" style="flex:1;min-width:160px">
+      <input id="srv-pw" type="password" placeholder="Senha (mín. 4 caracteres)" style="flex:1;min-width:160px">
+      <button type="submit" class="btn sm" id="srv-ok">+ Salvar Servidor</button>
+    </form>
+  </div>
   <div class="row"><button type="button" class="btn o" id="btn-audit-csv">Exportar Logs de Auditoria (CSV)</button></div>
   <label for="aq">Filtrar registros de auditoria</label><input id="aq" type="search" placeholder="Servidor, ação, time, evento ou data...">
   <div style="overflow-x:auto;margin-top:14px;background:#fff;border:1px solid var(--line)">
@@ -1078,6 +1098,19 @@ async function admAudit(el){
     </table>
   </div>`;
   el.onclick=e=>{const b=e.target.closest("button");if(!b)return;if(b.dataset.t){A.tab=b.dataset.t;admin()}else if(b.dataset.out){encerrarSessao()}};
+  const fSrv=$("#f-srv");
+  if(fSrv)fSrv.onsubmit=async e=>{
+    e.preventDefault();
+    const lg=$("#srv-lg").value.trim(),pw=$("#srv-pw").value.trim(),bt=$("#srv-ok");
+    if(!lg||pw.length<4){toast("Informe login e senha com no mínimo 4 caracteres.",true);return}
+    bt.disabled=true;bt.textContent="Salvando...";
+    try{
+      const res=await call({acao:"criarServidor",login:lg,senha:pw});
+      if(res&&res.ok){toast(`✓ Servidor "${lg}" salvo!`);fSrv.reset();admAudit(el)}
+      else toast((res&&res.msg)||"Não foi possível salvar servidor.",true);
+    }catch(err){toast("Erro ao salvar servidor.",true)}
+    bt.disabled=false;bt.textContent="+ Salvar Servidor";
+  };
   const aq=$("#aq");
   if(aq)aq.oninput=debounce(e=>{const v=e.target.value.toLowerCase();el.querySelectorAll("#tb-audit tbody tr[data-aq]").forEach(tr=>{tr.hidden=!tr.dataset.aq.includes(v)})},100);
   const btnCsv=$("#btn-audit-csv");
@@ -1978,43 +2011,52 @@ function renderTorneioPublico(ev,tor){
 
   const jgFinal=jgsMata.length?jgsMata[jgsMata.length-1]:null;
   const campeao=jgFinal&&jgFinal.status_jogo==="finalizado"&&jgFinal.vencedor&&jgFinal.vencedor!=="EMPATE"?jgFinal.vencedor:"";
+  const fasesTodas=[];
+  tor.partidas.forEach(j=>{
+    const chv=j.etapa==="grupos"?(j.grupo||"Grupos"):(j.fase||"Jogos");
+    let b=fasesTodas.find(x=>x.nome===chv);
+    if(!b){b={nome:chv,jogos:[]};fasesTodas.push(b)}
+    b.jogos.push(j);
+  });
 
   return`
     <h2>🏆 Chaveamento e Resultados</h2>
     ${campeao?`<div class="safe" style="background:#ecfdf5;border-left:5px solid var(--green);font-size:18px;padding:12px 16px">🏆 <b>Campeão:</b> ${esc(campeao)}</div>`:""}
-    ${fasesMata.length?`
-      ${renderArvoreChavesHTML(fasesMata,campeao,false)}
-    `:""}
-    ${temClassif?`
-      <div style="margin-top:16px">
-        ${renderTabelaClassificacaoHTML(tor,true)}
-      </div>
-    `:""}
-    ${blocosFase1.length?`
-      <h3 style="margin-top:20px;color:var(--navy)">Confrontos por ${tor.formato==="grupos"?"Grupo":"Rodada"}</h3>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0">
+      <input id="pub-tor-q" type="search" placeholder="🔍 Buscar meu time nos jogos..." style="flex:1;min-width:190px;min-height:38px">
+      ${fasesMata.length?`<div style="display:flex;gap:6px"><button type="button" class="chip sm on" data-pt-v="lista">📋 Jogos por Fase</button><button type="button" class="chip sm" data-pt-v="arvore">🌳 Árvore Completa</button></div>`:""}
+    </div>
+    ${fasesMata.length?`<div id="pt-arvore" hidden>${renderArvoreChavesHTML(fasesMata,campeao,false)}</div>`:""}
+    <div id="pt-lista">
       <div class="match-grid">
-        ${blocosFase1.map(b=>`
+        ${fasesTodas.map(b=>`
           <div class="card2" style="margin:0">
-            <div style="background:var(--navy);color:#fff;padding:6px 10px;border-radius:4px;font:800 15px 'Barlow Condensed',sans-serif;text-transform:uppercase;margin-bottom:8px">${esc(b.nome)}</div>
+            <div style="background:var(--navy);color:#fff;padding:6px 10px;border-radius:6px;font:800 15px 'Barlow Condensed',sans-serif;text-transform:uppercase;margin-bottom:8px">${esc(b.nome)}</div>
             ${b.jogos.map(j=>{
-              const fin=j.status_jogo==="finalizado";
+              const isBye=j.status_jogo==="bye"||j.time_b==="BYE";
+              const fin=j.status_jogo==="finalizado"||isBye;
               const wA=fin&&j.vencedor===j.time_a;
               const wB=fin&&j.vencedor===j.time_b;
               return`
-                <div class="chaves-card ${fin?"done":""}" style="margin-bottom:6px">
+                <div class="chaves-card ${fin?"done":""} ${isBye?"bye":""}" data-pub-tm="${esc((j.time_a+" "+j.time_b).toLowerCase())}" style="margin-bottom:8px">
                   <div class="chaves-tm ${wA?"win":""}">
-                    <span class="chaves-nm">${wA?"🏆 ":""}${esc(j.time_a)}</span>
-                    <span class="chaves-sc">${esc(j.placar_a!==""?j.placar_a:"–")}</span>
+                    <span class="chaves-nm">${wA?"🏆 ":""}${esc(j.time_a||"A definir")}</span>
+                    <span class="chaves-sc">${isBye?"✓":esc(j.placar_a!==""?j.placar_a:"–")}</span>
                   </div>
                   <div class="chaves-tm ${wB?"win":""}">
-                    <span class="chaves-nm">${wB?"🏆 ":""}${esc(j.time_b)}</span>
-                    <span class="chaves-sc">${esc(j.placar_b!==""?j.placar_b:"–")}</span>
+                    <span class="chaves-nm">${wB?"🏆 ":""}${esc(isBye?"Folga (passa direto)":(j.time_b||"A definir"))}</span>
+                    <span class="chaves-sc">${isBye?"–":esc(j.placar_b!==""?j.placar_b:"–")}</span>
                   </div>
                 </div>
               `;
             }).join("")}
           </div>
         `).join("")}
+      </div>
+    </div>
+    ${temClassif?`
+      <div style="margin-top:16px">
+        ${renderTabelaClassificacaoHTML(tor,true)}
       </div>
     `:""}
   `;
@@ -2072,13 +2114,22 @@ function renderPainelTorneioAdminHTML(ev,tor,abaAtiva){
   const pct=totalJ?Math.round((concluidos/totalJ)*100):0;
 
   return`
-    <div style="background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:8px 0">
-      <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:6px">
+    <div style="background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:8px 0">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;font-size:13px;margin-bottom:6px">
         <span><b>${concluidos} de ${totalJ}</b> jogos concluídos (${pct}%)</span>
-        <button type="button" class="chip sm" data-tor-share="1">📤 WhatsApp</button>
+        <div style="display:flex;gap:6px">
+          <button type="button" class="chip sm" data-tor-print="1">🖨️ Imprimir</button>
+          <button type="button" class="chip sm" data-tor-share="1">📤 WhatsApp</button>
+        </div>
       </div>
       <div style="height:8px;background:#e2e8f0;border-radius:999px;overflow:hidden"><div style="height:100%;width:${pct}%;background:var(--green);transition:width .3s"></div></div>
     </div>
+    ${campeao?`
+      <div class="safe" style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;max-width:100%;background:#ecfdf5;border-left:5px solid var(--green)">
+        <span>🏆 <b>Campeão definido: ${esc(campeao)}!</b> Publicar 1º e 2º lugar no Pódio do site?</span>
+        <button type="button" class="btn sm" data-pub-podio="1">🏅 Publicar no Pódio</button>
+      </div>
+    `:""}
     <div class="tor-mode-bar">
       <button type="button" class="tor-mode-btn ${modoTor==="placares"?"on":""}" data-tor-modo="placares">📝 Lançar Placares ${pendentes?`(${pendentes})`:""}</button>
       <button type="button" class="tor-mode-btn ${modoTor==="arvore"?"on":""}" data-tor-modo="arvore">🌳 Ver Chaveamento</button>
@@ -2225,7 +2276,20 @@ ${G.map(g=>{
 }).join("")||'<p class="mut" style="margin-top:12px">Nenhuma inscrição neste evento ainda.</p>'}`}`:'<p class="mut" style="margin-top:12px">Escolha um evento acima para ver os inscritos, gerar chaveamento ou imprimir a súmula.</p>'}`;
 const btnRefInsc=$("#btn-ref-insc");
 if(btnRefInsc)btnRefInsc.onclick=()=>{delete ADM_CACHE.inscricoes[A.ev];admin(true)};
-el.onclick=async e=>{
+function imprimirTabelaJogos(ev,tor){
+  const w=window.open("","_blank","width=960,height=800");
+  if(!w){toast("Permita pop-ups para imprimir a tabela de jogos.",true);return}
+  const jgs=(tor&&tor.partidas||[]).filter(j=>j.status_jogo!=="bye"&&j.time_b!=="BYE");
+  w.document.open();
+  w.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><title>Tabela de Jogos · ${esc(ev.nome)}</title>
+  <style>body{font:13px/1.4 Arial,sans-serif;color:#111;padding:16px}h1{margin:0 0 4px;font-size:18px;color:#1a365d}table{width:100%;border-collapse:collapse;margin-top:12px}th,td{border:1px solid #334155;padding:8px;text-align:left}th{background:#1a365d;color:#fff}@media print{.np{display:none}}</style>
+  </head><body><div class="np" style="margin-bottom:10px"><button onclick="window.print()" style="padding:8px 16px;background:#10b981;border:0;font-weight:bold;cursor:pointer">🖨️ Imprimir / Salvar PDF</button></div>
+  <h1>${esc(ev.nome)} · Tabela Oficial de Jogos</h1><div>${esc(ev.modalidade||"")} · ${esc(ev.categoria||"")} · ${esc(ev.local_evento||"")}</div>
+  <table><thead><tr><th>Fase / Grupo</th><th>Equipe A</th><th style="text-align:center;width:90px">Placar</th><th>Equipe B</th><th>Vencedor</th></tr></thead>
+  <tbody>${jgs.map(j=>`<tr><td><b>${esc(j.fase||j.grupo||"-")}</b></td><td>${esc(j.time_a)}</td><td style="text-align:center">${esc(j.placar_a!==""?j.placar_a:"___")} x ${esc(j.placar_b!==""?j.placar_b:"___")}</td><td>${esc(j.time_b)}</td><td>${esc(j.vencedor||"")}</td></tr>`).join("")}</tbody></table></body></html>`);
+  w.document.close();
+}
+
 function abrirModalPlacar(ev,tor,idJogo,el,r){
   const jg=(tor&&tor.partidas||[]).find(x=>String(x.id_jogo)===String(idJogo));
   if(!jg||jg.status_jogo==="bye"||jg.time_b==="BYE")return;
@@ -2302,13 +2366,14 @@ function abrirModalPlacar(ev,tor,idJogo,el,r){
   mod.classList.add("on");
 }
 
+el.onclick=async e=>{
   const cardScroll=e.target.closest("[data-scroll-mc]");
   if(cardScroll&&tor){
     abrirModalPlacar(ev,tor,cardScroll.dataset.scrollMc,el,r);
     return;
   }
   const b=e.target.closest("button");if(!b)return;const d=b.dataset;
-  if(d.t){A.tab=d.t;admin()}else if(d.out){encerrarSessao()}else if(d.sub){A.subTab=d.sub;admInsc(el,r)}else if(d.torModo){A.torModo=d.torModo;admInsc(el,r)}else if(d.torPend){A.torSoPend=!A.torSoPend;admInsc(el,r)}else if(d.reabrirJogo){A.editJogoId=d.reabrirJogo;admInsc(el,r)}else if(d.torShare&&tor){const lines=["*🏆 "+ev.nome+"*",""].concat(tor.partidas.filter(j=>j.status_jogo!=="bye"&&j.time_b!=="BYE").slice(0,25).map(j=>`${j.fase}: ${j.time_a} ${j.placar_a!==""?j.placar_a:"–"} x ${j.placar_b!==""?j.placar_b:"–"} ${j.time_b}${j.vencedor?" (🏆 "+j.vencedor+")":""}`));window.open("https://wa.me/?text="+encodeURIComponent(lines.join("\n")),"_blank","noopener")}else if(d.faseF!==undefined){A.faseTorneio=d.faseF;admInsc(el,r)}else if(d.woToggle){const tBox=document.getElementById("tie-"+d.woToggle);if(tBox)tBox.classList.toggle("on")}else if(d.step){const[idJ,lado,delta]=d.step.split("|"),inp=el.querySelector(`[data-s${lado.toLowerCase()}="${idJ}"]`);if(inp){const v=Math.max(0,(parseInt(inp.value,10)||0)+(+delta));inp.value=String(v)}}else if(d.ia==="torneio")abrirModalTorneio(ev,rows);else if(d.ia==="csv")csvBaixar(ev,rows);else if(d.ia==="xls")excelBaixar(ev,rows);else if(d.ia==="sumula")imprimirSumula(ev,rows);else if(d.ia)formInsc(ev,d.ia,null);
+  if(d.t){A.tab=d.t;admin()}else if(d.out){encerrarSessao()}else if(d.sub){A.subTab=d.sub;admInsc(el,r)}else if(d.torModo){A.torModo=d.torModo;admInsc(el,r)}else if(d.torPend){A.torSoPend=!A.torSoPend;admInsc(el,r)}else if(d.reabrirJogo){A.editJogoId=d.reabrirJogo;admInsc(el,r)}else if(d.torPrint&&tor){imprimirTabelaJogos(ev,tor)}else if(d.pubPodio&&tor){const jgsM=tor.partidas.filter(j=>j.etapa==="mata_mata");const jf=jgsM[jgsM.length-1];if(jf&&jf.vencedor&&jf.vencedor!=="EMPATE"){const camp=jf.vencedor,vice=jf.vencedor===jf.time_a?jf.time_b:jf.time_a;b.disabled=true;b.textContent="Publicando...";await call({acao:"salvar",aba:"colocacoes",dados:{evento_id:ev.id,colocacao:"1",nome_equipe:camp}});if(vice&&vice!=="A definir")await call({acao:"salvar",aba:"colocacoes",dados:{evento_id:ev.id,colocacao:"2",nome_equipe:vice}});ADM_CACHE.colocacoes=null;toast("🏅 Pódio oficial publicado no site!");b.textContent="✓ Publicado!"}}else if(d.torShare&&tor){const lines=["*🏆 "+ev.nome+"*",""].concat(tor.partidas.filter(j=>j.status_jogo!=="bye"&&j.time_b!=="BYE").slice(0,25).map(j=>`${j.fase}: ${j.time_a} ${j.placar_a!==""?j.placar_a:"–"} x ${j.placar_b!==""?j.placar_b:"–"} ${j.time_b}${j.vencedor?" (🏆 "+j.vencedor+")":""}`));window.open("https://wa.me/?text="+encodeURIComponent(lines.join("\n")),"_blank","noopener")}else if(d.faseF!==undefined){A.faseTorneio=d.faseF;admInsc(el,r)}else if(d.woToggle){const tBox=document.getElementById("tie-"+d.woToggle);if(tBox)tBox.classList.toggle("on")}else if(d.step){const[idJ,lado,delta]=d.step.split("|"),inp=el.querySelector(`[data-s${lado.toLowerCase()}="${idJ}"]`);if(inp){const v=Math.max(0,(parseInt(inp.value,10)||0)+(+delta));inp.value=String(v)}}else if(d.ia==="torneio")abrirModalTorneio(ev,rows);else if(d.ia==="csv")csvBaixar(ev,rows);else if(d.ia==="xls")excelBaixar(ev,rows);else if(d.ia==="sumula")imprimirSumula(ev,rows);else if(d.ia)formInsc(ev,d.ia,null);
   else if(d.torAvancar&&tor){
     b.disabled=true;b.textContent="Atualizando...";
     preencherFinaisDosGrupos(tor);
