@@ -619,11 +619,13 @@ function calcularStatsReais(){
   const atletas=Math.max(srvAtletas,somaEv);
   return{realizados,ativos,atletas};
 }
-function home(){const ab=D.eventos.filter(e=>["ab","ne","es"].includes(stk(e))).sort(byDate),m=D.home_fotos||[],st=calcularStatsReais();
+function home(){const ab=D.eventos.filter(e=>["ab","ne","es"].includes(stk(e))).sort(byDate),m=D.home_fotos||[],st=calcularStatsReais(),ms=[...new Set(ab.map(e=>e.modalidade).filter(Boolean))].sort();
 $("#inicio").innerHTML=`<div class="hero"><div><div class="eb">Portal Oficial do Caxias Mais Esporte</div><h1>Esporte para todos</h1><p>Veja o que vem por aí, confira os resultados e inscreva sua equipe gratuitamente.</p><div class="row" style="margin-top:16px"><a class="btn" href="#inscricoes">Inscrever-se Agora</a><button type="button" class="btn o" id="home-cons">Já me inscrevi</button></div></div>${m[0]?fo(m[0]):""}</div>
-<h2>O que está rolando</h2>${ab.length?`<div class="g3">${ab.map(e=>card(e)).join("")}</div>`:'<p class="mut">Nenhuma inscrição aberta agora. Veja o Calendário para os próximos eventos.</p>'}
+<h2>O que está rolando</h2>${ms.length>1?`<div class="bar" id="home-chips"><button type="button" class="chip sm on" data-hm="">Todos (${ab.length})</button>${ms.map(x=>`<button type="button" class="chip sm" data-hm="${esc(x)}">${esc(x)}</button>`).join("")}</div>`:""}<div id="home-cards">${ab.length?`<div class="g3">${ab.map(e=>card(e)).join("")}</div>`:'<p class="mut">Nenhuma inscrição aberta agora. Veja o Calendário para os próximos eventos.</p>'}</div>
 ${m.length>1?`<h2>Nos nossos eventos</h2><div class="g4">${m.slice(1).map(fo).join("")}</div>`:""}
-<div class="num"><div><b id="st-real">${st.realizados}</b>eventos realizados</div><div><b id="st-ativ">${st.ativos}</b>eventos ativos</div><div><b id="st-atl">${st.atletas}</b>atletas participantes</div></div>`;const hc=$("#home-cons");if(hc)hc.onclick=()=>{nav("#inscricoes");setTimeout(()=>{const bm=$("#bm"),pm=$("#pm");if(pm&&pm.hidden&&bm)bm.click()},80)}}
+<div class="num"><div><b id="st-real">${st.realizados}</b>eventos realizados</div><div><b id="st-ativ">${st.ativos}</b>eventos ativos</div><div><b id="st-atl">${st.atletas}</b>atletas participantes</div></div>`;
+const hc=$("#home-cons");if(hc)hc.onclick=()=>{nav("#inscricoes");setTimeout(()=>{const bm=$("#bm"),pm=$("#pm");if(pm&&pm.hidden&&bm)bm.click()},80)};
+const hch=$("#home-chips");if(hch)hch.onclick=e=>{const b=e.target.closest("[data-hm]");if(!b)return;hch.querySelectorAll(".chip").forEach(x=>x.classList.remove("on"));b.classList.add("on");const mod=b.dataset.hm,filt=mod?ab.filter(x=>x.modalidade===mod):ab;$("#home-cards").innerHTML=filt.length?`<div class="g3">${filt.map(x=>card(x)).join("")}</div>`:'<p class="mut">Nenhum evento nesta modalidade.</p>'}}
 const chips=(a,k)=>["",...a].map(v=>`<button type="button" class="chip${F[k]===v?" on":""}" data-k="${k}" data-v="${esc(v)}">${esc(v||"Todos")}</button>`).join("");
 let CM=null;const MESN=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"],DSEM=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
 document.addEventListener("click",e=>{const b=e.target.closest("[data-cm]");if(b){CM.m+=+b.dataset.cm;if(CM.m<0){CM.m=11;CM.y--}if(CM.m>11){CM.m=0;CM.y++}calendario()}});
@@ -699,21 +701,26 @@ $("#inscricao").innerHTML=`<a href="#evento/${esc(id)}">← Voltar para o evento
 <div class="err" id="er"></div><div class="row"><button class="btn" type="submit">Enviar Inscrição</button></div></form>`;
 const btnAddRes=$("#btn-add-res");
 if(btnAddRes)btnAddRes.onclick=()=>{const prox=document.querySelector('#f details[data-at-box][hidden]');if(prox){prox.hidden=false;prox.open=true;prox.scrollIntoView({behavior:"smooth",block:"nearest"})}if(!document.querySelector('#f details[data-at-box][hidden]'))btnAddRes.hidden=true};
-const f=$("#f");let busy=false;f.onsubmit=async ev=>{ev.preventDefault();if(busy)return;const er=$("#er"),show=m=>{er.textContent=m;er.style.display="block"},at=[];let msg="";
+const f=$("#f"),draftKey="smel_draft_"+id;
+try{const rawD=localStorage.getItem(draftKey);if(rawD){const dr=JSON.parse(rawD);if(dr.time&&$("#time"))$("#time").value=dr.time;if(dr.igt&&$("#igt"))$("#igt").value=dr.igt;if(Array.isArray(dr.at))dr.at.forEach((a,i)=>{Object.keys(a||{}).forEach(k=>{const inp=f.querySelector(`[data-i="${i}"][data-n="${k}"]`);if(inp&&a[k]){inp.value=a[k];const box=inp.closest("details");if(box){box.hidden=false}}})})}}catch(e){}
+f.addEventListener("input",debounce(()=>{try{const atD=Array.from({length:MX},(_,i)=>{const o={};["nome","idade","telefone","cpf","email","rede_social"].forEach(k=>{const inp=f.querySelector(`[data-i="${i}"][data-n="${k}"]`);if(inp&&inp.value)o[k]=inp.value});return o});localStorage.setItem(draftKey,JSON.stringify({time:($("#time")||{}).value||"",igt:($("#igt")||{}).value||"",at:atD}))}catch(e){}},400));
+f.querySelectorAll('[data-n="cpf"],[data-n="email"]').forEach(inp=>{inp.onblur=()=>{const v=inp.value.trim(),old=inp.parentElement.querySelector(".ok-hint,.err-hint");if(old)old.remove();inp.classList.remove("err-field");if(!v)return;const ok=inp.dataset.n==="cpf"?cpfOk(v):/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);const sp=document.createElement("span");sp.className=ok?"ok-hint":"err-hint";sp.textContent=ok?(inp.dataset.n==="cpf"?"✓ CPF válido":"✓ E-mail válido"):(inp.dataset.n==="cpf"?"⚠️ CPF inválido. Confira os 11 números.":"⚠️ E-mail inválido.");if(!ok)inp.classList.add("err-field");inp.parentElement.appendChild(sp)}});
+for(let i=1;i<MX;i++){const telInp=f.querySelector(`[data-i="${i}"][data-n="telefone"]`);if(telInp){const bt=document.createElement("button");bt.type="button";bt.className="chip sm";bt.style.marginTop="4px";bt.textContent="📱 Usar mesmo WhatsApp do Atleta 1";bt.onclick=()=>{const t0=f.querySelector('[data-i="0"][data-n="telefone"]');if(t0&&t0.value){telInp.value=t0.value;toast("✓ WhatsApp copiado!")}};telInp.parentElement.appendChild(bt)}}
+let busy=false;f.onsubmit=async ev=>{ev.preventDefault();if(busy)return;f.querySelectorAll(".err-field").forEach(x=>x.classList.remove("err-field"));const er=$("#er"),show=(m,elErr)=>{er.textContent=m;er.style.display="block";if(elErr){const box=elErr.closest("details");if(box){box.hidden=false;box.open=true}elErr.classList.add("err-field");elErr.scrollIntoView({behavior:"smooth",block:"center"});elErr.focus()}},at=[];let msg="",elErr=null;
 for(let i=0;i<MX&&!msg;i++){const g=k=>(f.querySelector(`[data-i="${i}"][data-n="${k}"]`).value||"").trim(),a={nome:g("nome"),idade:g("idade"),telefone:g("telefone"),cpf:g("cpf"),email:g("email"),rede_social:g("rede_social")},n="Atleta "+(i+1)+": ";
 if(i>=MN&&!Object.values(a).some(Boolean))continue;
-if(!a.nome||!a.idade||!a.telefone||!a.cpf||(i===0&&!a.email))msg=n+"falta nome, idade, telefone, CPF"+(i===0?" ou e-mail":"")+".";
-else if(!cpfOk(a.cpf))msg=n+"CPF inválido. Confira os números.";
-else if(!(+a.idade>0&&+a.idade<100))msg=n+"idade inválida.";
-else if(!/^\d{10,11}$/.test(a.telefone.replace(/\D/g,"")))msg=n+"telefone inválido. Use DDD + número.";
-else if(a.email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(a.email))msg=n+"e-mail inválido.";
+if(!a.nome){msg=n+"falta o nome.";elErr=f.querySelector(`[data-i="${i}"][data-n="nome"]`)}
+else if(!(+a.idade>0&&+a.idade<100)){msg=n+"idade inválida.";elErr=f.querySelector(`[data-i="${i}"][data-n="idade"]`)}
+else if(!/^\d{10,11}$/.test(a.telefone.replace(/\D/g,""))){msg=n+"telefone inválido. Use DDD + número.";elErr=f.querySelector(`[data-i="${i}"][data-n="telefone"]`)}
+else if(!cpfOk(a.cpf)){msg=n+"CPF inválido. Confira os números.";elErr=f.querySelector(`[data-i="${i}"][data-n="cpf"]`)}
+else if((i===0&&!a.email)||(a.email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(a.email))){msg=n+"e-mail inválido.";elErr=f.querySelector(`[data-i="${i}"][data-n="email"]`)}
 else at.push(a)}
-if(!msg&&MX>1&&!$("#time").value.trim())msg="Informe o nome do time.";
+if(!msg&&MX>1&&!$("#time").value.trim()){msg="Informe o nome do time.";elErr=$("#time")}
 if(!msg&&new Set(at.map(a=>a.cpf.replace(/\D/g,""))).size!==at.length)msg="Há CPF repetido na lista de atletas.";
 if(!msg&&!($("#lg").checked&&$("#lg2").checked))msg="Marque as duas confirmações do Aceite para continuar.";
-if(msg){show(msg);return}
+if(msg){show(msg,elErr);return}
 er.style.display="none";busy=true;const sb=f.querySelector("[type=submit]"),tx=sb.textContent;sb.disabled=true;sb.textContent="Enviando inscrição, aguarde...";const time=$("#time").value.trim();
-try{const r=await api({acao:"inscrever",evento_id:id,evento:e.nome,time,instagram_time:$("#igt").value.trim(),atletas:at,termo:true});if(r.ok){sucesso(r.protocolo,e,time,at,r.codigo);f.reset()}else show(r.msg||"Não foi possível enviar.")}catch(x){show("Não foi possível enviar. Chame a Secretaria no WhatsApp.")}
+try{const r=await api({acao:"inscrever",evento_id:id,evento:e.nome,time,instagram_time:$("#igt").value.trim(),atletas:at,termo:true});if(r.ok){try{localStorage.removeItem(draftKey)}catch(e){}sucesso(r.protocolo,e,time,at,r.codigo);f.reset()}else show(r.msg||"Não foi possível enviar.")}catch(x){show("Não foi possível enviar. Chame a Secretaria no WhatsApp.")}
 busy=false;sb.disabled=false;sb.textContent=tx}}
 document.addEventListener("click",e=>{const c=e.target.closest(".chip");if(c){F[c.dataset.k]=c.dataset.v;lista()}const h=e.target.closest("[data-f]");if(h)F.st=h.dataset.f});
 document.addEventListener("input",e=>{const i=e.target,d=i.value.replace(/\D/g,"");if((i.dataset.n||i.name)==="cpf")i.value=d.slice(0,11).replace(/(\d{3})(\d)/,"$1.$2").replace(/(\d{3})(\d)/,"$1.$2").replace(/(\d{3})(\d{1,2})$/,"$1-$2");if((i.dataset.n||i.name)==="telefone"){const n=d.slice(0,11);i.value=n.length>6?`(${n.slice(0,2)}) ${n.slice(2,n.length-4)}-${n.slice(-4)}`:n.length>2?`(${n.slice(0,2)}) ${n.slice(2)}`:n}});
@@ -967,9 +974,9 @@ function confirmarComSenha({titulo,descricao,labelBotao,corBotao,onConfirmar}){
 
 async function admin(forcarRede){try{await adm(forcarRede)}catch(x){$("#admin").innerHTML=`${barra()}<div class="card2"><p class="err" style="display:block;margin-top:0">Falha de comunicação com o servidor (verifique sua conexão com a internet).</p><button class="btn" type="button" onclick="admin(true)">Tentar novamente</button></div>`}}
 async function adm(forcarRede){const el=$("#admin");renderAdminBar();salvarEstadoAdmin();
-if(!A.tok){el.innerHTML=`<h2 style="margin-top:8px">Acesso Servidores</h2>${A.msgSessao?`<div class="safe" style="border-left-color:#d97706;background:#fef3c7;color:#92400e"><b>Aviso:</b> ${esc(A.msgSessao)}</div>`:""}<form id="lf" style="max-width:380px"><label for="lg1">Usuário</label><input id="lg1" autocomplete="username" autocapitalize="none" placeholder="Seu usuário"><label for="pw">Senha</label><div class="pw-wrap"><input id="pw" type="password" autocomplete="current-password" placeholder="Sua senha"><button type="button" class="pw-eye" id="pw-eye" title="Mostrar/ocultar senha">👁️</button></div><div class="err" id="le"></div><div class="row"><button class="btn" style="width:100%;min-height:48px">Entrar no Painel</button></div><p class="mut" style="font-size:12.5px;margin-top:10px;text-align:center">Esqueceu a senha? Fale com a coordenação da SMEL para redefinir.</p></form>`;
+if(!A.tok){const lastU=localStorage.getItem("smel_last_user")||"";el.innerHTML=`<h2 style="margin-top:8px">Acesso Servidores</h2>${A.msgSessao?`<div class="safe" style="border-left-color:#d97706;background:#fef3c7;color:#92400e"><b>Aviso:</b> ${esc(A.msgSessao)}</div>`:""}<form id="lf" style="max-width:380px"><label for="lg1">Usuário</label><input id="lg1" autocomplete="username" autocapitalize="none" placeholder="Seu usuário" value="${esc(lastU)}"><label for="pw">Senha</label><div class="pw-wrap"><input id="pw" type="password" autocomplete="current-password" placeholder="Sua senha"><button type="button" class="pw-eye" id="pw-eye" title="Mostrar/ocultar senha">👁️</button></div><div class="err" id="le"></div><div class="row"><button class="btn" style="width:100%;min-height:48px">Entrar no Painel</button></div><p class="mut" style="font-size:12.5px;margin-top:10px;text-align:center">Esqueceu a senha? Fale com a coordenação da SMEL para redefinir.</p></form>`;
 const eye=$("#pw-eye");if(eye)eye.onclick=()=>{const pw=$("#pw");pw.type=pw.type==="password"?"text":"password";eye.textContent=pw.type==="password"?"👁️":"🙈"};
-$("#lf").onsubmit=async e=>{e.preventDefault();const le=$("#le"),b=e.target.querySelector("button"),st=rlStatus("login_ui",5,900000);le.style.display="none";if(!st.ok){le.textContent=`Muitas tentativas. Aguarde ${st.min} min.`;le.style.display="block";return}b.disabled=true;b.textContent="Entrando...";const lgVal=$("#lg1").value.trim();try{const r=await api({acao:"login",login:lgVal,senha:$("#pw").value});if(r.ok){rlClear("login_ui");regLogLocal(r.login||lgVal,"LOGIN",`${r.login||lgVal} iniciou sessão no painel administrativo`);salvarSessao(r.token,r.login||lgVal);sincronizarAtletasBackground();admin()}else{const rest=rlFail("login_ui",5,900000);le.textContent=r.msg||("Login ou senha incorretos."+(rest>0?` Restam ${rest} tentativa(s).`:" Bloqueado por 15 minutos."));le.style.display="block"}}catch(x){le.textContent="Sem conexão com o servidor. Verifique sua internet.";le.style.display="block"}b.disabled=false;b.textContent="Entrar no Painel"};return}
+$("#lf").onsubmit=async e=>{e.preventDefault();const le=$("#le"),b=e.target.querySelector("button"),st=rlStatus("login_ui",5,900000);le.style.display="none";if(!st.ok){le.textContent=`Muitas tentativas. Aguarde ${st.min} min.`;le.style.display="block";return}b.disabled=true;b.textContent="Entrando...";const lgVal=$("#lg1").value.trim();try{const r=await api({acao:"login",login:lgVal,senha:$("#pw").value});if(r.ok){try{localStorage.setItem("smel_last_user",lgVal)}catch(e){}rlClear("login_ui");regLogLocal(r.login||lgVal,"LOGIN",`${r.login||lgVal} iniciou sessão no painel administrativo`);salvarSessao(r.token,r.login||lgVal);sincronizarAtletasBackground();admin()}else{const rest=rlFail("login_ui",5,900000);le.textContent=r.msg||("Login ou senha incorretos."+(rest>0?` Restam ${rest} tentativa(s).`:" Bloqueado por 15 minutos."));le.style.display="block";$("#pw").focus();$("#pw").select()}}catch(x){le.textContent="Sem conexão com o servidor. Verifique sua internet.";le.style.display="block"}b.disabled=false;b.textContent="Entrar no Painel"};return}
 sincronizarAtletasBackground();
 if(A.tab==="auditoria")return admAudit(el);
 if(A.tab==="inscricoes"&&!A.ev&&(D.eventos||[]).length){A.ev=D.eventos[0].id}
@@ -2051,9 +2058,19 @@ function renderPainelTorneioAdminHTML(ev,tor,abaAtiva){
   const faseFiltro=A.faseTorneio||"";
   const secoesVisiveis=faseFiltro&&secoes.some(s=>s.titulo===faseFiltro)?secoes.filter(s=>s.titulo===faseFiltro):secoes;
   const modoTor=A.torModo||"placares";
+  const totalJ=tor.partidas.length;
   const pendentes=tor.partidas.filter(j=>j.status_jogo!=="finalizado"&&j.status_jogo!=="bye"&&j.time_b!=="BYE").length;
+  const concluidos=totalJ-pendentes;
+  const pct=totalJ?Math.round((concluidos/totalJ)*100):0;
 
   return`
+    <div style="background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:8px 0">
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:6px">
+        <span><b>${concluidos} de ${totalJ}</b> jogos concluídos (${pct}%)</span>
+        <button type="button" class="chip sm" data-tor-share="1">📤 WhatsApp</button>
+      </div>
+      <div style="height:8px;background:#e2e8f0;border-radius:999px;overflow:hidden"><div style="height:100%;width:${pct}%;background:var(--green);transition:width .3s"></div></div>
+    </div>
     <div class="tor-mode-bar">
       <button type="button" class="tor-mode-btn ${modoTor==="placares"?"on":""}" data-tor-modo="placares">📝 Lançar Placares ${pendentes?`(${pendentes})`:""}</button>
       <button type="button" class="tor-mode-btn ${modoTor==="arvore"?"on":""}" data-tor-modo="arvore">🌳 Ver Chaveamento</button>
@@ -2067,50 +2084,60 @@ function renderPainelTorneioAdminHTML(ev,tor,abaAtiva){
     ${modoTor==="arvore"?`
       ${fasesMata.length?renderArvoreChavesHTML(fasesMata,campeao,true):'<div class="card2"><p class="mut">Este formato não possui chaves eliminatórias. Use a aba <b>📊 Classificação</b> para ver a tabela.</p></div>'}
     `:`
+      <div style="display:flex;gap:8px;align-items:center;margin:8px 0">
+        <input id="tor-q" type="search" placeholder="🔍 Buscar time na tabela..." style="flex:1;min-height:38px">
+        ${pendentes?`<button type="button" class="chip sm ${A.torSoPend?"on":""}" data-tor-pend="1" style="white-space:nowrap">⏳ Só Aguardando (${pendentes})</button>`:""}
+      </div>
       ${secoes.length>1?`
         <div class="bar" style="margin:6px 0">
           <button type="button" class="chip sm ${!faseFiltro?"on":""}" data-fase-f="">Todas (${tor.partidas.length})</button>
           ${secoes.map(s=>`<button type="button" class="chip sm ${faseFiltro===s.titulo?"on":""}" data-fase-f="${esc(s.titulo)}">${esc(s.titulo)} (${s.jogos.length})</button>`).join("")}
         </div>
       `:""}
-      ${secoesVisiveis.map(sec=>`
+      ${secoesVisiveis.map(sec=>{
+        const jgsSec=A.torSoPend?sec.jogos.filter(j=>j.status_jogo!=="finalizado"&&j.status_jogo!=="bye"&&j.time_b!=="BYE"):sec.jogos;
+        if(!jgsSec.length)return"";
+        return`
         <h3 style="margin-top:14px;color:var(--navy);border-bottom:2px solid var(--line);padding-bottom:4px;font-size:18px">${esc(sec.titulo)}</h3>
         <div class="match-grid">
-          ${sec.jogos.map((j,idxJ)=>{
+          ${jgsSec.map((j,idxJ)=>{
             const isBye=j.status_jogo==="bye"||j.time_b==="BYE";
             const fin=j.status_jogo==="finalizado"||isBye;
             const wA=fin&&j.vencedor&&j.vencedor===j.time_a;
             const wB=fin&&j.vencedor&&j.vencedor===j.time_b;
             const rotuloCard=sec.etapa==="mata_mata"?`Jogo ${idxJ+1}`:`Confronto ${idxJ+1}`;
-            const tbdA=!j.time_a||j.time_a==="A definir";
-            const tbdB=!j.time_b||j.time_b==="A definir";
+            const tbdA=!j.time_a||j.time_a==="A definir"||j.time_a.includes("º Grupo");
+            const tbdB=!j.time_b||j.time_b==="A definir"||j.time_b.includes("º Grupo");
+            const travado=!isBye&&(tbdA||tbdB);
+            const editando=A.editJogoId===j.id_jogo;
+            const mostrarStepper=!isBye&&!travado&&(!fin||editando);
             return`
-              <div class="match-card ${fin?"done":""} ${isBye?"bye":""}" id="mc-${esc(j.id_jogo)}" data-mc="${esc(j.id_jogo)}">
+              <div class="match-card ${fin?"done":""} ${isBye||travado?"bye":""}" id="mc-${esc(j.id_jogo)}" data-mc="${esc(j.id_jogo)}" data-tor-tm="${esc((j.time_a+" "+j.time_b).toLowerCase())}">
                 <div class="mc-hdr">
                   <span>${rotuloCard} · ${esc(sec.titulo)}</span>
-                  <span style="color:${fin?"#065f46":"var(--mut)"}">${isBye?"Folga (passa direto)":fin?"✓ Concluído":"Aguardando"}</span>
+                  <span style="color:${fin?"#065f46":"var(--mut)"}">${isBye?"Folga (passa direto)":travado?"Aguardando definição":fin?"✓ Concluído":"Pronto para jogar"}</span>
                 </div>
                 <div class="mc-team ${wA?"win":""}">
                   <span class="mc-team-nm" title="${esc(j.time_a)}">${wA?"🏆 ":""}${esc(tbdA?"Aguardando vencedor":j.time_a)}</span>
-                  ${isBye?`<b style="color:#065f46;font-size:12px">Avança</b>`:`
+                  ${isBye?`<b style="color:#065f46;font-size:12px">Avança</b>`:mostrarStepper?`
                     <div class="mc-stepper">
                       <button type="button" class="mc-step-btn" data-step="${esc(j.id_jogo)}|A|-1" aria-label="Diminuir placar">−</button>
                       <input type="number" min="0" inputmode="numeric" class="score-inp" data-sa="${esc(j.id_jogo)}" placeholder="0" value="${esc(j.placar_a)}">
                       <button type="button" class="mc-step-btn" data-step="${esc(j.id_jogo)}|A|1" aria-label="Aumentar placar">+</button>
                     </div>
-                  `}
+                  `:`<b style="font:800 18px 'Barlow Condensed',sans-serif;padding:0 8px">${esc(j.placar_a!==""?j.placar_a:"–")}</b>`}
                 </div>
                 <div class="mc-team ${wB?"win":""}">
                   <span class="mc-team-nm" title="${esc(j.time_b)}">${wB?"🏆 ":""}${esc(isBye?"Folga (sem adversário)":(tbdB?"Aguardando vencedor":j.time_b))}</span>
-                  ${isBye?`<span class="mut" style="font-size:12px">–</span>`:`
+                  ${isBye?`<span class="mut" style="font-size:12px">–</span>`:mostrarStepper?`
                     <div class="mc-stepper">
                       <button type="button" class="mc-step-btn" data-step="${esc(j.id_jogo)}|B|-1" aria-label="Diminuir placar">−</button>
                       <input type="number" min="0" inputmode="numeric" class="score-inp" data-sb="${esc(j.id_jogo)}" placeholder="0" value="${esc(j.placar_b)}">
                       <button type="button" class="mc-step-btn" data-step="${esc(j.id_jogo)}|B|1" aria-label="Aumentar placar">+</button>
                     </div>
-                  `}
+                  `:`<b style="font:800 18px 'Barlow Condensed',sans-serif;padding:0 8px">${esc(j.placar_b!==""?j.placar_b:"–")}</b>`}
                 </div>
-                ${!isBye?`
+                ${!isBye&&!travado?(mostrarStepper?`
                   <div class="tie-prompt" id="tie-${esc(j.id_jogo)}">
                     <b>Quem venceu esta partida? (Desempate / W.O.)</b>
                     <div style="display:flex;gap:6px">
@@ -2124,12 +2151,12 @@ function renderPainelTorneioAdminHTML(ev,tor,abaAtiva){
                     </button>
                     <button type="button" class="btn-win-alt" data-wo-toggle="${esc(j.id_jogo)}" title="Escolher vencedor sem placar ou em caso de W.O.">W.O. / Vencedor</button>
                   </div>
-                `:""}
+                `:`<div class="mc-actions"><button type="button" class="btn-win-alt" data-reabrir-jogo="${esc(j.id_jogo)}" style="width:100%">✏️ Corrigir Placar</button></div>`):""}
               </div>
             `;
           }).join("")}
         </div>
-      `).join("")}
+      `}).join("")}
     `}
   `;
 }
@@ -2200,7 +2227,7 @@ el.onclick=async e=>{
     return;
   }
   const b=e.target.closest("button");if(!b)return;const d=b.dataset;
-  if(d.t){A.tab=d.t;admin()}else if(d.out){encerrarSessao()}else if(d.sub){A.subTab=d.sub;admInsc(el,r)}else if(d.torModo){A.torModo=d.torModo;admInsc(el,r)}else if(d.faseF!==undefined){A.faseTorneio=d.faseF;admInsc(el,r)}else if(d.woToggle){const tBox=document.getElementById("tie-"+d.woToggle);if(tBox)tBox.classList.toggle("on")}else if(d.step){const[idJ,lado,delta]=d.step.split("|"),inp=el.querySelector(`[data-s${lado.toLowerCase()}="${idJ}"]`);if(inp){const v=Math.max(0,(parseInt(inp.value,10)||0)+(+delta));inp.value=String(v)}}else if(d.ia==="torneio")abrirModalTorneio(ev,rows);else if(d.ia==="csv")csvBaixar(ev,rows);else if(d.ia==="xls")excelBaixar(ev,rows);else if(d.ia==="sumula")imprimirSumula(ev,rows);else if(d.ia)formInsc(ev,d.ia,null);
+  if(d.t){A.tab=d.t;admin()}else if(d.out){encerrarSessao()}else if(d.sub){A.subTab=d.sub;admInsc(el,r)}else if(d.torModo){A.torModo=d.torModo;admInsc(el,r)}else if(d.torPend){A.torSoPend=!A.torSoPend;admInsc(el,r)}else if(d.reabrirJogo){A.editJogoId=d.reabrirJogo;admInsc(el,r)}else if(d.torShare&&tor){const lines=["*🏆 "+ev.nome+"*",""].concat(tor.partidas.filter(j=>j.status_jogo!=="bye"&&j.time_b!=="BYE").slice(0,25).map(j=>`${j.fase}: ${j.time_a} ${j.placar_a!==""?j.placar_a:"–"} x ${j.placar_b!==""?j.placar_b:"–"} ${j.time_b}${j.vencedor?" (🏆 "+j.vencedor+")":""}`));window.open("https://wa.me/?text="+encodeURIComponent(lines.join("\n")),"_blank","noopener")}else if(d.faseF!==undefined){A.faseTorneio=d.faseF;admInsc(el,r)}else if(d.woToggle){const tBox=document.getElementById("tie-"+d.woToggle);if(tBox)tBox.classList.toggle("on")}else if(d.step){const[idJ,lado,delta]=d.step.split("|"),inp=el.querySelector(`[data-s${lado.toLowerCase()}="${idJ}"]`);if(inp){const v=Math.max(0,(parseInt(inp.value,10)||0)+(+delta));inp.value=String(v)}}else if(d.ia==="torneio")abrirModalTorneio(ev,rows);else if(d.ia==="csv")csvBaixar(ev,rows);else if(d.ia==="xls")excelBaixar(ev,rows);else if(d.ia==="sumula")imprimirSumula(ev,rows);else if(d.ia)formInsc(ev,d.ia,null);
   else if(d.torAvancar&&tor){
     b.disabled=true;b.textContent="Atualizando...";
     preencherFinaisDosGrupos(tor);
@@ -2232,6 +2259,7 @@ el.onclick=async e=>{
         preencherFinaisDosGrupos(tor);
       }
     }
+    A.editJogoId="";
     admInsc(el,r);
     toast(`✓ Vitória de ${venc} · salvando na nuvem...`);
     persistirTorneio(ev,tor,"atualizarPlacar",{
@@ -2283,6 +2311,7 @@ el.onclick=async e=>{
         preencherFinaisDosGrupos(tor);
       }
     }
+    A.editJogoId="";
     admInsc(el,r);
     toast(`✓ Placar ${jg.placar_a} x ${jg.placar_b} · salvando na nuvem...`);
     persistirTorneio(ev,tor,"atualizarPlacar",{
@@ -2313,6 +2342,7 @@ else if(d.gx){
 $("#es").onchange=e=>{A.ev=e.target.value;A.subTab="inscricoes";A.faseTorneio="";salvarEstadoAdmin();admin()};
 const bq=$("#bq");if(bq)bq.oninput=debounce(e=>{const v=e.target.value.toLowerCase();el.querySelectorAll("[data-q]").forEach(c=>{c.hidden=!c.dataset.q.includes(v)})},100);
 const bfp=$("#btn-f-pend");if(bfp)bfp.onclick=()=>{bfp.classList.toggle("on");const soPend=bfp.classList.contains("on");el.querySelectorAll("[data-q]").forEach(c=>{c.hidden=soPend?!c.innerHTML.includes(">Pendente<"):false})};
+const torQ=$("#tor-q");if(torQ)torQ.oninput=debounce(e=>{const v=e.target.value.toLowerCase();el.querySelectorAll("[data-tor-tm]").forEach(c=>{c.hidden=!c.dataset.torTm.includes(v)})},100);
 if(_sy>0)requestAnimationFrame(()=>window.scrollTo(0,_sy));
 if(A.autoOpenTorneio&&ev){A.autoOpenTorneio=false;abrirModalTorneio(ev,rows)}}
 function formInsc(ev,modo,g){const el=$("#admin"),[MN,MX]=lim(ev),c0=g?g[0]:{},bas=modo==="basica";
