@@ -348,7 +348,7 @@ async function sbApi(p){
     normEv(ev);
     if(!/^aberto/i.test(ev.status)||jaPassou(ev))return{ok:0,msg:"As inscrições deste evento estão encerradas."};
     if(p.termo!==true)return{ok:0,msg:"É necessário aceitar o Termo de Responsabilidade."};
-    const ins=await sbReq("inscricoes?evento_id=eq."+encodeURIComponent(ev.id)+"&status_aprovacao=neq.Recusada");
+    const ins=await sbReq("inscricoes?evento_id=eq."+encodeURIComponent(ev.id)+"&status_aprovacao=neq.Recusada&select=cpf,time");
     const cpfs=new Set((ins||[]).map(i=>String(i.cpf||"").replace(/\D/g,"")));
     const dup=(p.atletas||[]).find(a=>cpfs.has(String(a.cpf||"").replace(/\D/g,"")));
     if(dup)return{ok:0,msg:"O CPF "+dup.cpf+" já está inscrito neste evento."};
@@ -372,9 +372,11 @@ async function sbApi(p){
     if(/^[A-Z][A-Z0-9]{5}$/.test(c)){
       rows=await sbReq("inscricoes?codigo=eq."+encodeURIComponent(c)+"&order=id.asc");
     }else if(cpfD.length===11){
-      const all=await sbReq("inscricoes?select=*&order=id.desc");
-      const hit=(all||[]).find(i=>String(i.cpf||"").replace(/\D/g,"")===cpfD);
-      if(hit)rows=(all||[]).filter(i=>i.codigo===hit.codigo&&i.evento_id===hit.evento_id);
+      const cpfFmt=cpfD.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,"$1.$2.$3-$4");
+      const hits=await sbReq("inscricoes?or=(cpf.eq."+encodeURIComponent(cpfD)+",cpf.eq."+encodeURIComponent(cpfFmt)+")&select=codigo,evento_id&order=id.desc&limit=1");
+      if(hits&&hits[0]){
+        rows=await sbReq("inscricoes?codigo=eq."+encodeURIComponent(hits[0].codigo)+"&evento_id=eq."+encodeURIComponent(hits[0].evento_id)+"&order=id.asc");
+      }
     }
     if(!rows||!rows.length)return{ok:0,msg:"Inscrição não encontrada. Confira o código ou CPF."};
     const evs=await sbReq("eventos?id=eq."+encodeURIComponent(rows[0].evento_id));
