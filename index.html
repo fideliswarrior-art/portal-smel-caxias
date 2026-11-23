@@ -1638,6 +1638,31 @@ function calcularClassificacao(tor){
   return resultado;
 }
 
+function calcularRankingVitorias(tor){
+  if(!tor||!Array.isArray(tor.partidas))return[];
+  const mapa={};
+  const ign=t=>!t||t==="BYE"||t==="FOLGA"||t==="A definir"||t.includes("º Grupo");
+  const addT=t=>{if(!ign(t)&&!mapa[t])mapa[t]={time:t,v:0,e:0,d:0,j:0,gp:0,gc:0,sg:0};};
+  (tor.times||[]).forEach(addT);
+  tor.partidas.forEach(j=>{
+    addT(j.time_a);addT(j.time_b);
+    if(j.status_jogo!=="finalizado"||j.time_b==="BYE")return;
+    const tA=mapa[j.time_a],tB=mapa[j.time_b];
+    if(!tA||!tB)return;
+    tA.j++;tB.j++;
+    const pa=String(j.placar_a??"").trim(),pb=String(j.placar_b??"").trim();
+    if(pa!==""&&pb!==""&&!isNaN(+pa)&&!isNaN(+pb)){
+      const na=+pa,nb=+pb;
+      tA.gp+=na;tA.gc+=nb;tA.sg=tA.gp-tA.gc;
+      tB.gp+=nb;tB.gc+=na;tB.sg=tB.gp-tB.gc;
+    }
+    if(j.vencedor==="EMPATE"){tA.e++;tB.e++}
+    else if(j.vencedor===j.time_a){tA.v++;tB.d++}
+    else if(j.vencedor===j.time_b){tB.v++;tA.d++}
+  });
+  return Object.values(mapa).sort((a,b)=>b.v-a.v||b.sg-a.sg||b.gp-a.gp||b.j-a.j||a.time.localeCompare(b.time));
+}
+
 function propagarVencedorMataMata(partidas,jogoAtual,vencedorNome){
   if(!jogoAtual.proximo_jogo_id||!vencedorNome||vencedorNome==="EMPATE")return;
   const prox=partidas.find(x=>String(x.id_jogo)===String(jogoAtual.proximo_jogo_id));
@@ -1988,6 +2013,81 @@ function renderArvoreChavesHTML(fasesMata,campeao,modoAdmin){
   `;
 }
 
+function renderRankingVitoriasHTML(tor){
+  const rk=calcularRankingVitorias(tor);
+  if(!rk.length)return"";
+  return`
+    <div style="margin-top:14px">
+      <h3 style="color:var(--navy);margin-bottom:6px">🏆 Ranking Geral de Vitórias</h3>
+      <div class="tb-wrap">
+        <table class="tb-standings" style="min-width:340px">
+          <thead><tr><th>#</th><th>Time / Atleta</th><th title="Vitórias">VITÓRIAS</th><th title="Jogos">J</th><th title="Saldo de Placar">SALDO</th></tr></thead>
+          <tbody>
+            ${rk.map((l,idx)=>`
+              <tr class="${idx===0&&l.v>0?"qual":""}">
+                <td>${idx===0?"🥇":idx===1?"🥈":idx===2?"🥉":(idx+1)+"º"}</td>
+                <td><b>${esc(l.time)}</b></td>
+                <td><b style="color:var(--navy);font-size:16px">${l.v}</b></td>
+                <td>${l.j}</td>
+                <td>${l.sg>0?"+"+l.sg:l.sg}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function renderGruposVisualHTML(tor,fasesMata,campeao,modoAdmin){
+  const tabelas=calcularClassificacao(tor);
+  const nomesG=Object.keys(tabelas);
+  const passam=+tor.passam_por_grupo||2;
+  const jgsG=tor.partidas.filter(j=>j.etapa==="grupos");
+  return`
+    <div class="chaves-wrap" style="background:#f8fafc">
+      <div class="chaves-hint">
+        <span><b>🛡️ Etapa 1 · Fase de Grupos</b> (os ${passam===1?"1º colocados":"1º e 2º colocados"} em verde avançam para o Mata-Mata)</span>
+      </div>
+      <div class="match-grid" style="margin-top:6px">
+        ${nomesG.map(g=>{
+          const linhas=tabelas[g]||[];
+          const jogos=jgsG.filter(j=>j.grupo===g);
+          return`
+            <div class="card2" style="margin:0;border-top:4px solid var(--navy)">
+              <div style="font:800 17px 'Barlow Condensed',sans-serif;text-transform:uppercase;color:var(--navy);margin-bottom:8px">${esc(g)}</div>
+              <div style="border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-bottom:10px">
+                ${linhas.map((l,idx)=>`
+                  <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;font-size:13px;background:${idx<passam?"#ecfdf5":"#fff"};border-bottom:1px solid #f1f5f9">
+                    <span><b>${idx+1}º</b> ${esc(l.time)}${idx<passam?' <span class="win-badge">Passa</span>':""}</span>
+                    <span class="mut" style="font-size:12px"><b>${l.pts} pts</b> · ${l.v}V</span>
+                  </div>
+                `).join("")}
+              </div>
+              <div style="font-size:11.5px;font-weight:700;text-transform:uppercase;color:var(--mut);margin-bottom:4px">Jogos do ${esc(g)}</div>
+              ${jogos.map(j=>{
+                const fin=j.status_jogo==="finalizado",wA=fin&&j.vencedor===j.time_a,wB=fin&&j.vencedor===j.time_b;
+                return`
+                  <div class="chaves-card ${fin?"done":""}" ${modoAdmin?`data-scroll-mc="${esc(j.id_jogo)}" style="cursor:pointer;margin-bottom:6px" title="Toque para lançar placar"`:`style="margin-bottom:6px"`}>
+                    <div class="chaves-tm ${wA?"win":""}"><span class="chaves-nm">${wA?"🏆 ":""}${esc(j.time_a)}</span><span class="chaves-sc">${esc(j.placar_a!==""?j.placar_a:"–")}</span></div>
+                    <div class="chaves-tm ${wB?"win":""}"><span class="chaves-nm">${wB?"🏆 ":""}${esc(j.time_b)}</span><span class="chaves-sc">${esc(j.placar_b!==""?j.placar_b:"–")}</span></div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          `;
+        }).join("")}
+      </div>
+      ${fasesMata.length?`
+        <div style="text-align:center;margin:14px 0 6px;font:800 14px Barlow,sans-serif;color:#065f46;background:#ecfdf5;border:1px dashed var(--green);padding:8px;border-radius:8px">
+          ⬇️ ETAPA 2 · CLASSIFICADOS AVANÇAM PARA O MATA-MATA FINAL ⬇️
+        </div>
+        ${renderArvoreChavesHTML(fasesMata,campeao,modoAdmin)}
+      `:""}
+    </div>
+  `;
+}
+
 function renderTorneioPublico(ev,tor){
   if(!tor||!Array.isArray(tor.partidas)||!tor.partidas.length)return"";
   const temClassif=tor.formato==="grupos"||tor.formato==="pontos_corridos";
@@ -2026,7 +2126,7 @@ function renderTorneioPublico(ev,tor){
       <input id="pub-tor-q" type="search" placeholder="🔍 Buscar meu time nos jogos..." style="flex:1;min-width:190px;min-height:38px">
       ${fasesMata.length?`<div style="display:flex;gap:6px"><button type="button" class="chip sm on" data-pt-v="lista">📋 Jogos por Fase</button><button type="button" class="chip sm" data-pt-v="arvore">🌳 Árvore Completa</button></div>`:""}
     </div>
-    ${fasesMata.length?`<div id="pt-arvore" hidden>${renderArvoreChavesHTML(fasesMata,campeao,false)}</div>`:""}
+    ${fasesMata.length||tor.formato==="grupos"?`<div id="pt-arvore" hidden>${tor.formato==="grupos"?renderGruposVisualHTML(tor,fasesMata,campeao,false):renderArvoreChavesHTML(fasesMata,campeao,false)}</div>`:""}
     <div id="pt-lista">
       <div class="match-grid">
         ${fasesTodas.map(b=>`
@@ -2054,6 +2154,7 @@ function renderTorneioPublico(ev,tor){
         `).join("")}
       </div>
     </div>
+    ${renderRankingVitoriasHTML(tor)}
     ${temClassif?`
       <div style="margin-top:16px">
         ${renderTabelaClassificacaoHTML(tor,true)}
@@ -2072,17 +2173,20 @@ function renderPainelTorneioAdminHTML(ev,tor,abaAtiva){
     `;
   }
   const temClassif=tor.formato==="grupos"||tor.formato==="pontos_corridos";
-  if(abaAtiva==="classificacao"&&temClassif){
+  if(abaAtiva==="classificacao"){
     return`
       <div class="card2">
-        <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px">
-          <div>
-            <b>Tabela de Classificação (Atualização Automática)</b>
-            <div class="mut">Ordem: 1º Pontos (Vitória=3, Empate=1) · 2º Vitórias · 3º Saldo · 4º Pontos Pró</div>
+        ${renderRankingVitoriasHTML(tor)}
+        ${temClassif?`
+          <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;margin-top:18px;border-top:1px solid var(--line);padding-top:14px">
+            <div>
+              <b>Tabela de Classificação por Grupos / Pontos</b>
+              <div class="mut">Ordem: 1º Pontos (Vitória=3, Empate=1) · 2º Vitórias · 3º Saldo</div>
+            </div>
+            ${tor.formato==="grupos"?`<button type="button" class="btn sm" data-tor-avancar="1">⚡ Avançar Classificados para as Chaves Finais</button>`:""}
           </div>
-          ${tor.formato==="grupos"?`<button type="button" class="btn sm" data-tor-avancar="1">⚡ Avançar Classificados para as Chaves Finais</button>`:""}
-        </div>
-        ${renderTabelaClassificacaoHTML(tor,false)}
+          ${renderTabelaClassificacaoHTML(tor,false)}
+        `:""}
       </div>
     `;
   }
@@ -2117,7 +2221,8 @@ function renderPainelTorneioAdminHTML(ev,tor,abaAtiva){
     <div style="background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:8px 0">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;font-size:13px;margin-bottom:6px">
         <span><b>${concluidos} de ${totalJ}</b> jogos concluídos (${pct}%)</span>
-        <div style="display:flex;gap:6px">
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button type="button" class="chip sm" data-tor-rename="1">✏️ Renomear Times</button>
           <button type="button" class="chip sm" data-tor-print="1">🖨️ Imprimir</button>
           <button type="button" class="chip sm" data-tor-share="1">📤 WhatsApp</button>
         </div>
@@ -2141,7 +2246,7 @@ function renderPainelTorneioAdminHTML(ev,tor,abaAtiva){
       </div>
     `:""}
     ${modoTor==="arvore"?`
-      ${fasesMata.length?renderArvoreChavesHTML(fasesMata,campeao,true):'<div class="card2"><p class="mut">Este formato não possui chaves eliminatórias. Use a aba <b>📊 Classificação</b> para ver a tabela.</p></div>'}
+      ${tor.formato==="grupos"?renderGruposVisualHTML(tor,fasesMata,campeao,true):(fasesMata.length?renderArvoreChavesHTML(fasesMata,campeao,true):'<div class="card2"><p class="mut">Este formato não possui chaves eliminatórias. Use a aba <b>📊 Ranking & Classificação</b> para ver a tabela.</p></div>')}
     `:`
       <div style="display:flex;gap:8px;align-items:center;margin:8px 0">
         <input id="tor-q" type="search" placeholder="🔍 Buscar time na tabela..." style="flex:1;min-height:38px">
@@ -2242,7 +2347,7 @@ ${ev?`<div class="card2" style="display:flex;flex-wrap:wrap;justify-content:spac
 <div class="t-nav">
   <button type="button" class="t-tab ${sub==="inscricoes"?"on":""}" data-sub="inscricoes">📋 Inscritos (${G.length})</button>
   <button type="button" class="t-tab ${sub==="partidas"?"on":""}" data-sub="partidas">🔀 Chaves e Jogos ${temTor?`(${tor.partidas.length})`:""}</button>
-  ${temClassif||sub==="classificacao"?`<button type="button" class="t-tab ${sub==="classificacao"?"on":""}" data-sub="classificacao">📊 Classificação</button>`:""}
+  ${temTor||sub==="classificacao"?`<button type="button" class="t-tab ${sub==="classificacao"?"on":""}" data-sub="classificacao">📊 Ranking & Classificação</button>`:""}
   ${temTor?`<a class="chip sm" style="margin-left:auto;text-decoration:none;display:inline-flex;align-items:center" href="#evento/${esc(ev.id)}">👁️ Ver no Site</a>`:""}
 </div>
 ${sub==="partidas"||sub==="classificacao"?renderPainelTorneioAdminHTML(ev,tor,sub):`
@@ -2366,6 +2471,62 @@ function abrirModalPlacar(ev,tor,idJogo,el,r){
   mod.classList.add("on");
 }
 
+function abrirModalRenomearTimes(ev,tor,el,r){
+  if(!tor||!Array.isArray(tor.partidas))return;
+  const mod=$("#modal-torneio"),body=$("#modal-torneio-body");
+  const ign=t=>!t||t==="BYE"||t==="FOLGA"||t==="A definir"||t.includes("º Grupo");
+  const setT=new Set();
+  (tor.times||[]).forEach(t=>{if(!ign(t))setT.add(t)});
+  tor.partidas.forEach(j=>{if(!ign(j.time_a))setT.add(j.time_a);if(!ign(j.time_b))setT.add(j.time_b)});
+  const lista=[...setT];
+  body.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding-bottom:10px">
+      <div>
+        <div class="eb" style="margin:0;color:var(--green)">Edição em Tempo Real</div>
+        <h2 style="margin:2px 0 0;border:0;padding:0;font-size:20px">✏️ Renomear Times do Torneio</h2>
+      </div>
+      <button type="button" class="chip sm" id="mr-fechar">✕ Fechar</button>
+    </div>
+    <p class="mut" style="margin:8px 0">Altere o nome de qualquer time abaixo. Todas as chaves, placares e rankings serão atualizados automaticamente.</p>
+    <div style="max-height:50vh;overflow-y:auto;display:grid;gap:8px">
+      ${lista.map((nm,idx)=>`
+        <div style="display:flex;align-items:center;gap:8px">
+          <b style="min-width:24px;color:var(--mut)">${idx+1}.</b>
+          <input class="mr-inp" data-orig="${esc(nm)}" value="${esc(nm)}">
+        </div>
+      `).join("")}
+    </div>
+    <button type="button" class="btn" id="mr-salvar" style="width:100%;margin-top:14px;min-height:48px">✓ Salvar Novos Nomes</button>
+  `;
+  const fechar=()=>mod.classList.remove("on");
+  $("#mr-fechar").onclick=fechar;
+  $("#mr-salvar").onclick=async()=>{
+    const mapa={};
+    body.querySelectorAll(".mr-inp").forEach(inp=>{
+      const orig=inp.dataset.orig,novo=inp.value.trim();
+      if(novo&&novo!==orig)mapa[orig]=novo;
+    });
+    if(!Object.keys(mapa).length){fechar();return}
+    tor.times=(tor.times||[]).map(t=>mapa[t]||t);
+    tor.partidas.forEach(j=>{
+      if(mapa[j.time_a])j.time_a=mapa[j.time_a];
+      if(mapa[j.time_b])j.time_b=mapa[j.time_b];
+      if(mapa[j.vencedor])j.vencedor=mapa[j.vencedor];
+    });
+    const bt=$("#mr-salvar");bt.disabled=true;bt.textContent="Salvando...";
+    try{
+      await persistirTorneio(ev,tor,"salvarPartidas");
+      fechar();
+      admInsc(el,r);
+      toast("✓ Nomes dos times atualizados!");
+    }catch(e){
+      bt.disabled=false;bt.textContent="✓ Salvar Novos Nomes";
+      toast("Erro ao salvar nomes.",true);
+    }
+  };
+  mod.classList.add("on");
+}
+
 el.onclick=async e=>{
   const cardScroll=e.target.closest("[data-scroll-mc]");
   if(cardScroll&&tor){
@@ -2373,7 +2534,7 @@ el.onclick=async e=>{
     return;
   }
   const b=e.target.closest("button");if(!b)return;const d=b.dataset;
-  if(d.t){A.tab=d.t;admin()}else if(d.out){encerrarSessao()}else if(d.sub){A.subTab=d.sub;admInsc(el,r)}else if(d.torModo){A.torModo=d.torModo;admInsc(el,r)}else if(d.torPend){A.torSoPend=!A.torSoPend;admInsc(el,r)}else if(d.reabrirJogo){A.editJogoId=d.reabrirJogo;admInsc(el,r)}else if(d.torPrint&&tor){imprimirTabelaJogos(ev,tor)}else if(d.pubPodio&&tor){const jgsM=tor.partidas.filter(j=>j.etapa==="mata_mata");const jf=jgsM[jgsM.length-1];if(jf&&jf.vencedor&&jf.vencedor!=="EMPATE"){const camp=jf.vencedor,vice=jf.vencedor===jf.time_a?jf.time_b:jf.time_a;b.disabled=true;b.textContent="Publicando...";await call({acao:"salvar",aba:"colocacoes",dados:{evento_id:ev.id,colocacao:"1",nome_equipe:camp}});if(vice&&vice!=="A definir")await call({acao:"salvar",aba:"colocacoes",dados:{evento_id:ev.id,colocacao:"2",nome_equipe:vice}});ADM_CACHE.colocacoes=null;toast("🏅 Pódio oficial publicado no site!");b.textContent="✓ Publicado!"}}else if(d.torShare&&tor){const lines=["*🏆 "+ev.nome+"*",""].concat(tor.partidas.filter(j=>j.status_jogo!=="bye"&&j.time_b!=="BYE").slice(0,25).map(j=>`${j.fase}: ${j.time_a} ${j.placar_a!==""?j.placar_a:"–"} x ${j.placar_b!==""?j.placar_b:"–"} ${j.time_b}${j.vencedor?" (🏆 "+j.vencedor+")":""}`));window.open("https://wa.me/?text="+encodeURIComponent(lines.join("\n")),"_blank","noopener")}else if(d.faseF!==undefined){A.faseTorneio=d.faseF;admInsc(el,r)}else if(d.woToggle){const tBox=document.getElementById("tie-"+d.woToggle);if(tBox)tBox.classList.toggle("on")}else if(d.step){const[idJ,lado,delta]=d.step.split("|"),inp=el.querySelector(`[data-s${lado.toLowerCase()}="${idJ}"]`);if(inp){const v=Math.max(0,(parseInt(inp.value,10)||0)+(+delta));inp.value=String(v)}}else if(d.ia==="torneio")abrirModalTorneio(ev,rows);else if(d.ia==="csv")csvBaixar(ev,rows);else if(d.ia==="xls")excelBaixar(ev,rows);else if(d.ia==="sumula")imprimirSumula(ev,rows);else if(d.ia)formInsc(ev,d.ia,null);
+  if(d.t){A.tab=d.t;admin()}else if(d.out){encerrarSessao()}else if(d.sub){A.subTab=d.sub;admInsc(el,r)}else if(d.torModo){A.torModo=d.torModo;admInsc(el,r)}else if(d.torPend){A.torSoPend=!A.torSoPend;admInsc(el,r)}else if(d.reabrirJogo){A.editJogoId=d.reabrirJogo;admInsc(el,r)}else if(d.torRename&&tor){abrirModalRenomearTimes(ev,tor,el,r)}else if(d.torPrint&&tor){imprimirTabelaJogos(ev,tor)}else if(d.pubPodio&&tor){const jgsM=tor.partidas.filter(j=>j.etapa==="mata_mata");const jf=jgsM[jgsM.length-1];if(jf&&jf.vencedor&&jf.vencedor!=="EMPATE"){const camp=jf.vencedor,vice=jf.vencedor===jf.time_a?jf.time_b:jf.time_a;b.disabled=true;b.textContent="Publicando...";await call({acao:"salvar",aba:"colocacoes",dados:{evento_id:ev.id,colocacao:"1",nome_equipe:camp}});if(vice&&vice!=="A definir")await call({acao:"salvar",aba:"colocacoes",dados:{evento_id:ev.id,colocacao:"2",nome_equipe:vice}});ADM_CACHE.colocacoes=null;toast("🏅 Pódio oficial publicado no site!");b.textContent="✓ Publicado!"}}else if(d.torShare&&tor){const lines=["*🏆 "+ev.nome+"*",""].concat(tor.partidas.filter(j=>j.status_jogo!=="bye"&&j.time_b!=="BYE").slice(0,25).map(j=>`${j.fase}: ${j.time_a} ${j.placar_a!==""?j.placar_a:"–"} x ${j.placar_b!==""?j.placar_b:"–"} ${j.time_b}${j.vencedor?" (🏆 "+j.vencedor+")":""}`));window.open("https://wa.me/?text="+encodeURIComponent(lines.join("\n")),"_blank","noopener")}else if(d.faseF!==undefined){A.faseTorneio=d.faseF;admInsc(el,r)}else if(d.woToggle){const tBox=document.getElementById("tie-"+d.woToggle);if(tBox)tBox.classList.toggle("on")}else if(d.step){const[idJ,lado,delta]=d.step.split("|"),inp=el.querySelector(`[data-s${lado.toLowerCase()}="${idJ}"]`);if(inp){const v=Math.max(0,(parseInt(inp.value,10)||0)+(+delta));inp.value=String(v)}}else if(d.ia==="torneio")abrirModalTorneio(ev,rows);else if(d.ia==="csv")csvBaixar(ev,rows);else if(d.ia==="xls")excelBaixar(ev,rows);else if(d.ia==="sumula")imprimirSumula(ev,rows);else if(d.ia)formInsc(ev,d.ia,null);
   else if(d.torAvancar&&tor){
     b.disabled=true;b.textContent="Atualizando...";
     preencherFinaisDosGrupos(tor);
